@@ -4373,7 +4373,7 @@ function renderDashCharts() {
   });
 
   // inject mini legend
-  const legendWrap = chartStatusEl.parentElement;
+  const legendWrap = chartStatusEl.parentElement.parentElement;
   let leg = legendWrap.querySelector('.donut-legend');
   if (!leg) { leg = document.createElement('div'); leg.className = 'donut-legend'; legendWrap.appendChild(leg); }
   const clrs = ['#F97316','#009FE3','#A855F7','#22C55E'];
