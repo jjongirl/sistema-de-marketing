@@ -86,11 +86,11 @@ module.exports = async function handler(req, res) {
 
 // ── 5. Envia ─────────────────────────────────────────────────
   try {
-    // 🚨 O TRUQUE DA VERCEL: Envolver o envio numa Promise explícita
+    // A Vercel é forçada a esperar o Gmail responder por causa dessa Promise
     const info = await new Promise((resolve, reject) => {
       transporter.sendMail(mailOptions, (err, info) => {
         if (err) {
-          console.error('[send-email] ❌ Erro interno do Nodemailer:', err);
+          console.error('[send-email] ❌ Erro ao enviar:', err);
           reject(err);
         } else {
           console.log(`[send-email] ✅ Enviado para ${to} — MessageId: ${info.messageId}`);
