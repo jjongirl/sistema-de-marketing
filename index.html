@@ -3346,6 +3346,18 @@ function requestRevision(id) {
   showToast('Ajuste solicitado!','info');
   addActivity(`Ajuste solicitado em "${i.title}"`, 'approval');
 }
+
+function deleteApproval(id) {
+  if(!confirm('Tem certeza que deseja excluir este material da aprovação?')) return;
+  
+  firebaseDelete('approvals', id);
+  
+  // Atualiza a tela se estiver usando localStorage de backup
+  if(!fdb) renderApprovals();
+  
+  showToast('Material excluído com sucesso!', 'info');
+}
+   
 function saveApproval() {
   const title=document.getElementById('ap_title').value.trim();
   if(!title){showToast('Título é obrigatório','error');return;}
