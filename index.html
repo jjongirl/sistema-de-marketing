@@ -254,7 +254,11 @@ img{max-width:100%}
 .card{
   background:var(--bg-card);border:1px solid var(--border-subtle);
   border-radius:var(--radius-lg);padding:18px;
+  height: auto; /* Permite que a altura se ajuste ao conteúdo */
+  min-height: fit-content; /* Garante que engloba tudo */
+  padding-bottom: 20px; /* Adiciona um espaço extra no fundo para não ficar colado */
 }
+   
 .card-sm{padding:14px}
 .card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
 .card-title{font-size:13px;font-weight:600;color:var(--text-secondary);display:flex;align-items:center;gap:6px}
