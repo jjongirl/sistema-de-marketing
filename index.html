@@ -1298,6 +1298,13 @@ textarea.form-control{resize:vertical;min-height:80px}
         </div>
         <div id="approvalDetailContent"></div>
       </div>
+       <div class="approval-actions">
+        <button class="btn btn-xs btn-success" onclick="approveItem('${i.id}')" style="flex:1"><i class="fa-solid fa-check"></i>Aprovar</button>
+        <button class="btn btn-xs btn-danger" onclick="rejectItem('${i.id}')" style="flex:1"><i class="fa-solid fa-xmark"></i>Reprovar</button>
+        <button class="btn btn-xs btn-secondary" onclick="requestRevision('${i.id}')" style="flex:1"><i class="fa-solid fa-pen"></i>Ajustes</button>
+        
+        <button class="btn btn-xs btn-ghost" onclick="deleteApproval('${i.id}')" title="Excluir Material"><i class="fa-solid fa-trash"></i></button>
+      </div>
     </div>
   </section>
 
