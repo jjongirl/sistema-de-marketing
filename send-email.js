@@ -84,10 +84,20 @@ module.exports = async function handler(req, res) {
     text: html.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim()
   };
 
-  // ── 5. Envia ─────────────────────────────────────────────────
+// ── 5. Envia ─────────────────────────────────────────────────
   try {
-    const info = await transporter.sendMail(mailOptions);
-    console.log(`[send-email] ✅ Enviado para ${to} — MessageId: ${info.messageId}`);
+    // 🚨 O TRUQUE DA VERCEL: Envolver o envio numa Promise explícita
+    const info = await new Promise((resolve, reject) => {
+      transporter.sendMail(mailOptions, (err, info) => {
+        if (err) {
+          console.error('[send-email] ❌ Erro interno do Nodemailer:', err);
+          reject(err);
+        } else {
+          console.log(`[send-email] ✅ Enviado para ${to} — MessageId: ${info.messageId}`);
+          resolve(info);
+        }
+      });
+    });
 
     return res.status(200).json({
       success: true,
@@ -97,7 +107,7 @@ module.exports = async function handler(req, res) {
       sentAt: new Date().toISOString()
     });
   } catch (err) {
-    console.error('[send-email] ❌ Erro ao enviar:', err.message);
+    console.error('[send-email] ❌ Erro capturado no Catch:', err.message);
     return res.status(500).json({
       success: false,
       error: err.message,
