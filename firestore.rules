@@ -1,0 +1,25 @@
+// firestore.rules
+// Regras de segurança do Firestore para o Grupo Impresul OpsHub
+// IMPORTANTE: Em produção, adicione autenticação Firebase Auth e restrinja
+// acesso por usuário. Por enquanto, libera leitura/escrita para o workspace.
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Workspace do Grupo Impresul
+    match /teams/impresul {
+      allow read, write: if true;  // TODO: restringir por auth
+
+      // Todas as subcoleções do workspace
+      match /{collection}/{docId} {
+        allow read, write: if true;  // TODO: restringir por auth
+      }
+    }
+
+    // Bloqueia tudo mais
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

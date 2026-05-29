@@ -1,0 +1,40 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "tasks",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "__createdAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "projects",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "__createdAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "pautas",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "__createdAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "cobrancas",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "__createdAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "notifications",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "__createdAt", "order": "DESCENDING" }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}
