@@ -1696,9 +1696,13 @@ textarea.form-control{resize:vertical;min-height:80px}
       <textarea class="form-control" id="ap_desc" placeholder="Contexto do material..." rows="2"></textarea>
     </div>
     <div class="form-group">
-      <label class="form-label">URL do Material (opcional)</label>
-      <input class="form-control" id="ap_url" placeholder="https://...">
-    </div>
+  <label class="form-label">Link do Material (Google Drive, etc.)</label>
+  <input class="form-control" id="ap_url" placeholder="https://...">
+</div>
+<div class="form-group">
+  <label class="form-label">Anexar Imagem para a Miniatura (Capa)</label>
+  <input class="form-control" type="file" id="ap_image" accept="image/*">
+</div>
     <input type="hidden" id="ap_id">
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="closeModal('approvalModal')">Cancelar</button>
@@ -3308,10 +3312,10 @@ function renderApprovals() {
   const statusBadges={pending:'badge-orange',approved:'badge-green',rejected:'badge-red',revision:'badge-yellow'};
 
   el.innerHTML=items.map(i=>`
-    <div class="approval-card">
-      <div class="approval-preview" ${i.url ? `onclick="window.open('${i.url}', '_blank')" style="cursor:pointer" title="Clique para visualizar o material"` : ''}>
-            ${i.url?`<img src="${i.url}" onerror="this.style.display='none'" alt="">`:``}
-            <div class="approval-preview-icon">
+  <div class="approval-card">
+    <div class="approval-preview" ${i.url ? `onclick="window.open('${i.url}', '_blank')" style="cursor:pointer" title="Clique para abrir o link (Google Drive, etc.)"` : ''}>
+          ${i.thumbnailUrl ? `<img src="${i.thumbnailUrl}" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1;" alt="Capa">` : ``}
+          <div class="approval-preview-icon">
               <i class="${typeIcons[i.type]||'fa-solid fa-file'}" style="font-size:40px;color:var(--text-muted);opacity:0.5"></i>
             </div>
             <div style="position:absolute;top:8px;right:8px">
@@ -3389,19 +3393,52 @@ function deleteApproval(id) {
   showToast('Material excluído com sucesso!', 'info');
 }
    
-function saveApproval() {
-  const title=document.getElementById('ap_title').value.trim();
+async function saveApproval() {
+  const title = document.getElementById('ap_title').value.trim();
   if(!title){showToast('Título é obrigatório','error');return;}
-  const id=document.getElementById('ap_id').value||genId();
-  const item={id,title,type:document.getElementById('ap_type').value,project:document.getElementById('ap_project').value,assignee:document.getElementById('ap_assignee').value,category:document.getElementById('ap_category').value,desc:document.getElementById('ap_desc').value,url:document.getElementById('ap_url').value,status:'pending',comments:[],created:today()};
-  firebaseCreate('approvals',item);
+  const id = document.getElementById('ap_id').value||genId();
+  
+  // Armazena o link original do Google Drive
+  const materialUrl = document.getElementById('ap_url').value.trim();
+  
+  // Captura o arquivo de imagem enviado e converte para string
+  const imgFile = document.getElementById('ap_image').files[0];
+  let thumbnailUrl = ""; 
+  
+  if (imgFile) {
+    thumbnailUrl = await fileToBase64(imgFile);
+  }
+
+  const item = {
+    id,
+    title,
+    type: document.getElementById('ap_type').value,
+    project: document.getElementById('ap_project').value,
+    assignee: document.getElementById('ap_assignee').value,
+    category: document.getElementById('ap_category').value,
+    desc: document.getElementById('ap_desc').value,
+    url: materialUrl,           // Link do Drive guardado com segurança
+    thumbnailUrl: thumbnailUrl, // Imagem local convertida para carregar como miniatura
+    status: 'pending',
+    comments: [],
+    created: today()
+  };
+  
+  firebaseCreate('approvals', item);
   addActivity(`Material "${title}" enviado para aprovação`,'approval');
   closeModal('approvalModal');
+  
   if(!fdb) renderApprovals();
-  document.getElementById('ap_id').value='';
+  
+  // Limpeza completa dos campos do formulário (incluindo o input de arquivo)
+  document.getElementById('ap_id').value = '';
+  document.getElementById('ap_title').value = '';
+  document.getElementById('ap_desc').value = '';
+  document.getElementById('ap_url').value = '';
+  document.getElementById('ap_image').value = '';
+  
   showToast('Material enviado para aprovação!','success');
 }
-
 // ============================================================
 // PAUTA OPERACIONAL
 // ============================================================
