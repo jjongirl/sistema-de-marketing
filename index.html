@@ -3392,6 +3392,16 @@ function deleteApproval(id) {
   
   showToast('Material excluído com sucesso!', 'info');
 }
+
+// Função utilitária para converter arquivo de imagem em string Base64
+function fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = error => reject(error);
+  });
+}
    
 async function saveApproval() {
   const title = document.getElementById('ap_title').value.trim();
