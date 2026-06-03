@@ -713,12 +713,30 @@ textarea.form-control{resize:vertical;min-height:80px}
 .check-item input[type=checkbox]{width:14px;height:14px;accent-color:var(--accent-blue);cursor:pointer}
 
 /* Tab underline */
-.tab-underline{display:flex;border-bottom:1px solid var(--border-subtle);gap:0;margin-bottom:20px}
-.tab-u{padding:10px 16px;font-size:12px;font-weight:600;cursor:pointer;color:var(--text-secondary);border-bottom:2px solid transparent;margin-bottom:-1px;transition:all var(--trans)}
-.tab-u.active{color:var(--accent-blue);border-bottom-color:var(--accent-blue)}
-.tab-u:hover{color:var(--text-primary)}
-.tab-panel{display:none}
-.tab-panel.active{display:block}
+.tab-underline {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+.tab-u {
+  display: flex;
+  align-items: center;
+  padding: 6px 14px;
+  border-radius: 20px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-subtle);
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  color: var(--text-secondary);
+  transition: all var(--trans);
+}
+.tab-u:hover, .tab-u.active {
+  background: var(--bg-card);
+  border-color: var(--accent-blue);
+  color: var(--accent-blue);
+}
 /* ============================================================
    ENHANCED INTERACTIONS
 ============================================================ */
@@ -814,7 +832,9 @@ textarea.form-control{resize:vertical;min-height:80px}
 <!-- SIDEBAR -->
 <aside class="sidebar" id="sidebar">
   <div class="sidebar-logo">
-    <div class="logo-icon">MKT</div>
+    <div class="logo-icon">
+       <img src="LOGO-IMPRESUL.svg" alt="Logo" style="width: 24px; height: 24px; object-fit: contain;">
+    </div>
     <div>
       <div class="logo-text">Grupo <span>Impresul</span></div>
     </div>
