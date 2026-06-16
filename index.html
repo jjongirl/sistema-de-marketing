@@ -5002,7 +5002,7 @@ async function igFetchAll() {
       { label: 'Seguidores', value: (accInfo.followers_count || 0).toLocaleString('pt-BR'), icon: 'fa-users', color: 'blue', sub: `Seguindo: ${(accInfo.follows_count || 0).toLocaleString('pt-BR')}` },
       { label: 'Publicações', value: (accInfo.media_count || 0).toLocaleString('pt-BR'), icon: 'fa-images', color: 'magenta', sub: 'Total de posts' },
       { label: 'Alcance 30d', value: (v => v > 999 ? (v / 1000).toFixed(1) + 'k' : v.toLocaleString('pt-BR'))(sum(insightsMap['reach'] || [])), icon: 'fa-bullseye', color: 'green', sub: 'Contas alcançadas' },
-      { label: 'Impressões 30d', value: (v => v > 999 ? (v / 1000).toFixed(1) + 'k' : v.toLocaleString('pt-BR'))(sum(insightsMap['impressions'] || [])), icon: 'fa-eye', color: 'orange', sub: 'Visualizações totais' },
+      { label: 'Impressões 30d', value: (v => v > 999 ? (v / 1000).toFixed(1) + 'k' : v.toLocaleString('pt-BR'))(sum(insightsMap['views'] || [])), icon: 'fa-eye', color: 'orange', sub: 'Visualizações totais' },
       { label: 'Visitas Perfil 30d', value: sum(insightsMap['profile_views'] || []).toLocaleString('pt-BR'), icon: 'fa-user-check', color: 'blue', sub: 'Acessos ao perfil' },
       { label: 'Engajadas 30d', value: sum(insightsMap['accounts_engaged'] || []).toLocaleString('pt-BR'), icon: 'fa-heart', color: 'magenta', sub: 'Contas únicas' },
     ];
@@ -5051,7 +5051,7 @@ function igRenderCharts(insightsMap) {
   if (igChartReach) igChartReach.destroy();
   igChartReach = new Chart(document.getElementById('ig-chart-reach').getContext('2d'), {
     type: 'bar',
-    data: { labels, datasets: [{ label: 'Alcance', data: getVals('reach'), backgroundColor: 'rgba(0,159,227,0.7)', borderRadius: 4 }, { label: 'Impressões', data: getVals('impressions'), backgroundColor: 'rgba(230,0,126,0.5)', borderRadius: 4 }] },
+    data: { labels, datasets: [{ label: 'Alcance', data: getVals('reach'), backgroundColor: 'rgba(0,159,227,0.7)', borderRadius: 4 }, { label: 'Impressões', data: getVals('views'), backgroundColor: 'rgba(230,0,126,0.5)', borderRadius: 4 }] },
     options: opts
   });
 }
