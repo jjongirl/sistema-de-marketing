@@ -5111,7 +5111,13 @@ async function igFetchAds(adAccount) {
   section.style.display = 'block';
   badge.textContent = 'Carregando...';
   try {
-    const data = await igFetch(`${adAccount}/insights`, {
+    // Correção: Adiciona automaticamente o 'act_' se o usuário esquecer
+    let safeAdAccount = adAccount.trim();
+    if (!safeAdAccount.startsWith('act_')) {
+      safeAdAccount = 'act_' + safeAdAccount;
+    }
+
+    const data = await igFetch(`${safeAdAccount}/insights`, {
       fields: 'spend,reach,impressions,clicks,cpc,cpm',
       date_preset: 'last_30d', level: 'account'
     });
