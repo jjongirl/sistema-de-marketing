@@ -4976,14 +4976,26 @@ async function igFetchAll() {
     const igId = page.instagram_business_account.id;
 
     document.getElementById('ig-loading-msg').textContent = 'Carregando métricas...';
-    const [accInfo, insightData, mediaData] = await Promise.all([
+    const [accInfo, insightTimeSeries, insightTotals, mediaData] = await Promise.all([
       igFetch(igId, { fields: 'id,name,username,followers_count,follows_count,media_count' }),
+      
+      // Requisição 1: Métricas que suportam histórico diário (Alcance)
       igFetch(`${igId}/insights`, {
-        metric: 'reach,views,profile_views,accounts_engaged',
+        metric: 'reach',
         period: 'day',
         since: Math.floor((Date.now() - 30 * 86400000) / 1000),
         until: Math.floor(Date.now() / 1000)
       }),
+      
+      // Requisição 2: Métricas que agora exigem valor total (Views e Engajamento)
+      igFetch(`${igId}/insights`, {
+        metric: 'views,profile_views,accounts_engaged',
+        period: 'day',
+        metric_type: 'total_value',
+        since: Math.floor((Date.now() - 30 * 86400000) / 1000),
+        until: Math.floor(Date.now() / 1000)
+      }),
+      
       igFetch(`${igId}/media`, {
         fields: 'id,caption,media_type,thumbnail_url,media_url,timestamp,like_count,comments_count,impressions,reach',
         limit: 12
@@ -4995,7 +5007,15 @@ async function igFetchAll() {
     document.getElementById('ig-last-update').textContent = 'Atualizado às ' + new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
 
     const insightsMap = {};
-    (insightData.data || []).forEach(m => { insightsMap[m.name] = m.values || []; });
+    
+    // Mapeia o histórico diário
+    (insightTimeSeries.data || []).forEach(m => { insightsMap[m.name] = m.values || []; });
+    
+    // Mapeia os valores totais
+    (insightTotals.data || []).forEach(m => {
+      insightsMap[m.name] = [{ value: m.total_value?.value || 0 }];
+    });
+
     const sum = arr => arr.reduce((a, b) => a + (b.value || 0), 0);
 
     const stats = [
@@ -5051,7 +5071,7 @@ function igRenderCharts(insightsMap) {
   if (igChartReach) igChartReach.destroy();
   igChartReach = new Chart(document.getElementById('ig-chart-reach').getContext('2d'), {
     type: 'bar',
-    data: { labels, datasets: [{ label: 'Alcance', data: getVals('reach'), backgroundColor: 'rgba(0,159,227,0.7)', borderRadius: 4 }, { label: 'Impressões', data: getVals('views'), backgroundColor: 'rgba(230,0,126,0.5)', borderRadius: 4 }] },
+    data: { labels, datasets: [{ label: 'Alcance', data: getVals('reach'), backgroundColor: 'rgba(0,159,227,0.7)', borderRadius: 4 }] },
     options: opts
   });
 }
