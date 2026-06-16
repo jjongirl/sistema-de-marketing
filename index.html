@@ -1384,11 +1384,15 @@ textarea.form-control{resize:vertical;min-height:80px}
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px">
       <div class="card">
         <div class="card-header"><div class="card-title"><i class="fa-solid fa-eye"></i>Alcance (14 dias)</div></div>
-        <canvas id="ig-chart-followers" height="180"></canvas>
+        <div style="position:relative; height:180px;">
+          <canvas id="ig-chart-followers"></canvas>
+        </div>
       </div>
       <div class="card">
         <div class="card-header"><div class="card-title"><i class="fa-solid fa-chart-bar"></i>Alcance × Impressões</div></div>
-        <canvas id="ig-chart-reach" height="180"></canvas>
+        <div style="position:relative; height:180px;">
+          <canvas id="ig-chart-reach"></canvas>
+        </div>
       </div>
     </div>
 
