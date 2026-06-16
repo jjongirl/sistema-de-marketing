@@ -749,6 +749,8 @@ textarea.form-control{resize:vertical;min-height:80px}
 @keyframes shimmer{0%{background-position:-400px 0}100%{background-position:400px 0}}
 .skeleton{background:linear-gradient(90deg,var(--bg-elevated) 25%,var(--bg-hover) 50%,var(--bg-elevated) 75%);background-size:800px 100%;animation:shimmer 1.5s infinite;border-radius:var(--radius-md);height:14px;margin-bottom:8px}
 
+@keyframes spin { 0% { transform: rotate(0deg) } 100% { transform: rotate(360deg) } }
+
 /* Pulse animation for overdue items */
 @keyframes pulse-red{0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,0.3)}50%{box-shadow:0 0 0 6px rgba(239,68,68,0)}}
 .overdue-pulse{animation:pulse-red 2s infinite}
@@ -868,6 +870,7 @@ textarea.form-control{resize:vertical;min-height:80px}
 
     <div class="nav-section-label">Analytics</div>
     <div class="nav-item" onclick="navigate('relatorios')"><i class="fa-solid fa-chart-line"></i>Relatórios</div>
+    <div class="nav-item" onclick="navigate('instagram')"><i class="fa-brands fa-instagram"></i>Instagram</div>
   </nav>
 
   <div class="sidebar-bottom">
@@ -1342,6 +1345,82 @@ textarea.form-control{resize:vertical;min-height:80px}
     </div>
     <div id="reportContent"></div>
   </section>
+   <section class="page-content" id="page-instagram">
+  <div class="section-header">
+    <div>
+      <div class="section-title">Instagram Analytics</div>
+      <div class="section-subtitle">Métricas e performance da conta</div>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <span id="ig-token-status" class="badge badge-red"><i class="fa-solid fa-circle-xmark"></i> Token não configurado</span>
+      <button class="btn btn-secondary" onclick="openModal('igTokenModal')"><i class="fa-solid fa-key"></i>Configurar Token</button>
+      <button class="btn btn-primary" onclick="igFetchAll()" id="ig-refresh-btn" style="display:none"><i class="fa-solid fa-rotate-right"></i>Atualizar</button>
+    </div>
+  </div>
+
+  <div id="ig-setup-cta" class="card" style="text-align:center;padding:48px 24px">
+    <div style="font-size:48px;margin-bottom:16px;opacity:0.3"><i class="fa-brands fa-instagram"></i></div>
+    <div style="font-size:16px;font-weight:700;margin-bottom:8px">Configure seu Token de Acesso</div>
+    <div style="font-size:13px;color:var(--text-secondary);max-width:480px;margin:0 auto 20px">
+      Conecte sua conta do Instagram Business via Meta Graph API para visualizar seguidores, alcance, engajamento, posts e muito mais.
+    </div>
+    <button class="btn btn-primary" onclick="openModal('igTokenModal')"><i class="fa-solid fa-plug"></i>Conectar Instagram</button>
+  </div>
+
+  <div id="ig-dashboard" style="display:none">
+    <div id="ig-account-bar" class="card" style="display:flex;align-items:center;gap:16px;margin-bottom:16px;padding:14px 18px">
+      <div style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--accent-magenta),var(--accent-blue));display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">
+        <i class="fa-brands fa-instagram" style="color:#fff"></i>
+      </div>
+      <div style="flex:1">
+        <div style="font-weight:700;font-size:15px" id="ig-acc-name">—</div>
+        <div style="font-size:12px;color:var(--text-secondary)" id="ig-acc-username">@—</div>
+      </div>
+      <div style="font-size:11px;color:var(--text-muted)" id="ig-last-update"></div>
+    </div>
+
+    <div class="stat-grid" id="ig-stat-grid" style="grid-template-columns:repeat(auto-fit,minmax(150px,1fr));margin-bottom:20px"></div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px">
+      <div class="card">
+        <div class="card-header"><div class="card-title"><i class="fa-solid fa-eye"></i>Alcance (14 dias)</div></div>
+        <canvas id="ig-chart-followers" height="180"></canvas>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-title"><i class="fa-solid fa-chart-bar"></i>Alcance × Impressões</div></div>
+        <canvas id="ig-chart-reach" height="180"></canvas>
+      </div>
+    </div>
+
+    <div id="ig-ads-section" class="card" style="margin-bottom:20px;display:none">
+      <div class="card-header">
+        <div class="card-title"><i class="fa-solid fa-rectangle-ad"></i>Meta Ads — Verbas e Performance</div>
+        <span class="badge badge-magenta" id="ig-ads-badge">Carregando...</span>
+      </div>
+      <div id="ig-ads-content" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title"><i class="fa-solid fa-images"></i>Posts Recentes</div>
+        <span class="badge badge-blue" id="ig-posts-count">0 posts</span>
+      </div>
+      <div id="ig-posts-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin-top:4px"></div>
+    </div>
+  </div>
+
+  <div id="ig-loading" style="display:none;text-align:center;padding:60px 0">
+    <div style="font-size:32px;margin-bottom:12px;animation:spin 1s linear infinite;display:inline-block"><i class="fa-solid fa-circle-notch"></i></div>
+    <div style="font-size:13px;color:var(--text-secondary)" id="ig-loading-msg">Conectando...</div>
+  </div>
+
+  <div id="ig-error-state" style="display:none;text-align:center;padding:48px 0">
+    <div style="font-size:40px;margin-bottom:12px;color:var(--accent-red)"><i class="fa-solid fa-triangle-exclamation"></i></div>
+    <div style="font-size:15px;font-weight:700;margin-bottom:8px">Erro ao carregar dados</div>
+    <div style="font-size:13px;color:var(--text-secondary);max-width:420px;margin:0 auto 16px" id="ig-error-msg"></div>
+    <button class="btn btn-secondary" onclick="openModal('igTokenModal')"><i class="fa-solid fa-key"></i>Reconfigurar Token</button>
+  </div>
+</section>
 </main>
 
 </div><!-- end app-layout -->
@@ -1350,6 +1429,39 @@ textarea.form-control{resize:vertical;min-height:80px}
      MODALS
 ============================================================ -->
 
+ <div id="igTokenModal" class="modal-overlay">
+  <div class="modal" style="max-width:560px">
+    <div class="modal-header">
+      <div class="modal-title"><i class="fa-brands fa-instagram" style="color:var(--accent-magenta)"></i> Configurar Token do Instagram</div>
+      <button class="modal-close" onclick="closeModal('igTokenModal')"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div style="background:var(--bg-elevated);border-radius:var(--radius-md);padding:14px;margin-bottom:20px;border-left:3px solid var(--accent-blue)">
+      <div style="font-size:12px;font-weight:600;color:var(--accent-blue);margin-bottom:6px"><i class="fa-solid fa-circle-info"></i> Como obter seu token</div>
+      <ol style="font-size:12px;color:var(--text-secondary);padding-left:16px;display:flex;flex-direction:column;gap:4px">
+        <li>Acesse <a href="https://developers.facebook.com/tools/explorer/" target="_blank" style="color:var(--accent-blue)">developers.facebook.com/tools/explorer</a></li>
+        <li>Selecione sua App e gere um User Access Token</li>
+        <li>Adicione as permissões: <code style="font-family:monospace;background:var(--bg-card);padding:1px 5px;border-radius:4px;font-size:10px">instagram_basic, instagram_manage_insights, pages_show_list, ads_read</code></li>
+        <li>Copie o token gerado e cole abaixo</li>
+      </ol>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Access Token *</label>
+      <textarea class="form-control" id="ig-token-input" rows="3" placeholder="Cole aqui seu token..." style="font-family:monospace;font-size:11px;resize:none"></textarea>
+    </div>
+    <div class="form-group">
+      <label class="form-label">ID da Conta de Anúncios (opcional — para verbas)</label>
+      <input class="form-control" id="ig-adaccount-input" placeholder="Ex: act_123456789" style="font-family:monospace;font-size:12px">
+      <div style="font-size:11px;color:var(--text-muted);margin-top:4px">Encontre em business.facebook.com → Configurações → Contas de Anúncios</div>
+    </div>
+    <div id="ig-token-test-result" style="display:none;padding:10px 14px;border-radius:var(--radius-md);font-size:12px;margin-bottom:16px"></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('igTokenModal')">Cancelar</button>
+      <button class="btn btn-secondary" onclick="igTestToken()"><i class="fa-solid fa-vial"></i>Testar Token</button>
+      <button class="btn btn-primary" onclick="igSaveToken()"><i class="fa-solid fa-floppy-disk"></i>Salvar e Conectar</button>
+    </div>
+  </div>
+</div>  
+   
 <!-- TASK MODAL -->
 <div id="taskModal" class="modal-overlay">
   <div class="modal modal-lg">
@@ -2212,7 +2324,8 @@ const pageLabels = {
   pauta:'Pauta Operacional',
   cobranca:'Outros Setores & Cobrança Imediata',
   insights:'Insights & Referências',
-  relatorios:'Relatórios'
+  relatorios:'Relatórios',
+  instagram:'Instagram Analytics'
 };
 
 function navigate(page) {
@@ -2235,7 +2348,7 @@ function renderPage(p) {
     projetos:renderProjects, metas:renderMetas,
     pauta:renderPauta, cobranca:renderCobranca,
     insights:renderInsights,
-    aprovacoes:renderApprovals, relatorios:renderReports
+    aprovacoes:renderApprovals, relatorios:renderReports, instagram:renderInstagram
   };
   if (fns[p]) fns[p]();
 }
@@ -4763,6 +4876,248 @@ async function init() {
 }
 
 init();
+
+// ============================================================
+// INSTAGRAM ANALYTICS
+// ============================================================
+let igChartFollowers = null;
+let igChartReach = null;
+
+function igGetToken() {
+  return DB.settings?.igToken || localStorage.getItem('ig_token') || '';
+}
+function igGetAdAccount() {
+  return DB.settings?.igAdAccount || localStorage.getItem('ig_adaccount') || '';
+}
+function igSaveToken() {
+  const token = document.getElementById('ig-token-input').value.trim();
+  const adAcc = document.getElementById('ig-adaccount-input').value.trim();
+  if (!token) { alert('Cole o token antes de salvar.'); return; }
+  DB.settings.igToken = token;
+  DB.settings.igAdAccount = adAcc;
+  localStorage.setItem('ig_token', token);
+  localStorage.setItem('ig_adaccount', adAcc);
+  save();
+  closeModal('igTokenModal');
+  if (currentPage === 'instagram') igFetchAll();
+}
+function igTestToken() {
+  const token = document.getElementById('ig-token-input').value.trim();
+  if (!token) { alert('Cole o token primeiro.'); return; }
+  const el = document.getElementById('ig-token-test-result');
+  el.style.display = 'block';
+  el.style.background = 'var(--bg-elevated)';
+  el.style.color = 'var(--text-secondary)';
+  el.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Verificando...';
+  fetch(`https://graph.facebook.com/v19.0/me?fields=id,name&access_token=${token}`)
+    .then(r => r.json())
+    .then(data => {
+      if (data.error) {
+        el.style.background = 'rgba(239,68,68,0.1)'; el.style.color = 'var(--accent-red)';
+        el.innerHTML = `<i class="fa-solid fa-xmark-circle"></i> ${data.error.message}`;
+      } else {
+        el.style.background = 'rgba(34,197,94,0.1)'; el.style.color = 'var(--accent-green)';
+        el.innerHTML = `<i class="fa-solid fa-check-circle"></i> Token válido! Conectado como <strong>${data.name}</strong>`;
+      }
+    })
+    .catch(() => {
+      el.style.background = 'rgba(239,68,68,0.1)'; el.style.color = 'var(--accent-red)';
+      el.innerHTML = '<i class="fa-solid fa-xmark-circle"></i> Falha de rede.';
+    });
+}
+function igShowLoading(msg) {
+  document.getElementById('ig-setup-cta').style.display = 'none';
+  document.getElementById('ig-dashboard').style.display = 'none';
+  document.getElementById('ig-error-state').style.display = 'none';
+  document.getElementById('ig-loading').style.display = 'block';
+  document.getElementById('ig-loading-msg').textContent = msg || 'Conectando...';
+}
+function igShowError(msg) {
+  document.getElementById('ig-loading').style.display = 'none';
+  document.getElementById('ig-setup-cta').style.display = 'none';
+  document.getElementById('ig-dashboard').style.display = 'none';
+  document.getElementById('ig-error-state').style.display = 'block';
+  document.getElementById('ig-error-msg').textContent = msg;
+}
+function igShowDashboard() {
+  document.getElementById('ig-loading').style.display = 'none';
+  document.getElementById('ig-setup-cta').style.display = 'none';
+  document.getElementById('ig-error-state').style.display = 'none';
+  document.getElementById('ig-dashboard').style.display = 'block';
+}
+async function igFetch(path, params = {}) {
+  const token = igGetToken();
+  const url = new URL(`https://graph.facebook.com/v19.0/${path}`);
+  url.searchParams.set('access_token', token);
+  Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
+  const res = await fetch(url.toString());
+  const data = await res.json();
+  if (data.error) throw new Error(data.error.message);
+  return data;
+}
+async function igFetchAll() {
+  const token = igGetToken();
+  if (!token) {
+    document.getElementById('ig-setup-cta').style.display = 'block';
+    document.getElementById('ig-dashboard').style.display = 'none';
+    document.getElementById('ig-error-state').style.display = 'none';
+    document.getElementById('ig-loading').style.display = 'none';
+    document.getElementById('ig-token-status').innerHTML = '<i class="fa-solid fa-circle-xmark"></i> Token não configurado';
+    document.getElementById('ig-token-status').className = 'badge badge-red';
+    document.getElementById('ig-refresh-btn').style.display = 'none';
+    return;
+  }
+  igShowLoading('Buscando conta do Instagram...');
+  try {
+    document.getElementById('ig-loading-msg').textContent = 'Buscando páginas vinculadas...';
+    const meData = await igFetch('me/accounts', { fields: 'id,name,instagram_business_account' });
+    const page = meData.data?.find(p => p.instagram_business_account);
+    if (!page) throw new Error('Nenhuma conta Instagram Business vinculada encontrada.');
+    const igId = page.instagram_business_account.id;
+
+    document.getElementById('ig-loading-msg').textContent = 'Carregando métricas...';
+    const [accInfo, insightData, mediaData] = await Promise.all([
+      igFetch(igId, { fields: 'id,name,username,followers_count,follows_count,media_count' }),
+      igFetch(`${igId}/insights`, {
+        metric: 'reach,impressions,profile_views,accounts_engaged',
+        period: 'day',
+        since: Math.floor((Date.now() - 30 * 86400000) / 1000),
+        until: Math.floor(Date.now() / 1000)
+      }),
+      igFetch(`${igId}/media`, {
+        fields: 'id,caption,media_type,thumbnail_url,media_url,timestamp,like_count,comments_count,impressions,reach',
+        limit: 12
+      })
+    ]);
+
+    document.getElementById('ig-acc-name').textContent = accInfo.name || '—';
+    document.getElementById('ig-acc-username').textContent = '@' + (accInfo.username || '—');
+    document.getElementById('ig-last-update').textContent = 'Atualizado às ' + new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+
+    const insightsMap = {};
+    (insightData.data || []).forEach(m => { insightsMap[m.name] = m.values || []; });
+    const sum = arr => arr.reduce((a, b) => a + (b.value || 0), 0);
+
+    const stats = [
+      { label: 'Seguidores', value: (accInfo.followers_count || 0).toLocaleString('pt-BR'), icon: 'fa-users', color: 'blue', sub: `Seguindo: ${(accInfo.follows_count || 0).toLocaleString('pt-BR')}` },
+      { label: 'Publicações', value: (accInfo.media_count || 0).toLocaleString('pt-BR'), icon: 'fa-images', color: 'magenta', sub: 'Total de posts' },
+      { label: 'Alcance 30d', value: (v => v > 999 ? (v / 1000).toFixed(1) + 'k' : v.toLocaleString('pt-BR'))(sum(insightsMap['reach'] || [])), icon: 'fa-bullseye', color: 'green', sub: 'Contas alcançadas' },
+      { label: 'Impressões 30d', value: (v => v > 999 ? (v / 1000).toFixed(1) + 'k' : v.toLocaleString('pt-BR'))(sum(insightsMap['impressions'] || [])), icon: 'fa-eye', color: 'orange', sub: 'Visualizações totais' },
+      { label: 'Visitas Perfil 30d', value: sum(insightsMap['profile_views'] || []).toLocaleString('pt-BR'), icon: 'fa-user-check', color: 'blue', sub: 'Acessos ao perfil' },
+      { label: 'Engajadas 30d', value: sum(insightsMap['accounts_engaged'] || []).toLocaleString('pt-BR'), icon: 'fa-heart', color: 'magenta', sub: 'Contas únicas' },
+    ];
+    document.getElementById('ig-stat-grid').innerHTML = stats.map(s =>
+      `<div class="stat-card ${s.color}"><div class="stat-label"><i class="fa-solid ${s.icon}"></i>${s.label}</div><div class="stat-value">${s.value}</div><div class="stat-sub">${s.sub}</div></div>`
+    ).join('');
+
+    igRenderCharts(insightsMap);
+    igRenderPosts(mediaData.data || []);
+    const adAcc = igGetAdAccount();
+    if (adAcc) igFetchAds(adAcc);
+
+    document.getElementById('ig-token-status').innerHTML = `<i class="fa-solid fa-check-circle"></i> @${accInfo.username} conectado`;
+    document.getElementById('ig-token-status').className = 'badge badge-green';
+    document.getElementById('ig-refresh-btn').style.display = '';
+    igShowDashboard();
+  } catch (err) {
+    igShowError(err.message);
+    document.getElementById('ig-token-status').innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> Erro no token';
+    document.getElementById('ig-token-status').className = 'badge badge-red';
+  }
+}
+function igRenderCharts(insightsMap) {
+  const getVals = k => (insightsMap[k] || []).slice(-14).map(v => v.value || 0);
+  const getLbls = k => {
+    const arr = (insightsMap[k] || []).slice(-14);
+    return arr.length
+      ? arr.map(v => new Date(v.end_time || Date.now()).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }))
+      : Array.from({ length: 14 }, (_, i) => new Date(Date.now() - (13 - i) * 86400000).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }));
+  };
+  const labels = getLbls('reach');
+  const opts = {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: true, labels: { color: '#8B96B0', font: { size: 11 }, boxWidth: 12 } } },
+    scales: {
+      x: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#8B96B0', font: { size: 10 }, maxTicksLimit: 7 } },
+      y: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#8B96B0', font: { size: 10 } } }
+    }
+  };
+  if (igChartFollowers) igChartFollowers.destroy();
+  igChartFollowers = new Chart(document.getElementById('ig-chart-followers').getContext('2d'), {
+    type: 'line',
+    data: { labels, datasets: [{ label: 'Alcance', data: getVals('reach'), borderColor: '#009FE3', backgroundColor: 'rgba(0,159,227,0.12)', fill: true, tension: 0.4, pointRadius: 3, pointBackgroundColor: '#009FE3' }] },
+    options: opts
+  });
+  if (igChartReach) igChartReach.destroy();
+  igChartReach = new Chart(document.getElementById('ig-chart-reach').getContext('2d'), {
+    type: 'bar',
+    data: { labels, datasets: [{ label: 'Alcance', data: getVals('reach'), backgroundColor: 'rgba(0,159,227,0.7)', borderRadius: 4 }, { label: 'Impressões', data: getVals('impressions'), backgroundColor: 'rgba(230,0,126,0.5)', borderRadius: 4 }] },
+    options: opts
+  });
+}
+function igRenderPosts(posts) {
+  document.getElementById('ig-posts-count').textContent = posts.length + ' posts';
+  if (!posts.length) { document.getElementById('ig-posts-grid').innerHTML = '<div style="color:var(--text-muted);font-size:12px;padding:16px">Nenhum post encontrado.</div>'; return; }
+  document.getElementById('ig-posts-grid').innerHTML = posts.map(p => {
+    const thumb = p.thumbnail_url || p.media_url || '';
+    const date = p.timestamp ? new Date(p.timestamp).toLocaleDateString('pt-BR') : '—';
+    const caption = (p.caption || '').substring(0, 60) + ((p.caption || '').length > 60 ? '…' : '');
+    const typeIcon = p.media_type === 'VIDEO' ? 'fa-video' : p.media_type === 'CAROUSEL_ALBUM' ? 'fa-layer-group' : 'fa-image';
+    return `<div class="card card-sm" style="padding:0;overflow:hidden;cursor:pointer" onclick="window.open('https://instagram.com/p/${p.id}','_blank')">
+      <div style="height:140px;background:var(--bg-elevated);position:relative;overflow:hidden">
+        ${thumb ? `<img src="${thumb}" style="width:100%;height:100%;object-fit:cover">` : `<div style="height:100%;display:flex;align-items:center;justify-content:center;font-size:32px;color:var(--text-muted)"><i class="fa-solid ${typeIcon}"></i></div>`}
+        <div style="position:absolute;top:8px;right:8px;background:rgba(0,0,0,0.6);border-radius:20px;padding:3px 8px;font-size:10px;color:#fff"><i class="fa-solid ${typeIcon}"></i></div>
+      </div>
+      <div style="padding:10px">
+        <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px">${date}</div>
+        <div style="font-size:11px;color:var(--text-secondary);margin-bottom:8px;line-height:1.4">${caption || '<em>Sem legenda</em>'}</div>
+        <div style="display:flex;gap:10px;font-size:11px">
+          <span style="color:var(--accent-magenta)"><i class="fa-solid fa-heart"></i> ${(p.like_count || 0).toLocaleString('pt-BR')}</span>
+          <span style="color:var(--accent-blue)"><i class="fa-solid fa-comment"></i> ${(p.comments_count || 0).toLocaleString('pt-BR')}</span>
+          <span style="color:var(--text-muted)"><i class="fa-solid fa-eye"></i> ${p.reach ? p.reach.toLocaleString('pt-BR') : '—'}</span>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+async function igFetchAds(adAccount) {
+  const section = document.getElementById('ig-ads-section');
+  const badge = document.getElementById('ig-ads-badge');
+  const content = document.getElementById('ig-ads-content');
+  section.style.display = 'block';
+  badge.textContent = 'Carregando...';
+  try {
+    const data = await igFetch(`${adAccount}/insights`, {
+      fields: 'spend,reach,impressions,clicks,cpc,cpm',
+      date_preset: 'last_30d', level: 'account'
+    });
+    const d = data.data?.[0] || {};
+    const spend = parseFloat(d.spend || 0);
+    badge.textContent = `R$ ${spend.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} investidos`;
+    const adStats = [
+      { label: 'Verba (30d)', value: 'R$ ' + spend.toLocaleString('pt-BR', { minimumFractionDigits: 2 }), icon: 'fa-dollar-sign', color: 'magenta' },
+      { label: 'Cliques', value: parseInt(d.clicks || 0).toLocaleString('pt-BR'), icon: 'fa-computer-mouse', color: 'blue' },
+      { label: 'CPC Médio', value: 'R$ ' + parseFloat(d.cpc || 0).toFixed(2), icon: 'fa-tag', color: 'orange' },
+      { label: 'CPM', value: 'R$ ' + parseFloat(d.cpm || 0).toFixed(2), icon: 'fa-chart-bar', color: 'green' },
+      { label: 'Alcance Ads', value: (v => v > 999 ? (v / 1000).toFixed(1) + 'k' : v.toLocaleString('pt-BR'))(parseInt(d.reach || 0)), icon: 'fa-bullseye', color: 'blue' },
+      { label: 'Impressões Ads', value: (v => v > 999 ? (v / 1000).toFixed(1) + 'k' : v.toLocaleString('pt-BR'))(parseInt(d.impressions || 0)), icon: 'fa-eye', color: 'orange' },
+    ];
+    content.innerHTML = adStats.map(s =>
+      `<div class="stat-card ${s.color}" style="min-height:unset"><div class="stat-label"><i class="fa-solid ${s.icon}"></i>${s.label}</div><div class="stat-value" style="font-size:20px">${s.value}</div></div>`
+    ).join('');
+  } catch (err) {
+    badge.textContent = 'Erro';
+    content.innerHTML = `<div style="font-size:12px;color:var(--accent-red);padding:8px"><i class="fa-solid fa-triangle-exclamation"></i> ${err.message}</div>`;
+  }
+}
+function renderInstagram() {
+  const token = igGetToken();
+  const adAcc = igGetAdAccount();
+  document.getElementById('ig-token-input').value = token;
+  document.getElementById('ig-adaccount-input').value = adAcc;
+  igFetchAll();
+}   
+   
 </script>
 </body>
 </html>
