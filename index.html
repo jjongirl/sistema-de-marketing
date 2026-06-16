@@ -4979,7 +4979,7 @@ async function igFetchAll() {
     const [accInfo, insightData, mediaData] = await Promise.all([
       igFetch(igId, { fields: 'id,name,username,followers_count,follows_count,media_count' }),
       igFetch(`${igId}/insights`, {
-        metric: 'reach,impressions,profile_views,accounts_engaged',
+        metric: 'reach,views,profile_views,accounts_engaged',
         period: 'day',
         since: Math.floor((Date.now() - 30 * 86400000) / 1000),
         until: Math.floor(Date.now() / 1000)
