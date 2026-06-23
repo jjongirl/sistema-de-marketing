@@ -3925,7 +3925,19 @@ function renderNotifPanel() {
   document.getElementById('notifDot').style.display=unread?'block':'none';
 }
 function readNotif(id) {const n=DB.notifications.find(n=>n.id===id);if(n)n.read=true;save();renderNotifPanel();}
-function clearNotifs() {DB.notifications=[];save();renderNotifPanel();}
+async function clearNotifs() {
+  // Se estiver conectado ao Firebase, deleta cada notificação do banco de dados
+  if (fdb) {
+    for (const n of DB.notifications) {
+      await firebaseDelete('notifications', n.id);
+    }
+  }
+  
+  // Limpa da tela e do cache local
+  DB.notifications = [];
+  save();
+  renderNotifPanel();
+}
 
 // ============================================================
 // MODALS
