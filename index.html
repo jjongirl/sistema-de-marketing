@@ -4104,9 +4104,10 @@ function checkPautasOverdue() {
   getTodayPautas().forEach(p=>{
     if(p.status==='pending'&&p.deadlineTime&&p.deadlineTime<currentTime) {
       p.status='overdue';
+      firebaseUpdate('pautas', p.id, { status: 'overdue' }); // <--- ADICIONE ESTA LINHA
     }
   });
-  save();updateBadges();
+  updateBadges(); // Substitua o save() por updateBadges apenas
 }
 
 // ============================================================
@@ -4819,26 +4820,25 @@ async function init() {
     showToast('🔄 Conectando ao Firebase...', 'info');
     initFirebaseListeners();
     // Seed data into Firebase only if it's empty
-    setTimeout(async () => {
-      try {
-        const snap = await COL('tasks').limit(1).get();
-        if (snap.empty) {
-          showToast('📦 Carregando dados iniciais...', 'info');
-          seedData();
-          // Push seed data to Firebase
-          const collections = ['tasks','projects','metas','pending','insights','approvals','pautas','cobrancas'];
-          for (const colName of collections) {
-            for (const item of DB[colName] || []) {
-              await firebaseCreate(colName, item);
-            }
-          }
-          showToast('✅ Dados iniciais carregados no Firebase!', 'success');
+   // Remova ou comente este bloco inteiro dentro da função init()
+/*
+setTimeout(async () => {
+  try {
+    const snap = await COL('tasks').limit(1).get();
+    if (snap.empty) {
+      showToast('📦 Carregando dados iniciais...', 'info');
+      seedData();
+      const collections = ['tasks','projects','metas','pending','insights','approvals','pautas','cobrancas'];
+      for (const colName of collections) {
+        for (const item of DB[colName] || []) {
+          await firebaseCreate(colName, item);
         }
-      } catch(e) {
-        console.warn('Seed check failed, using localStorage', e);
-        seedData();
       }
-    }, 1500);
+      showToast('✅ Dados iniciais carregados no Firebase!', 'success');
+    }
+  } catch(e) { ... }
+}, 1500);
+*/
   } else {
     // No Firebase — use localStorage
     seedData();
@@ -4871,12 +4871,10 @@ async function init() {
   checkCobrancasOverdue();
   setInterval(checkCobrancasOverdue, 60000);
 
-  // 9. Daily reminder notification (only once per session)
-  setTimeout(() => {
-    const notif = {id:genId(),text:'💡 Lembrete: verifique as metas do dia!',type:'info',read:false,time:new Date().toISOString()};
-    firebaseCreate('notifications', notif);
-    if(!fdb) renderNotifPanel();
-  }, 30000);
+// 9. Daily reminder notification (apenas visual, sem salvar no banco)
+setTimeout(() => {
+  showToast('💡 Lembrete: verifique as metas do dia!', 'info');
+}, 30000);
 }
 
 init();
