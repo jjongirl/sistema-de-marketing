@@ -1542,6 +1542,90 @@ textarea.form-control{resize:vertical;min-height:80px}
     <button class="btn btn-secondary" onclick="openModal('igTokenModal')"><i class="fa-solid fa-key"></i>Reconfigurar Token</button>
   </div>
 </section>
+
+<section class="page-content" id="page-transcritor">
+      <div class="section-header">
+        <div>
+          <div class="section-title">Transcritor IA</div>
+          <div class="section-subtitle">Transcreva vídeos e adapte o texto para carrosséis automaticamente (100% Grátis)</div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom:20px;background:var(--bg-elevated);border:1px solid var(--border-strong)">
+        <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+          <i class="fa-solid fa-bolt" style="color:var(--accent-magenta)"></i>
+          <div class="form-group" style="margin:0;flex:1;min-width:250px">
+            <input type="password" class="form-control" id="gkey" placeholder="Groq API Key (gsk_...)" oninput="saveGroqKey()">
+          </div>
+          <a href="https://console.groq.com" target="_blank" style="font-size:11px;color:var(--accent-blue);text-decoration:underline">Obter chave grátis</a>
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom:20px">
+        <div class="upload-zone-ia" id="transcritor-drop">
+          <input type="file" id="t-file-input" accept=".mp3,.mp4,.m4a,.wav,.webm,.ogg" onchange="handleTranscritorFile(this)">
+          <i class="fa-solid fa-cloud-arrow-up" style="font-size:32px;color:var(--accent-magenta);margin-bottom:12px"></i>
+          <h3 style="font-size:14px;margin-bottom:4px">Arraste o arquivo de áudio ou vídeo aqui</h3>
+          <p style="font-size:12px;color:var(--text-muted)">MP3, MP4, M4A, WAV (Máx 25MB)</p>
+        </div>
+        <div id="t-file-info" style="display:none;margin-top:12px"></div>
+        
+        <div style="display:flex;justify-content:flex-end;margin-top:16px">
+          <button class="btn btn-primary" id="btn-transcrever" onclick="startTranscription()">
+            <i class="fa-solid fa-closed-captioning"></i> Transcrever Áudio
+          </button>
+        </div>
+      </div>
+
+      <div class="loader-bar" id="t-loader"><div class="loader-bar-inner"></div></div>
+
+      <div class="ai-output-box" id="t-result-box">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+          <h4 style="font-size:13px;color:var(--accent-blue)"><i class="fa-solid fa-check-circle"></i> Transcrição Concluída</h4>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-xs btn-secondary" onclick="copyAiOutput('t-text')"><i class="fa-solid fa-copy"></i> Copiar</button>
+            <button class="btn btn-xs btn-primary" onclick="document.getElementById('t-carousel-section').style.display='block'"><i class="fa-solid fa-images"></i> Adaptar p/ Carrossel</button>
+          </div>
+        </div>
+        <div class="ai-output-content" id="t-text"></div>
+      </div>
+
+      <div class="card" id="t-carousel-section" style="display:none;margin-top:20px;border-left:3px solid var(--accent-blue)">
+        <div class="card-title">Adaptar transcrição para Carrossel Instagram</div>
+        <div class="form-row" style="margin-bottom:16px">
+          <div class="form-group">
+            <label class="form-label">Marca</label>
+            <select class="form-control" id="c-marca">
+              <option value="click">Click Impresso (Tom casual, B2C)</option>
+              <option value="impresul">Impresul (Tom técnico, Premium, B2B)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Foco do Carrossel</label>
+            <select class="form-control" id="c-foco">
+              <option value="educativo">📚 Educativo / Ensinar algo</option>
+              <option value="conversao">🎯 Conversão / Venda</option>
+              <option value="autoridade">🏆 Autoridade / Especialista</option>
+              <option value="bastidores">🎬 Bastidores / Processo</option>
+            </select>
+          </div>
+        </div>
+        <div style="text-align:right">
+           <button class="btn btn-primary" onclick="genCarousel()"><i class="fa-solid fa-wand-magic-sparkles"></i> Gerar Roteiro do Carrossel</button>
+        </div>
+      </div>
+
+      <div class="loader-bar" id="c-loader"><div class="loader-bar-inner"></div></div>
+
+      <div class="ai-output-box" id="c-result-box">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+          <h4 style="font-size:13px;color:var(--accent-magenta)"><i class="fa-solid fa-images"></i> Carrossel Gerado</h4>
+          <button class="btn btn-xs btn-secondary" onclick="copyAiOutput('c-text')"><i class="fa-solid fa-copy"></i> Copiar</button>
+        </div>
+        <div class="ai-output-content" id="c-text"></div>
+      </div>
+    </section>   
+   
 </main>
 
 </div><!-- end app-layout -->
@@ -5347,6 +5431,120 @@ async function callGroqStudio(prompt, loaderId, resultBoxId, textId) {
     loader.classList.remove('visible');
   }
 }
+
+// ============================================================
+// TRANSCRITOR IA & CARROSSEL (GROQ)
+// ============================================================
+
+pageLabels['transcritor'] = 'Estúdio / Transcritor IA';
+
+function saveGroqKey() {
+  const gkey = document.getElementById('gkey')?.value.trim();
+  if(gkey) localStorage.setItem('groq_key', gkey);
+}
+
+function loadGroqKey() {
+  const g = localStorage.getItem('groq_key');
+  if(g && document.getElementById('gkey')) document.getElementById('gkey').value = g;
+}
+setTimeout(loadGroqKey, 500);
+
+let transcritorFile = null;
+let transcritorText = '';
+
+function handleTranscritorFile(input) {
+  const file = input.files[0];
+  if(!file) return;
+  transcritorFile = file;
+  const info = document.getElementById('t-file-info');
+  info.innerHTML = `<div class="file-item-ia" style="display:flex;align-items:center;gap:10px;background:var(--bg-elevated);padding:10px;border-radius:8px;border:1px solid var(--border-subtle);"><i class="fa-solid fa-music" style="color:var(--accent-magenta)"></i> <span style="flex:1;font-size:13px">${file.name}</span> <span style="color:var(--text-muted);font-size:12px">${(file.size/1024/1024).toFixed(1)}MB</span> <button class="btn btn-xs btn-ghost" onclick="transcritorFile=null;document.getElementById('t-file-info').style.display='none'"><i class="fa-solid fa-xmark"></i></button></div>`;
+  info.style.display = 'block';
+}
+
+async function startTranscription() {
+  const gkey = document.getElementById('gkey').value.trim() || localStorage.getItem('groq_key');
+  if(!gkey) return showToast('Preencha a Groq API Key', 'error');
+  if(!transcritorFile) return showToast('Selecione um arquivo de áudio ou vídeo', 'error');
+  
+  const btn = document.getElementById('btn-transcrever');
+  const loader = document.getElementById('t-loader');
+  btn.disabled = true; loader.classList.add('visible');
+  document.getElementById('t-result-box').classList.remove('visible');
+
+  try {
+    const formData = new FormData();
+    formData.append('file', transcritorFile);
+    formData.append('model', 'whisper-large-v3-turbo');
+    formData.append('response_format', 'json');
+    formData.append('language', 'pt');
+
+    const res = await fetch('https://api.groq.com/openai/v1/audio/transcriptions', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + gkey },
+      body: formData
+    });
+
+    if(!res.ok) throw new Error('Erro na transcrição. O arquivo pode ser muito grande (máx 25MB) ou a chave está incorreta.');
+    const data = await res.json();
+    
+    transcritorText = data.text;
+    document.getElementById('t-text').textContent = transcritorText;
+    document.getElementById('t-result-box').classList.add('visible');
+  } catch(e) {
+    showToast(e.message, 'error');
+  } finally {
+    btn.disabled = false; loader.classList.remove('visible');
+  }
+}
+
+async function genCarousel() {
+  if(!transcritorText) return showToast('Transcreva um arquivo primeiro', 'error');
+  const gkey = document.getElementById('gkey').value.trim() || localStorage.getItem('groq_key');
+  if(!gkey) return showToast('Groq API Key não encontrada', 'error');
+
+  const marca = document.getElementById('c-marca').value;
+  const foco = document.getElementById('c-foco').value;
+  
+  const loader = document.getElementById('c-loader');
+  loader.classList.add('visible');
+  document.getElementById('c-result-box').classList.remove('visible');
+
+  const prompt = `Atue como copywriter especialista em redes sociais da marca ${marca==='click'?'Click Impresso (B2C, gráfica rápida e expressa)':'Impresul (B2B, gráfica premium de alta tiragem)'}. 
+Transforme esta transcrição em um carrossel magnético para Instagram focado em ${foco}.
+Gere de 5 a 7 slides. 
+Formato obrigatório: 
+[Slide 1 - Capa] Headline impactante e curiosa
+[Slide 2] ...
+[Slide Final] CTA forte para engajamento ou venda.
+
+Transcrição do vídeo: "${transcritorText}"`;
+
+  try {
+    const resp = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + gkey },
+      body: JSON.stringify({
+        model: 'llama-3.3-70b-versatile',
+        messages: [{ role: 'user', content: prompt }],
+        temperature: 0.7
+      })
+    });
+    if(!resp.ok) throw new Error('Erro ao gerar carrossel');
+    const data = await resp.json();
+    document.getElementById('c-text').innerHTML = data.choices[0].message.content.replace(/\n/g, '<br>');
+    document.getElementById('c-result-box').classList.add('visible');
+  } catch(e) {
+    showToast(e.message, 'error');
+  } finally {
+    loader.classList.remove('visible');
+  }
+}
+
+function copyAiOutput(id) {
+  const text = document.getElementById(id).innerText;
+  navigator.clipboard.writeText(text).then(() => showToast('Copiado com sucesso!', 'success'));
+}
+   
 </script>
 </body>
 </html>
