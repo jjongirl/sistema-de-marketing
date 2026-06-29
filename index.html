@@ -852,6 +852,32 @@ textarea.form-control{resize:vertical;min-height:80px}
 @keyframes loadingSlide { 0% { transform: translateX(-100%); width: 40%; } 50% { width: 60%; } 100% { transform: translateX(300%); width: 40%; } }
 
 .file-item-ia { display: flex; align-items: center; gap: 10px; background: var(--bg-elevated); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 8px 12px; font-size: 12px; margin-top: 8px; }   
+
+
+/* ============================================================
+   CARROSSEL IA (VISUAL AVANÇADO)
+============================================================ */
+.brand-card-ia { display:flex; align-items:center; gap:12px; background:var(--bg-surface); border:1.5px solid var(--border-subtle); border-radius:10px; padding:16px; cursor:pointer; transition:all 0.2s; }
+.brand-card-ia:hover { border-color:var(--border-strong); }
+.brand-card-ia.active { border-color:var(--accent-magenta); background:rgba(230,0,126,0.06); }
+.brand-logo-ia { width:40px; height:40px; border-radius:8px; flex-shrink:0; display:flex; align-items:center; justify-content:center; overflow:hidden; }
+.brand-check-ia { font-size:13px; font-weight:700; color:var(--accent-magenta); margin-left:auto; opacity:0; transition:opacity 0.2s; }
+.brand-card-ia.active .brand-check-ia { opacity:1; }
+
+.type-pill-ia { font-size:12px; font-weight:600; padding:6px 14px; border-radius:99px; border:1px solid var(--border-subtle); background:transparent; color:var(--text-secondary); cursor:pointer; transition:all 0.15s; }
+.type-pill-ia:hover { border-color:var(--border-strong); color:var(--text-primary); }
+.type-pill-ia.active { background:rgba(0,159,227,0.15); border-color:var(--accent-blue); color:var(--accent-blue); }
+
+.slide-card-ia { background:var(--bg-surface); border:1px solid var(--border-subtle); border-radius:10px; padding:20px; position:relative; border-left:3px solid var(--accent-blue); margin-bottom:16px; }
+.slide-card-ia:nth-child(3n+2) { border-left-color:var(--accent-magenta); }
+.slide-card-ia:nth-child(3n+3) { border-left-color:#FFED00; }
+.slide-num-ia { position:absolute; top:-10px; left:16px; font-size:10px; font-weight:800; letter-spacing:0.1em; text-transform:uppercase; background:var(--accent-blue); color:#000; padding:2px 8px; border-radius:99px; }
+.slide-card-ia:nth-child(3n+2) .slide-num-ia { background:var(--accent-magenta); color:#fff; }
+.slide-card-ia:nth-child(3n+3) .slide-num-ia { background:#FFED00; color:#000; }
+.slide-type-ia { font-size:11px; font-weight:600; letter-spacing:0.08em; text-transform:uppercase; color:var(--text-muted); margin-bottom:6px; margin-top:4px; }
+.slide-hl-ia { font-size:17px; font-weight:700; line-height:1.35; color:var(--text-primary); margin-bottom:10px; }
+.slide-body-ia { font-size:13.5px; line-height:1.75; color:var(--text-secondary); white-space:pre-line; }
+.slide-cta-ia { display:inline-block; margin-top:10px; font-size:12px; font-weight:700; text-transform:uppercase; padding:6px 14px; border-radius:99px; background:rgba(0,159,227,0.15); color:var(--accent-blue); border:1px solid rgba(0,159,227,0.3); }
    
 </style>
 </head>
@@ -1357,89 +1383,60 @@ textarea.form-control{resize:vertical;min-height:80px}
 <!-- ==============================
        TRANSCRITOR IA
   ============================== -->
-  <section class="page-content" id="page-transcritor">
-    <div class="section-header">
-      <div>
-        <div class="section-title">Transcritor IA</div>
-        <div class="section-subtitle">Transcreva vídeos e adapte o texto para carrosséis automaticamente</div>
-      </div>
-    </div>
-
-    <!-- API KEY & CONFIGS -->
-    <div class="card" style="margin-bottom:20px;background:linear-gradient(135deg, rgba(230,0,126,0.05), rgba(0,159,227,0.05))">
-      <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
-        <i class="fa-solid fa-key" style="color:var(--accent-magenta)"></i>
-        <div class="form-group" style="margin:0;flex:1;min-width:250px">
-          <input type="password" class="form-control" id="gkey" placeholder="Groq API Key (gsk_...)" oninput="saveAiKeys()">
+<div class="card" id="t-carousel-section" style="display:none;margin-top:20px;border-left:3px solid var(--accent-blue)">
+        <div class="card-title">Adaptar para Carrossel Instagram</div>
+        
+        <p style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--text-muted);margin-bottom:12px">Escolha a marca</p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px" id="brand-selector">
+          <div class="brand-card-ia active" id="brand-click" onclick="selectBrandIA('click')">
+            <div class="brand-logo-ia" style="background:#132957">
+              <svg width="24" height="24" viewBox="0 0 40 40" fill="none"><rect width="40" height="40" rx="8" fill="#132957"/><circle cx="14" cy="20" r="7" fill="#009FE3"/><circle cx="20" cy="20" r="7" fill="#E6007E"/><circle cx="26" cy="20" r="7" fill="#FFED00"/></svg>
+            </div>
+            <div>
+              <div style="font-size:13px;font-weight:700;color:var(--text-primary)">Click Impresso</div>
+              <div style="font-size:11px;color:var(--text-muted)">B2C · Casual</div>
+            </div>
+            <div class="brand-check-ia" id="check-click">✓</div>
+          </div>
+          <div class="brand-card-ia" id="brand-impresul" onclick="selectBrandIA('impresul')">
+            <div class="brand-logo-ia" style="background:#1D1D1B">
+              <svg width="24" height="24" viewBox="0 0 40 40" fill="none"><rect width="40" height="40" rx="8" fill="#1D1D1B"/><circle cx="15" cy="20" r="7" fill="#E6007E"/><circle cx="22" cy="20" r="7" fill="#009FE3"/><circle cx="28" cy="16" r="5" fill="#FFED00"/></svg>
+            </div>
+            <div>
+              <div style="font-size:13px;font-weight:700;color:var(--text-primary)">Impresul</div>
+              <div style="font-size:11px;color:var(--text-muted)">B2B · Premium</div>
+            </div>
+            <div class="brand-check-ia" id="check-impresul">✓</div>
+          </div>
         </div>
-        <a href="https://console.groq.com" target="_blank" style="font-size:11px;color:var(--accent-blue);text-decoration:underline">Obter chave grátis</a>
-      </div>
-    </div>
 
-    <div class="card" style="margin-bottom:20px">
-      <div class="upload-zone-ia" id="transcritor-drop">
-        <input type="file" id="t-file-input" accept=".mp3,.mp4,.m4a,.wav,.webm,.ogg" onchange="handleTranscritorFile(this)">
-        <i class="fa-solid fa-cloud-arrow-up" style="font-size:32px;color:var(--accent-magenta);margin-bottom:12px"></i>
-        <h3 style="font-size:14px;margin-bottom:4px">Arraste o arquivo de áudio ou vídeo aqui</h3>
-        <p style="font-size:12px;color:var(--text-muted)">MP3, MP4, M4A, WAV (Máx 25MB)</p>
-      </div>
-      <div id="t-file-info" style="display:none"></div>
-      
-      <div style="display:flex;justify-content:flex-end;margin-top:16px">
-        <button class="btn btn-primary" id="btn-transcrever" onclick="startTranscription()">
-          <i class="fa-solid fa-closed-captioning"></i> Transcrever Áudio
-        </button>
-      </div>
-    </div>
+        <p style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--text-muted);margin-bottom:12px">Tipo de carrossel</p>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px">
+          <button class="type-pill-ia active" data-type="educativo" onclick="selTypeIA(this)">📚 Educativo</button>
+          <button class="type-pill-ia" data-type="conversao" onclick="selTypeIA(this)">🎯 Conversão</button>
+          <button class="type-pill-ia" data-type="autoridade" onclick="selTypeIA(this)">🏆 Autoridade</button>
+          <button class="type-pill-ia" data-type="bastidores" onclick="selTypeIA(this)">🎬 Bastidores</button>
+          <button class="type-pill-ia" data-type="storytelling" onclick="selTypeIA(this)">✨ Storytelling</button>
+        </div>
 
-    <div class="loader-bar" id="t-loader"><div class="loader-bar-inner"></div></div>
-
-    <!-- RESULTADO TRANSCRIÇÃO -->
-    <div class="ai-output-box" id="t-result-box">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
-        <h4 style="font-size:13px;color:var(--accent-blue)"><i class="fa-solid fa-check-circle"></i> Transcrição Concluída</h4>
-        <div style="display:flex;gap:8px">
-          <button class="btn btn-xs btn-secondary" onclick="copyAiOutput('t-text')"><i class="fa-solid fa-copy"></i> Copiar</button>
-          <button class="btn btn-xs btn-primary" onclick="document.getElementById('t-carousel-section').style.display='block'"><i class="fa-solid fa-images"></i> Adaptar p/ Carrossel</button>
+        <div style="text-align:right">
+           <button class="btn btn-primary" onclick="genCarousel()"><i class="fa-solid fa-wand-magic-sparkles"></i> Gerar Carrossel</button>
         </div>
       </div>
-      <div class="ai-output-content" id="t-text"></div>
-    </div>
 
-    <!-- GERAR CARROSSEL -->
-    <div class="card" id="t-carousel-section" style="display:none;margin-top:20px;border-left:3px solid var(--accent-blue)">
-      <div class="card-title">Adaptar transcrição para Carrossel Instagram</div>
-      <div class="form-row" style="margin-bottom:16px">
-        <div class="form-group">
-          <label class="form-label">Marca</label>
-          <select class="form-control" id="c-marca">
-            <option value="click">Click Impresso (Tom casual, B2C)</option>
-            <option value="impresul">Impresul (Tom técnico, Premium, B2B)</option>
-          </select>
+      <div class="loader-bar" id="c-loader"><div class="loader-bar-inner"></div></div>
+
+      <div class="ai-output-box" id="c-result-box" style="padding:0;background:transparent;border:none">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;background:var(--bg-elevated);padding:16px 20px;border-radius:10px;border:1px solid var(--border-subtle)">
+          <h4 style="font-size:13px;color:var(--accent-blue)"><i class="fa-solid fa-images"></i> Carrossel Gerado</h4>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-xs btn-secondary" onclick="copyC()"><i class="fa-solid fa-copy"></i> Copiar</button>
+            <button class="btn btn-xs btn-secondary" onclick="dlC()"><i class="fa-solid fa-download"></i> Baixar .txt</button>
+          </div>
         </div>
-        <div class="form-group">
-          <label class="form-label">Foco do Carrossel</label>
-          <select class="form-control" id="c-foco">
-            <option value="educativo">📚 Educativo / Ensinar algo</option>
-            <option value="conversao">🎯 Conversão / Venda</option>
-            <option value="autoridade">🏆 Autoridade / Especialista</option>
-            <option value="bastidores">🎬 Bastidores / Processo</option>
-          </select>
-        </div>
+        <div id="c-slides-container"></div>
       </div>
-      <button class="btn btn-primary" onclick="genCarousel()"><i class="fa-solid fa-wand-magic-sparkles"></i> Gerar Roteiro do Carrossel</button>
-    </div>
-
-    <div class="loader-bar" id="c-loader"><div class="loader-bar-inner"></div></div>
-
-    <div class="ai-output-box" id="c-result-box">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
-        <h4 style="font-size:13px;color:var(--accent-magenta)"><i class="fa-solid fa-images"></i> Carrossel Gerado</h4>
-        <button class="btn btn-xs btn-secondary" onclick="copyAiOutput('c-text')"><i class="fa-solid fa-copy"></i> Copiar</button>
-      </div>
-      <div class="ai-output-content" id="c-text"></div>
-    </div>
-  </section>
+    </section>
    
   <!-- ==============================
        RELATÓRIOS
@@ -5497,27 +5494,60 @@ async function startTranscription() {
   }
 }
 
+// --- LÓGICA AVANÇADA DO CARROSSEL ---
+let SEL_BRAND_IA = 'click';
+let SEL_TYPE_IA = 'educativo';
+let CDATA = null;
+
+function selectBrandIA(brand) {
+  SEL_BRAND_IA = brand;
+  ['click','impresul'].forEach(b => {
+    document.getElementById('brand-'+b).classList.toggle('active', b === brand);
+  });
+}
+
+function selTypeIA(btn) {
+  document.querySelectorAll('.type-pill-ia').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  SEL_TYPE_IA = btn.dataset.type;
+}
+
+const BRAND_PROMPTS = {
+  click: { label: 'Click Impresso', system: 'Você é o copywriter estratégico da Click Impresso, gráfica expressa B2C. Tom caloroso, próximo, linguagem simples e casual. Cores: Azul, Ciano, Magenta, Amarelo. Responda SEMPRE com JSON válido.' },
+  impresul: { label: 'Impresul', system: 'Você é o copywriter estratégico da Impresul, gráfica B2B premium. Tom ousado, técnico, linguagem confiante. Autoridade que se prova. Cores: Magenta, Ciano, Amarelo, Preto. Responda SEMPRE com JSON válido.' }
+};
+
+const TYPE_INSTRUCTIONS = {
+  educativo: 'Foco educativo: ensine algo útil. Cada slide = 1 aprendizado.',
+  conversao: 'Foco em conversão: conecte a um produto e conduza ao orçamento.',
+  autoridade: 'Foco em autoridade: use dados, técnica e expertise.',
+  bastidores: 'Foco em bastidores: mostre o processo por trás.',
+  storytelling: 'Foco em storytelling: emoção e narrativa.'
+};
+
 async function genCarousel() {
   if(!transcritorText) return showToast('Transcreva um arquivo primeiro', 'error');
   const gkey = document.getElementById('gkey').value.trim() || localStorage.getItem('groq_key');
   if(!gkey) return showToast('Groq API Key não encontrada', 'error');
 
-  const marca = document.getElementById('c-marca').value;
-  const foco = document.getElementById('c-foco').value;
-  
   const loader = document.getElementById('c-loader');
   loader.classList.add('visible');
   document.getElementById('c-result-box').classList.remove('visible');
 
-  const prompt = `Atue como copywriter especialista em redes sociais da marca ${marca==='click'?'Click Impresso (B2C, gráfica rápida e expressa)':'Impresul (B2B, gráfica premium de alta tiragem)'}. 
-Transforme esta transcrição em um carrossel magnético para Instagram focado em ${foco}.
-Gere de 5 a 7 slides. 
-Formato obrigatório: 
-[Slide 1 - Capa] Headline impactante e curiosa
-[Slide 2] ...
-[Slide Final] CTA forte para engajamento ou venda.
+  const brand = BRAND_PROMPTS[SEL_BRAND_IA];
+  const typeInstr = TYPE_INSTRUCTIONS[SEL_TYPE_IA];
 
-Transcrição do vídeo: "${transcritorText}"`;
+  const userPrompt = `Crie um carrossel de 5 a 8 slides para Instagram da ${brand.label}.
+TIPO: ${SEL_TYPE_IA.toUpperCase()} - ${typeInstr}
+TRANSCRIÇÃO DO VÍDEO: "${transcritorText.substring(0, 3500)}"
+
+REGRAS: 
+1. Capa com Hook de até 8 palavras (forte e curioso).
+2. Corpo dos slides não pode ser em tópicos (bullet points). Use prosa corrida de 3 a 4 linhas.
+3. Último slide é CTA específico.
+
+Retorne EXATAMENTE neste JSON:
+{"topic":"Tema em até 6 palavras","brand":"${brand.label}","slides":[{"type":"CAPA","headline":"HOOK CURTO","body":"2 linhas de introdução","cta":null},{"type":"CONTEÚDO","headline":"Título do slide","body":"Corpo aprofundado com exemplos","cta":null},{"type":"CTA","headline":"Chamada final","body":"Transformação","cta":"CTA específico"}]}`;
 
   try {
     const resp = await fetch('https://api.groq.com/openai/v1/chat/completions', {
@@ -5525,19 +5555,66 @@ Transcrição do vídeo: "${transcritorText}"`;
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + gkey },
       body: JSON.stringify({
         model: 'llama-3.3-70b-versatile',
-        messages: [{ role: 'user', content: prompt }],
-        temperature: 0.7
+        temperature: 0.75,
+        response_format: { type: 'json_object' },
+        messages: [
+          { role: 'system', content: brand.system },
+          { role: 'user', content: userPrompt }
+        ]
       })
     });
-    if(!resp.ok) throw new Error('Erro ao gerar carrossel');
+    
+    if(!resp.ok) throw new Error('Erro ao gerar carrossel com JSON');
+    
     const data = await resp.json();
-    document.getElementById('c-text').innerHTML = data.choices[0].message.content.replace(/\n/g, '<br>');
+    const raw = data.choices?.[0]?.message?.content || '';
+    const clean = raw.replace(/```json|```/g,'').trim();
+    const si = clean.indexOf('{'), ei = clean.lastIndexOf('}');
+    
+    if(si === -1) throw new Error('Formato inesperado na resposta.');
+    
+    CDATA = JSON.parse(clean.substring(si, ei+1));
+    renderCarousel(CDATA);
+    
     document.getElementById('c-result-box').classList.add('visible');
   } catch(e) {
-    showToast(e.message, 'error');
+    showToast('Erro: ' + e.message, 'error');
   } finally {
     loader.classList.remove('visible');
   }
+}
+
+function renderCarousel(d) {
+  const container = document.getElementById('c-slides-container');
+  container.innerHTML = '';
+  
+  d.slides.forEach((s, i) => {
+    const isCapa = s.type === 'CAPA';
+    container.innerHTML += `
+      <div class="slide-card-ia" style="${isCapa ? 'border-left-color:var(--accent-magenta);background:rgba(230,0,126,0.04)' : ''}">
+        <div class="slide-num-ia">Slide ${i+1}</div>
+        <div class="slide-type-ia" style="${isCapa ? 'color:var(--accent-magenta)' : ''}">${s.type}${isCapa ? ' 🎯 HOOK' : ''}</div>
+        <div class="slide-hl-ia">${s.headline}</div>
+        <div class="slide-body-ia">${s.body}</div>
+        ${s.cta ? `<div class="slide-cta-ia">${s.cta}</div>` : ''}
+      </div>
+    `;
+  });
+}
+
+function copyC() {
+  if(!CDATA) return;
+  let t = `CARROSSEL: ${CDATA.topic}\n${'─'.repeat(40)}\n\n`;
+  CDATA.slides.forEach((s,i) => { t += `SLIDE ${i+1} — ${s.type}\n${s.headline}\n${s.body}${s.cta ? '\nCTA: '+s.cta : ''}\n\n`; });
+  navigator.clipboard.writeText(t).then(() => showToast('✓ Carrossel copiado!', 'success'));
+}
+
+function dlC() {
+  if(!CDATA) return;
+  let t = `CARROSSEL INSTAGRAM\n${CDATA.topic}\n${'═'.repeat(40)}\n\n`;
+  CDATA.slides.forEach((s,i) => { t += `┌─ SLIDE ${i+1} — ${s.type}\n│ ${s.headline}\n│ ${s.body}${s.cta ? '\n│ CTA: '+s.cta : ''}\n└${'─'.repeat(32)}\n\n`; });
+  const a = Object.assign(document.createElement('a'), {href: URL.createObjectURL(new Blob([t], {type: 'text/plain;charset=utf-8'})), download: `carrossel-impresul.txt`});
+  a.click(); URL.revokeObjectURL(a.href);
 }
 
 function copyAiOutput(id) {
