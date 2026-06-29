@@ -1453,18 +1453,19 @@ textarea.form-control{resize:vertical;min-height:80px}
       </div>
     </div>
 
-    <!-- API KEYS (Claude & Gemini) -->
+  <!-- API KEYS (Groq & Gemini - 100% Gratuitas) -->
     <div class="card" style="margin-bottom:20px;background:var(--bg-elevated);border:1px solid var(--border-strong)">
       <div class="form-row">
         <div class="form-group" style="margin:0">
-          <label class="form-label"><i class="fa-solid fa-robot" style="color:var(--accent-magenta)"></i> Anthropic API Key (Claude)</label>
-          <input type="password" class="form-control" id="ckey" placeholder="sk-ant-..." oninput="saveAiKeys()">
+          <label class="form-label"><i class="fa-solid fa-bolt" style="color:var(--accent-magenta)"></i> Groq API Key (Roteiros, Músicas e Transcrição)</label>
+          <input type="password" class="form-control" id="gkey-reels" placeholder="gsk_..." oninput="saveAiKeys()">
         </div>
         <div class="form-group" style="margin:0">
-          <label class="form-label"><i class="fa-solid fa-sparkles" style="color:var(--accent-blue)"></i> Google Gemini API Key</label>
+          <label class="form-label"><i class="fa-solid fa-sparkles" style="color:var(--accent-blue)"></i> Google Gemini API Key (Edição Visual)</label>
           <input type="password" class="form-control" id="gemini-key" placeholder="AIzaSy..." oninput="saveAiKeys()">
         </div>
       </div>
+      <p style="font-size:11px;color:var(--text-muted);margin-top:8px">Ambas as APIs possuem planos gratuitos generosos. Nenhuma chave paga é necessária.</p>
     </div>
 
     <!-- INTERNAL TABS -->
@@ -1472,7 +1473,8 @@ textarea.form-control{resize:vertical;min-height:80px}
       <button class="tab-u active" onclick="setReelsTab('roteiro', this)">📝 Roteiro</button>
       <button class="tab-u" onclick="setReelsTab('topreels', this)">🔥 Top Reels</button>
       <button class="tab-u" onclick="setReelsTab('edicao', this)">✂️ Edição</button>
-      <button class="tab-u" onclick="setReelsTab('legendas', this)">💬 Legendas</button>
+      <button class="tab-u" onclick="setReelsTab('legendas', this)">💬 Transcrição & Legendas</button>
+      <button class="tab-u" onclick="setReelsTab('musica', this)">🎵 Música</button>
     </div>
 
     <!-- TAB 1: ROTEIRO -->
@@ -1590,36 +1592,108 @@ textarea.form-control{resize:vertical;min-height:80px}
       </div>
     </div>
 
-    <!-- TAB 4: LEGENDAS -->
+    <!-- TAB 4: TRANSCRIÇÃO & LEGENDAS -->
     <div class="reels-tab-content" id="rtab-legendas">
       <div class="card">
-        <div class="card-title">Transcrição & Legendas (Gemini)</div>
+        <div class="card-title">Transcrição Automática e Legendas (Gemini)</div>
+        <p style="font-size:12px;color:var(--text-muted);margin-bottom:16px">Envie o vídeo finalizado ou cole o roteiro falado. O Gemini ouve e transcreve tudo palavra por palavra.</p>
+
         <div class="upload-zone-ia" style="margin-bottom:16px">
           <input type="file" id="leg-file" accept="video/*,audio/*" onchange="handleLegFile(this)">
           <i class="fa-solid fa-microphone-lines" style="font-size:32px;color:var(--accent-magenta);margin-bottom:12px"></i>
-          <h3 style="font-size:14px;margin-bottom:4px">Envie o vídeo/áudio finalizado</h3>
-          <p style="font-size:12px;color:var(--text-muted)">O Gemini transcreverá as falas para legendas</p>
+          <h3 style="font-size:14px;margin-bottom:4px">Envie o vídeo/áudio finalizado (opcional)</h3>
+          <p style="font-size:12px;color:var(--text-muted)">MP4, MOV, MP3, M4A — até 2 minutos</p>
         </div>
         <div id="leg-file-info" style="display:none;margin-bottom:16px"></div>
+        
         <div class="form-group">
-          <label class="form-label">Formato da Legenda</label>
-          <select class="form-control" id="leg-formato">
-            <option>Blocos curtos e dinâmicos (estilo CapCut)</option>
-            <option>Frases completas por cena</option>
-            <option>Arquivo SRT</option>
-          </select>
+          <label class="form-label">Texto Falado (Cole aqui caso não queira enviar o vídeo)</label>
+          <textarea class="form-control" id="leg-texto" rows="3" placeholder="Deixe em branco se enviou o vídeo — a IA transcreverá o áudio automaticamente."></textarea>
         </div>
+
+        <div class="form-row-3" style="margin-top:16px">
+          <div class="form-group">
+            <label class="form-label">Duração Total</label>
+            <select class="form-control" id="leg-duracao"><option>15s</option><option>30s</option><option selected>45s</option><option>60s</option><option>90s</option></select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Formato da Legenda</label>
+            <select class="form-control" id="leg-formato">
+              <option>Blocos curtos (2-4 palavras por cena)</option>
+              <option>Frases completas por corte</option>
+              <option>Arquivo SRT</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Plano de Edição (Opcional)</label>
+            <input type="text" class="form-control" id="leg-plano-edicao" placeholder="Cole o plano da aba Edição para sincronizar">
+          </div>
+        </div>
+
         <div style="text-align:right;margin-top:16px">
-          <button class="btn btn-primary" onclick="gerarLegendas()"><i class="fa-solid fa-language"></i> Extrair Legendas</button>
+          <button class="btn btn-primary" onclick="gerarTranscricaoCompleta()" style="background:var(--accent-magenta)"><i class="fa-solid fa-language"></i> Gerar Transcrição</button>
         </div>
       </div>
-      <div class="loader-bar" id="leg-loader"><div class="loader-bar-inner"></div></div>
+      <div class="loader-bar" id="leg-loader"><div class="loader-bar-inner" style="background:linear-gradient(90deg,var(--accent-magenta),var(--accent-cyan))"></div></div>
       <div class="ai-output-box" id="leg-result-box">
         <div style="display:flex;justify-content:space-between;margin-bottom:12px">
-          <h4 style="font-size:13px;color:var(--accent-magenta)">Legendas</h4>
+          <h4 style="font-size:13px;color:var(--accent-magenta)">Transcrição e Legendas</h4>
           <button class="btn btn-xs btn-secondary" onclick="copyAiOutput('leg-text')">Copiar</button>
         </div>
         <div class="ai-output-content" id="leg-text"></div>
+      </div>
+    </div>
+
+    <!-- TAB 5: MÚSICA -->
+    <div class="reels-tab-content" id="rtab-musica">
+      <div class="card">
+        <div class="card-title">Sugestão de Música e Trilhas (Claude)</div>
+        <p style="font-size:12px;color:var(--text-muted);margin-bottom:16px">Descubra as músicas em alta (trending) ou royalty-free para usar nos seus Reels.</p>
+        
+        <div class="form-row-3">
+          <div class="form-group">
+            <label class="form-label">Mood / Vibe</label>
+            <select class="form-control" id="mus-mood">
+              <option>Animado e energético</option>
+              <option>Satisfying / Calmo</option>
+              <option>Motivacional / Inspirador</option>
+              <option>Luxo / Premium</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Gênero</label>
+            <select class="form-control" id="mus-genero">
+              <option>Qualquer</option>
+              <option>Eletrônico / Lo-fi</option>
+              <option>Pop / Indie</option>
+              <option>Instrumental / ASMR</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Tipo de Licença</label>
+            <select class="form-control" id="mus-licenca">
+              <option>Trending no Instagram</option>
+              <option>Royalty-free (uso comercial)</option>
+              <option>Apenas sem letra (instrumental)</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group" style="margin-top:12px">
+          <label class="form-label">Contexto do Vídeo</label>
+          <input type="text" class="form-control" id="mus-contexto" placeholder="Ex: Bastidores de produção gráfica, ritmo de cortes rápidos, vibe moderna">
+        </div>
+        
+        <div style="text-align:right;margin-top:16px">
+          <button class="btn btn-primary" onclick="buscarMusicas()" style="background:var(--accent-blue)"><i class="fa-solid fa-music"></i> Buscar Músicas Tendência</button>
+        </div>
+      </div>
+      <div class="loader-bar" id="mus-loader"><div class="loader-bar-inner"></div></div>
+      <div class="ai-output-box" id="mus-result-box">
+        <div style="display:flex;justify-content:space-between;margin-bottom:12px">
+          <h4 style="font-size:13px;color:var(--accent-blue)">Sugestões de Música</h4>
+          <button class="btn btn-xs btn-secondary" onclick="copyAiOutput('mus-text')">Copiar</button>
+        </div>
+        <div class="ai-output-content" id="mus-text"></div>
       </div>
     </div>
   </section>
@@ -5466,146 +5540,63 @@ function renderInstagram() {
 pageLabels['reels'] = 'Estúdio / Reels Studio';
 pageLabels['transcritor'] = 'Estúdio / Transcritor IA';
 
-// 2. Chaves de API
+// 2. Chaves de API (Atualizado para Groq e Gemini)
 function saveAiKeys() {
   const gkey = document.getElementById('gkey')?.value.trim();
-  const ckey = document.getElementById('ckey')?.value.trim();
+  const gkeyReels = document.getElementById('gkey-reels')?.value.trim();
   const gemini = document.getElementById('gemini-key')?.value.trim();
   if(gkey) localStorage.setItem('groq_key', gkey);
-  if(ckey) localStorage.setItem('claude_key', ckey);
+  if(gkeyReels) localStorage.setItem('groq_key', gkeyReels);
   if(gemini) localStorage.setItem('gemini_key', gemini);
 }
 
 function loadAiKeys() {
   const g = localStorage.getItem('groq_key');
-  const c = localStorage.getItem('claude_key');
   const gem = localStorage.getItem('gemini_key');
   if(g && document.getElementById('gkey')) document.getElementById('gkey').value = g;
-  if(c && document.getElementById('ckey')) document.getElementById('ckey').value = c;
+  if(g && document.getElementById('gkey-reels')) document.getElementById('gkey-reels').value = g;
   if(gem && document.getElementById('gemini-key')) document.getElementById('gemini-key').value = gem;
 }
 setTimeout(loadAiKeys, 500);
 
-// --- TRANSCRITOR IA (GROQ) ---
-let transcritorFile = null;
-let transcritorText = '';
-
-function handleTranscritorFile(input) {
-  const file = input.files[0];
-  if(!file) return;
-  transcritorFile = file;
-  const info = document.getElementById('t-file-info');
-  info.innerHTML = `<div class="file-item-ia"><i class="fa-solid fa-music" style="color:var(--accent-magenta)"></i> <span style="flex:1">${file.name}</span> <span style="color:var(--text-muted)">${(file.size/1024/1024).toFixed(1)}MB</span> <button class="btn btn-xs btn-ghost" onclick="transcritorFile=null;document.getElementById('t-file-info').style.display='none'"><i class="fa-solid fa-xmark"></i></button></div>`;
-  info.style.display = 'block';
-}
-
-async function startTranscription() {
-  const gkey = localStorage.getItem('groq_key');
-  if(!gkey) return showToast('Preencha a Groq API Key', 'error');
-  if(!transcritorFile) return showToast('Selecione um arquivo de áudio', 'error');
+// --- CHAMADA UNIVERSAL DO GROQ (Textos Rápidos e Gratuitos) ---
+async function callGroqStudio(prompt, loaderId, resultBoxId, textId) {
+  const gkey = document.getElementById('gkey')?.value.trim() || document.getElementById('gkey-reels')?.value.trim() || localStorage.getItem('groq_key');
   
-  const btn = document.getElementById('btn-transcrever');
-  const loader = document.getElementById('t-loader');
-  btn.disabled = true; loader.classList.add('visible');
-  document.getElementById('t-result-box').classList.remove('visible');
+  if(!gkey) { showToast('Insira a Groq API Key para gerar textos', 'error'); return; }
 
-  try {
-    const formData = new FormData();
-    formData.append('file', transcritorFile);
-    formData.append('model', 'whisper-large-v3-turbo');
-    formData.append('response_format', 'json');
-    formData.append('language', 'pt');
-
-    const res = await fetch('https://api.groq.com/openai/v1/audio/transcriptions', {
-      method: 'POST',
-      headers: { 'Authorization': 'Bearer ' + gkey },
-      body: formData
-    });
-
-    if(!res.ok) throw new Error('Erro na API Groq. Verifique a chave ou limite de tamanho.');
-    const data = await res.json();
-    
-    transcritorText = data.text;
-    document.getElementById('t-text').textContent = transcritorText;
-    document.getElementById('t-result-box').classList.add('visible');
-  } catch(e) {
-    showToast(e.message, 'error');
-  } finally {
-    btn.disabled = false; loader.classList.remove('visible');
-  }
-}
-
-async function genCarousel() {
-  if(!transcritorText) return showToast('Transcreva um áudio primeiro', 'error');
-  const gkey = localStorage.getItem('groq_key');
-  if(!gkey) return showToast('Groq API Key não encontrada', 'error');
-
-  const marca = document.getElementById('c-marca').value;
-  const foco = document.getElementById('c-foco').value;
-  
-  const loader = document.getElementById('c-loader');
-  loader.classList.add('visible');
-  document.getElementById('c-result-box').classList.remove('visible');
-
-  const prompt = `Atue como copywriter da marca ${marca==='click'?'Click Impresso':'Impresul'}. 
-Transforme esta transcrição em um carrossel para Instagram focado em ${foco}.
-Gere de 5 a 7 slides. 
-Formato: 
-[Slide 1 - Capa] Headline impactante
-[Slide 2] Conteúdo...
-[Slide Final] CTA.
-
-Transcrição: ${transcritorText}`;
-
-  try {
-    const resp = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + gkey },
-      body: JSON.stringify({
-        model: 'llama-3.3-70b-versatile',
-        messages: [{ role: 'user', content: prompt }]
-      })
-    });
-    const data = await resp.json();
-    document.getElementById('c-text').textContent = data.choices[0].message.content;
-    document.getElementById('c-result-box').classList.add('visible');
-  } catch(e) {
-    showToast('Erro ao gerar carrossel', 'error');
-  } finally {
-    loader.classList.remove('visible');
-  }
-}
-
-// --- REELS STUDIO ---
-function setReelsTab(tab, btn) {
-  document.querySelectorAll('#page-reels .tab-u').forEach(b => b.classList.remove('active'));
-  document.querySelectorAll('.reels-tab-content').forEach(c => c.classList.remove('active'));
-  btn.classList.add('active');
-  document.getElementById('rtab-' + tab).classList.add('active');
-}
-
-// Chamada Universal Anthropic (Claude)
-async function callClaudeStudio(prompt, loaderId, resultBoxId, textId) {
-  const ckey = localStorage.getItem('claude_key');
-  if(!ckey) { showToast('Insira a Anthropic API Key', 'error'); return; }
-  
   const loader = document.getElementById(loaderId);
   loader.classList.add('visible');
   document.getElementById(resultBoxId).classList.remove('visible');
 
   try {
-    const res = await fetch("https://api.anthropic.com/v1/messages", {
+    const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
-      headers: { "Content-Type": "application/json", "x-api-key": ckey, "anthropic-version": "2023-06-01", "anthropic-dangerously-allow-browser": "true" },
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + gkey
+      },
       body: JSON.stringify({
-        model: "claude-3-5-sonnet-20241022",
-        max_tokens: 1500,
-        messages: [{ role: "user", content: prompt }]
+        model: "llama-3.3-70b-versatile",
+        temperature: 0.7,
+        messages: [
+          {
+            role: "system",
+            content: "Você é um especialista em criação de conteúdo para redes sociais, com foco em Reels e vídeos curtos para gráficas e negócios de impressão. Conhece as marcas Click Impresso (expressa/b2c) e Impresul (premium/b2b). Responda sempre em português brasileiro fluente. Use formatação clara com emojis. Seja prático e acionável."
+          },
+          { role: "user", content: prompt }
+        ]
       })
     });
-    if(!res.ok) throw new Error('Erro na API Claude');
+
+    if(!res.ok) throw new Error('Erro na API Groq. Verifique sua chave.');
     const data = await res.json();
-    document.getElementById(textId).innerHTML = formatTextWithLinks(data.content[0].text);
+    
+    let outputText = data.choices[0].message.content;
+    const urlRegex = /(https?:\/\/[^\s]+)/g;
+    outputText = outputText.replace(urlRegex, url => `<a href="${url}" target="_blank" style="color:var(--accent-blue)">${url}</a>`);
+    
+    document.getElementById(textId).innerHTML = outputText.replace(/\n/g, '<br>');
     document.getElementById(resultBoxId).classList.add('visible');
   } catch(e) {
     showToast(e.message, 'error');
@@ -5614,10 +5605,7 @@ async function callClaudeStudio(prompt, loaderId, resultBoxId, textId) {
   }
 }
 
-function formatTextWithLinks(text) {
-  const urlRegex = /(https?:\/\/[^\s]+)/g;
-  return text.replace(urlRegex, url => `<a href="${url}" target="_blank">${url}</a>`);
-}
+// --- FUNÇÕES DAS ABAS DO REELS STUDIO ---
 
 function gerarRoteiroReels() {
   const prompt = `Crie um roteiro de Reels (${document.getElementById('r-tempo').value}). 
@@ -5627,14 +5615,14 @@ function gerarRoteiroReels() {
   CTA: ${document.getElementById('r-cta').value}. 
   Dores/Benefícios: ${document.getElementById('r-dores').value}.
   Formate cena a cena com gancho de 3 segundos, áudio e visual.`;
-  callClaudeStudio(prompt, 'r-loader', 'r-result-box', 'r-text');
+  callGroqStudio(prompt, 'r-loader', 'r-result-box', 'r-text');
 }
 
 function analisarTopReels() {
   const prompt = `Analise os seguintes links e explique o padrão viral (gancho, retenção e formato):
   Links: ${document.getElementById('tr-links').value}
   Objetivo: ${document.getElementById('tr-objetivo').value}`;
-  callClaudeStudio(prompt, 'tr-loader', 'tr-result-box', 'tr-text');
+  callGroqStudio(prompt, 'tr-loader', 'tr-result-box', 'tr-text');
 }
 
 // Manipulação de Arquivos de Vídeo
@@ -5704,17 +5692,39 @@ function sugerirEdicaoReels() {
   callGeminiVideo(prompt, edReelsFiles, 'ed-loader', 'ed-result-box', 'ed-text');
 }
 
-function gerarLegendas() {
+function gerarTranscricaoCompleta() {
+  const texto = document.getElementById('leg-texto').value.trim();
+  const duracao = document.getElementById('leg-duracao').value;
   const formato = document.getElementById('leg-formato').value;
-  const prompt = `Assista/ouça ao vídeo e gere a transcrição EXATA palavra por palavra no formato: ${formato}.`;
-  callGeminiVideo(prompt, [legReelsFile], 'leg-loader', 'leg-result-box', 'leg-text');
+  const planoEdicao = document.getElementById('leg-plano-edicao').value;
+
+  if (!legReelsFile && !texto) {
+    showToast('Envie o vídeo ou cole o texto falado!', 'error');
+    return;
+  }
+
+  const prompt = `${legReelsFile ? `Você está recebendo um vídeo para transcrição. Ouça e transcreva TUDO palavra por palavra.` : `Você vai formatar o seguinte texto falado em legendas.`}
+  Duração total: ${duracao} | Formato de legenda: ${formato}
+  ${texto ? `Texto falado: "${texto}"` : ''}
+  ${planoEdicao ? `Plano de Edição para sincronizar:\n${planoEdicao}` : ''}
+  
+  Entregue a transcrição formatada e as marcações de onde usar palavras de destaque em tela.`;
+
+  if (legReelsFile) {
+    callGeminiVideo(prompt, [legReelsFile], 'leg-loader', 'leg-result-box', 'leg-text');
+  } else {
+    callGroqStudio(prompt, 'leg-loader', 'leg-result-box', 'leg-text');
+  }
 }
 
-function copyAiOutput(id) {
-  const text = document.getElementById(id).innerText;
-  navigator.clipboard.writeText(text).then(() => showToast('Copiado!', 'success'));
-}
-   
+function buscarMusicas() {
+  const prompt = `Você é especialista em trilhas trending no Instagram Reels e fontes royalty-free.
+  Filtros: Mood: ${document.getElementById('mus-mood').value} | Gênero: ${document.getElementById('mus-genero').value} | Licença: ${document.getElementById('mus-licenca').value}
+  Contexto: ${document.getElementById('mus-contexto').value || 'Bastidores dinâmicos de gráfica'}
+  
+  Entregue uma lista detalhada de 10 sugestões de música com nome, por que usar, onde encontrar e a minutagem do beat drop. Liste opções sem copyright.`;
+  callGroqStudio(prompt, 'mus-loader', 'mus-result-box', 'mus-text');
+}   
 </script>
 </body>
 </html>
