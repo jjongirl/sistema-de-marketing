@@ -922,7 +922,20 @@ textarea.form-control{resize:vertical;min-height:80px}
     <div class="nav-item" onclick="navigate('insights')"><i class="fa-solid fa-lightbulb"></i>Insights & Ref.</div>
 
     <div class="nav-section-label">Estúdios de Criação</div>
-    <div class="nav-item" onclick="navigate('transcritor')"><i class="fa-solid fa-closed-captioning"></i>Transcritor IA</div>
+    
+    <!-- Aba Interna (Abre dentro do sistema) -->
+    <div class="nav-item" onclick="navigate('transcritor')">
+      <i class="fa-solid fa-closed-captioning"></i>Transcritor IA
+    </div>
+    
+    <!-- Abas Externas (Abrem em nova guia) -->
+    <div class="nav-item" onclick="window.open('https://reels-platform-two.vercel.app/dashboard', '_blank')">
+      <i class="fa-solid fa-clapperboard"></i>Reels Studio <i class="fa-solid fa-arrow-up-right-from-square" style="font-size: 10px; margin-left: auto; opacity: 0.5;"></i>
+    </div>
+    
+    <div class="nav-item" onclick="window.open('https://gerador-de-prompt-de-imagem.vercel.app/', '_blank')">
+      <i class="fa-solid fa-image"></i>Gerador Prompt <i class="fa-solid fa-arrow-up-right-from-square" style="font-size: 10px; margin-left: auto; opacity: 0.5;"></i>
+    </div>
 
     <div class="nav-section-label">Analytics</div>
     <div class="nav-item" onclick="navigate('relatorios')"><i class="fa-solid fa-chart-line"></i>Relatórios</div>
