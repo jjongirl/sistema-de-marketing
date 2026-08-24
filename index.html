@@ -591,29 +591,251 @@ textarea.form-control{resize:vertical;min-height:80px}
 .insight-actions{display:flex;gap:6px;flex-wrap:wrap}
 
 /* ============================================================
-   APROVAÇÕES
+   APROVAÇÕES — layout "Entrega de Conteúdo" na pele do sistema
+   Estrutura idêntica à do arquivo modelo; só as cores, a
+   tipografia e os raios vêm dos tokens do sistema.
 ============================================================ */
-.approval-card{
-  background:var(--bg-card);border:1px solid var(--border-subtle);
-  border-radius:var(--radius-lg);overflow:hidden;
-  transition:all var(--trans);
+.ec{ --ec-linha:var(--border-subtle); }
+
+/* ---- CABEÇALHO ---- */
+.ec-topo{
+  position:sticky;top:0;z-index:40;
+  background:var(--bg-base);
+  border-bottom:1px solid var(--ec-linha);
 }
-.approval-card:hover{border-color:var(--border-default)}
-.approval-preview{
-  height:160px;background:var(--bg-elevated);
-  display:flex;align-items:center;justify-content:center;
-  position:relative;overflow:hidden;
+.ec-topo-in{padding:14px 2px;display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+.ec-marca{font-size:19px;font-weight:800;letter-spacing:-.02em;color:var(--text-primary)}
+.ec-divisor{width:1px;height:26px;background:var(--ec-linha)}
+.ec-nome{font-size:16px;font-weight:600;line-height:1.15;color:var(--text-primary)}
+.ec-meta{font-size:11px;color:var(--text-secondary);letter-spacing:.06em;text-transform:uppercase}
+.ec-topo-dir{margin-left:auto;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+
+.ec-abas{display:flex;gap:4px;background:var(--bg-elevated);padding:3px;border-radius:999px}
+.ec-aba{
+  padding:7px 16px;border-radius:999px;font-size:13px;background:none;
+  color:var(--text-secondary);transition:all var(--trans);
 }
-.approval-preview img{width:100%;height:100%;object-fit:cover}
-.approval-preview-icon{font-size:40px;color:var(--text-muted)}
-.approval-body{padding:14px}
-.approval-status-bar{display:flex;gap:6px;margin-top:10px}
-.approval-actions{display:flex;gap:6px;padding:12px 14px;border-top:1px solid var(--border-subtle)}
-.status-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
-.status-pending{background:var(--accent-orange)}
-.status-approved{background:var(--accent-green)}
-.status-rejected{background:var(--accent-red)}
-.status-revision{background:var(--accent-yellow)}
+.ec-aba[aria-selected="true"]{background:var(--bg-surface);color:var(--text-primary);box-shadow:var(--shadow-sm)}
+
+.ec-btn-nova{
+  font-size:12.5px;padding:8px 16px;border-radius:999px;
+  background:var(--accent-blue);color:#04121C;font-weight:700;
+}
+.ec-btn-nova:hover{opacity:.9}
+
+.ec-progresso{padding:0 2px 12px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.ec-barra{flex:1;min-width:150px;height:5px;background:var(--bg-elevated);border-radius:99px;overflow:hidden}
+.ec-barra i{display:block;height:100%;width:0;background:var(--accent-green);transition:width .35s ease}
+.ec-prog-txt{font-size:12.5px;color:var(--text-secondary);white-space:nowrap;font-variant-numeric:tabular-nums}
+.ec-btn-resumo{
+  font-size:12.5px;padding:7px 15px;border-radius:999px;white-space:nowrap;
+  background:var(--bg-elevated);color:var(--text-primary);border:1px solid var(--ec-linha);
+}
+.ec-btn-resumo:hover{border-color:var(--border-strong)}
+
+/* ---- LAYOUT ---- */
+.ec-corpo{display:grid;grid-template-columns:280px 1fr;gap:34px;align-items:start;padding:26px 2px 34px}
+@media (max-width:1080px){.ec-corpo{grid-template-columns:1fr;gap:20px}}
+
+.ec-lateral{position:sticky;top:118px;max-height:calc(100vh - 170px);overflow-y:auto;padding-right:6px}
+@media (max-width:1080px){.ec-lateral{position:static;max-height:none}}
+.ec-lateral h3{
+  font-size:11px;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--text-secondary);margin-bottom:12px;font-weight:700;
+}
+.ec-item{display:flex;align-items:center;gap:11px;padding:7px;border-radius:8px;width:100%;text-align:left;background:none}
+.ec-item:hover{background:var(--bg-hover)}
+.ec-item.on{background:var(--bg-elevated)}
+.ec-item-n{font-size:10.5px;color:var(--text-muted);width:20px;flex:none;font-variant-numeric:tabular-nums}
+.ec-item-thumb{
+  width:34px;height:42px;flex:none;border-radius:4px;object-fit:cover;background:var(--bg-elevated);
+  display:flex;align-items:center;justify-content:center;color:var(--text-muted);font-size:12px;
+}
+.ec-item-txt{flex:1;min-width:0}
+.ec-item-pilar{font-size:13px;color:var(--text-primary);display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ec-item-formato{font-size:10.5px;color:var(--text-muted);letter-spacing:.05em;text-transform:uppercase}
+.ec-item-status{width:7px;height:7px;border-radius:50%;flex:none;background:transparent}
+.ec-item-status.ok{background:var(--accent-green)}
+.ec-item-status.aj{background:var(--accent-yellow)}
+.ec-item-status.no{background:var(--accent-red)}
+
+.ec-painel-topo{margin-bottom:22px}
+.ec-selo{font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--text-secondary)}
+
+/* ---- GRADE DO FEED ---- */
+.ec-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}
+.ec-card{
+  position:relative;aspect-ratio:4/5;overflow:hidden;background:var(--bg-elevated);
+  border-radius:2px;width:100%;padding:0;display:block;
+}
+.ec-card.largo{grid-column:1/-1}
+.ec-card img,.ec-card video{width:100%;height:100%;object-fit:cover;transition:transform .4s ease}
+.ec-card iframe{width:100%;height:100%;border:0;background:#fff;pointer-events:none}
+.ec-card:hover img{transform:scale(1.03)}
+.ec-card-sem{
+  width:100%;height:100%;display:flex;flex-direction:column;gap:6px;
+  align-items:center;justify-content:center;color:var(--text-muted);
+}
+.ec-card-sem i{font-size:26px;opacity:.5}
+.ec-card-sem span{font-size:9.5px;letter-spacing:.1em;text-transform:uppercase}
+.ec-card-n{
+  position:absolute;top:7px;left:7px;z-index:2;font-size:9.5px;
+  background:rgba(255,255,255,.9);color:#0D1117;padding:2px 6px;border-radius:99px;font-variant-numeric:tabular-nums;
+}
+.ec-card-badge{
+  position:absolute;top:7px;right:7px;z-index:2;font-size:9px;letter-spacing:.09em;text-transform:uppercase;
+  background:rgba(0,0,0,.55);color:#fff;padding:3px 7px;border-radius:99px;
+}
+.ec-card-empresa{
+  position:absolute;bottom:7px;left:7px;z-index:2;font-size:9px;letter-spacing:.07em;text-transform:uppercase;
+  font-weight:700;color:#fff;padding:3px 8px;border-radius:99px;
+}
+.ec-card-empresa.click{background:rgba(0,159,227,.88)}
+.ec-card-empresa.impresul{background:rgba(168,85,247,.88)}
+.ec-card-empresa.geral{background:rgba(74,85,104,.9)}
+.ec-card-marca{position:absolute;bottom:8px;right:8px;z-index:2;width:9px;height:9px;border-radius:50%;box-shadow:0 0 0 2px rgba(255,255,255,.85)}
+.ec-card-marca.ok{background:var(--accent-green)}
+.ec-card-marca.aj{background:var(--accent-yellow)}
+.ec-card-marca.no{background:var(--accent-red)}
+.ec-vazio{padding:50px 20px;text-align:center;color:var(--text-muted);border:1px dashed var(--ec-linha);border-radius:10px}
+
+.ec-rodape{
+  padding:16px 2px 20px;font-size:12px;color:var(--text-muted);
+  display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;
+  border-top:1px solid var(--ec-linha);
+}
+
+/* ---- FOLHA (modal do post) ---- */
+.ec-folha{
+  position:relative;width:min(390px,100%);max-height:92vh;overflow-y:auto;
+  background:var(--bg-surface);border:1px solid var(--border-default);
+  border-radius:16px;box-shadow:var(--shadow-lg);
+}
+.ec-folha.wide{width:min(820px,100%)}
+.ec-fechar{
+  position:absolute;top:10px;right:10px;z-index:5;width:30px;height:30px;border-radius:50%;
+  background:rgba(0,0,0,.5);color:#fff;font-size:17px;line-height:1;
+}
+.ec-palco{position:relative;aspect-ratio:4/5;background:#0A0E14;border-radius:16px 16px 0 0;overflow:hidden}
+.ec-palco img,.ec-palco video{width:100%;height:100%;object-fit:cover}
+.ec-palco.contain img,.ec-palco.contain video{object-fit:contain}
+.ec-palco iframe{width:100%;height:100%;border:0;background:#fff}
+.ec-seta{
+  position:absolute;top:50%;transform:translateY(-50%);z-index:4;width:32px;height:32px;border-radius:50%;
+  background:rgba(255,255,255,.9);color:#0D1117;display:grid;place-items:center;font-size:15px;box-shadow:0 2px 8px rgba(0,0,0,.2);
+}
+.ec-seta.esq{left:9px} .ec-seta.dir{right:9px}
+.ec-seta[disabled]{opacity:0;pointer-events:none}
+.ec-pontos{position:absolute;bottom:9px;left:0;right:0;z-index:4;display:flex;justify-content:center;gap:5px}
+.ec-ponto{width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,.45)}
+.ec-ponto.on{background:#fff;width:14px;border-radius:99px}
+.ec-contador{position:absolute;top:10px;left:10px;z-index:4;font-size:10.5px;background:rgba(0,0,0,.5);color:#fff;padding:3px 8px;border-radius:99px}
+
+.ec-info{padding:18px 20px 20px}
+.ec-info-meta{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-bottom:11px}
+.ec-info-dim{font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-secondary)}
+.ec-info-titulo{font-size:20px;font-weight:700;line-height:1.25;margin-bottom:16px;color:var(--text-primary)}
+.ec-info-rot{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-muted);margin-bottom:8px}
+.ec-info-legenda{font-size:13.5px;white-space:pre-wrap;color:var(--text-secondary);line-height:1.65;margin-bottom:4px}
+.ec-aprovacao{border-top:1px solid var(--ec-linha);margin-top:16px;padding-top:16px}
+.ec-acoes{display:flex;gap:8px;margin-bottom:12px}
+.ec-acao{
+  flex:1;padding:11px 8px;border-radius:10px;border:1px solid var(--border-default);
+  font-size:13px;font-weight:600;text-align:center;background:var(--bg-elevated);
+  color:var(--text-primary);transition:all var(--trans);
+}
+.ec-acao:hover{border-color:var(--border-strong);background:var(--bg-hover)}
+.ec-acao[aria-pressed="true"]{border-color:transparent}
+.ec-acao.ok[aria-pressed="true"]{background:var(--accent-green);color:#06210F}
+.ec-acao.aj[aria-pressed="true"]{background:var(--accent-yellow);color:#231F00}
+.ec-acao.no[aria-pressed="true"]{background:var(--accent-red);color:#fff}
+.ec-aprovacao textarea{
+  width:100%;min-height:80px;resize:vertical;padding:12px 14px;
+  border:1px solid var(--border-default);border-radius:10px;font-size:13px;
+  background:var(--bg-elevated);color:var(--text-primary);font-family:var(--font-main);
+}
+.ec-aprovacao textarea::placeholder{color:var(--text-muted)}
+.ec-links{
+  display:flex;gap:18px;flex-wrap:wrap;align-items:center;
+  margin-top:16px;padding-top:14px;border-top:1px solid var(--ec-linha);
+}
+.ec-links button,.ec-links a{
+  display:inline-flex;align-items:center;gap:7px;
+  color:var(--text-secondary);background:none;font-size:12.5px;transition:color var(--trans);
+}
+.ec-links button:hover,.ec-links a:hover{color:var(--text-primary)}
+.ec-links i{font-size:11px}
+.ec-links .perigo:hover{color:var(--accent-red)}
+
+/* ---- GALERIA DO CARROSSEL (até 15 slides) ---- */
+.ec-imgs{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:9px}
+.ec-img{position:relative;width:60px;height:75px;border-radius:6px;overflow:hidden;border:1px solid var(--ec-linha);background:var(--bg-elevated)}
+.ec-img img{width:100%;height:100%;object-fit:cover}
+.ec-img-n{position:absolute;top:2px;left:2px;font-size:9px;background:rgba(0,0,0,.65);color:#fff;padding:1px 5px;border-radius:99px;font-variant-numeric:tabular-nums}
+.ec-img-acoes{position:absolute;bottom:0;left:0;right:0;display:flex;background:rgba(0,0,0,.65)}
+.ec-img-acoes button{flex:1;color:#fff;font-size:10px;line-height:17px;height:17px;background:none}
+.ec-img-acoes button:hover:not(:disabled){background:rgba(255,255,255,.22)}
+.ec-img-acoes button:disabled{opacity:.3;cursor:default}
+.ec-img-acoes .x:hover{background:var(--accent-red)}
+.ec-add{
+  width:100%;padding:11px;border:1px dashed var(--ec-linha);border-radius:9px;
+  font-size:13px;color:var(--text-secondary);background:none;transition:all var(--trans);
+}
+.ec-add:hover:not(:disabled){border-color:var(--accent-blue);color:var(--accent-blue)}
+.ec-add:disabled{opacity:.45;cursor:default}
+.ec-peso{font-size:10.5px;color:var(--text-muted);margin-top:6px}
+.ec-peso.alerta{color:var(--accent-orange)}
+.ec-peso.cheio{color:var(--accent-red)}
+
+/* ---- VÍDEO: botão de play sobre a prévia ---- */
+.ec-play{
+  position:absolute;inset:0;z-index:3;display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(180deg,rgba(0,0,0,.12),rgba(0,0,0,.42));
+  color:#fff;border:0;cursor:pointer;transition:background var(--trans);
+}
+.ec-play:hover{background:linear-gradient(180deg,rgba(0,0,0,.05),rgba(0,0,0,.3))}
+.ec-play i{
+  width:46px;height:46px;border-radius:50%;background:rgba(255,255,255,.92);color:#0D1117;
+  display:flex;align-items:center;justify-content:center;font-size:16px;padding-left:3px;
+  box-shadow:0 2px 12px rgba(0,0,0,.35);
+}
+.ec-play.pequeno i{width:30px;height:30px;font-size:11px}
+.ec-card.tocando .ec-card-badge,.ec-card.tocando .ec-card-empresa,.ec-card.tocando .ec-card-n{opacity:0;transition:opacity var(--trans)}
+.ec-card.tocando iframe,.ec-palco.tocando iframe{pointer-events:auto}
+
+/* ---- GALERIA DO CARROSSEL (imagens + vídeos, até 15) ---- */
+.ec-imgs{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:9px}
+.ec-img{position:relative;width:60px;height:75px;border-radius:6px;overflow:hidden;border:1px solid var(--ec-linha);background:var(--bg-elevated)}
+.ec-img img{width:100%;height:100%;object-fit:cover}
+.ec-img.vid{border-color:var(--accent-magenta)}
+.ec-img-vazio{
+  width:100%;height:100%;display:flex;align-items:center;justify-content:center;
+  color:var(--text-muted);font-size:16px;cursor:pointer;
+}
+.ec-img-n{position:absolute;top:2px;left:2px;font-size:9px;background:rgba(0,0,0,.65);color:#fff;padding:1px 5px;border-radius:99px;font-variant-numeric:tabular-nums}
+.ec-img-tipo{position:absolute;top:2px;right:2px;font-size:8px;background:var(--accent-magenta);color:#fff;padding:1px 5px;border-radius:99px;letter-spacing:.04em}
+.ec-img-acoes{position:absolute;bottom:0;left:0;right:0;display:flex;background:rgba(0,0,0,.65)}
+.ec-img-acoes button{flex:1;color:#fff;font-size:10px;line-height:17px;height:17px;background:none}
+.ec-img-acoes button:hover:not(:disabled){background:rgba(255,255,255,.22)}
+.ec-img-acoes button:disabled{opacity:.3;cursor:default}
+.ec-img-acoes .x:hover{background:var(--accent-red)}
+.ec-add-linha{display:flex;gap:7px}
+.ec-add{
+  flex:1;padding:11px;border:1px dashed var(--ec-linha);border-radius:9px;
+  font-size:13px;color:var(--text-secondary);background:none;transition:all var(--trans);
+}
+.ec-add:hover:not(:disabled){border-color:var(--accent-blue);color:var(--accent-blue)}
+.ec-add.vid:hover:not(:disabled){border-color:var(--accent-magenta);color:var(--accent-magenta)}
+.ec-add:disabled{opacity:.45;cursor:default}
+.ec-peso{font-size:10.5px;color:var(--text-muted);margin-top:6px;line-height:1.55}
+.ec-peso.alerta{color:var(--accent-orange)}
+.ec-peso.cheio{color:var(--accent-red)}
+
+.ec-resumo-txt{
+  width:100%;height:300px;padding:14px;border:1px solid var(--ec-linha);border-radius:8px;
+  font-family:var(--font-mono);font-size:12px;background:var(--bg-elevated);color:var(--text-primary);resize:vertical;
+}
+.ec-dims{font-size:10.5px;color:var(--text-muted);margin-top:4px}
 
 /* ============================================================
    METAS DO DIA
@@ -1462,39 +1684,83 @@ textarea.form-control{resize:vertical;min-height:80px}
        APROVAÇÕES
   ============================== -->
   <section class="page-content" id="page-aprovacoes">
-    <div class="section-header">
-      <div>
-        <div class="section-title">Aprovação de Conteúdos</div>
-        <div class="section-subtitle">Revise, aprove ou solicite ajustes nos materiais criativos</div>
-      </div>
-      <button class="btn btn-primary" onclick="openModal('approvalModal')">
-        <i class="fa-solid fa-plus"></i>Enviar Material
-      </button>
-    </div>
+   <div class="ec">
 
-    <div class="stat-grid" id="approvalStats" style="margin-bottom:20px"></div>
-
-    <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap">
-      <button class="filter-chip active" onclick="setApprovalFilter(this,'all')">Todos</button>
-      <button class="filter-chip" onclick="setApprovalFilter(this,'pending')"><i class="status-dot status-pending" style="display:inline-block;border-radius:50%;width:8px;height:8px"></i>Pendentes</button>
-      <button class="filter-chip" onclick="setApprovalFilter(this,'approved')"><i class="status-dot status-approved" style="display:inline-block;border-radius:50%;width:8px;height:8px"></i>Aprovados</button>
-      <button class="filter-chip" onclick="setApprovalFilter(this,'rejected')">Reprovados</button>
-      <button class="filter-chip" onclick="setApprovalFilter(this,'revision')">Aguardando Ajustes</button>
-    </div>
-
-    <div class="grid-auto" id="approvalGrid"></div>
-
-    <!-- Approval detail modal -->
-    <div id="approvalDetailModal" class="modal-overlay">
-      <div class="modal modal-lg">
-        <div class="modal-header">
-          <div class="modal-title" id="approvalDetailTitle">Material</div>
-          <button class="modal-close" onclick="closeModal('approvalDetailModal')"><i class="fa-solid fa-xmark"></i></button>
+    <header class="ec-topo">
+      <div class="ec-topo-in">
+        <div class="ec-marca">Aprovação</div>
+        <div class="ec-divisor"></div>
+        <div>
+          <div class="ec-nome">Entrega de conteúdo</div>
+          <div class="ec-meta" id="ecTotal"></div>
         </div>
-        <div id="approvalDetailContent"></div>
+        <div class="ec-topo-dir">
+          <div class="ec-abas" role="tablist">
+            <button class="ec-aba" role="tab" aria-selected="true"  onclick="ecAba(this,'all')">Todos</button>
+            <button class="ec-aba" role="tab" aria-selected="false" onclick="ecAba(this,'pending')">Pendentes</button>
+            <button class="ec-aba" role="tab" aria-selected="false" onclick="ecAba(this,'approved')">Aprovados</button>
+            <button class="ec-aba" role="tab" aria-selected="false" onclick="ecAba(this,'revision')">Ajustes</button>
+          </div>
+          <button class="ec-btn-nova" onclick="apNovo()">Enviar material</button>
+        </div>
       </div>
-    </div>
+      <div class="ec-progresso">
+        <div class="ec-barra"><i id="ecBarra"></i></div>
+        <div class="ec-prog-txt" id="ecProgresso"></div>
+        <button class="ec-btn-resumo" onclick="apEnviarLote()">Enviar pendentes</button>
+        <button class="ec-btn-resumo" onclick="apResumo()">Gerar retorno</button>
+      </div>
+    </header>
+
+    <main class="ec-corpo">
+      <aside class="ec-lateral">
+        <h3>Peças desta entrega</h3>
+        <div id="ecLista"></div>
+      </aside>
+
+      <section>
+        <div class="ec-painel-topo">
+          <div class="ec-selo">Prévia das peças · Aprovação</div>
+        </div>
+        <div class="ec-grid" id="approvalGrid"></div>
+      </section>
+    </main>
+
+    <footer class="ec-rodape">
+      <span id="ecRodape"></span>
+      <span>As decisões ficam salvas no sistema.</span>
+    </footer>
+
+   </div>
   </section>
+
+<!-- FOLHA DA PEÇA -->
+<div id="approvalDetailModal" class="modal-overlay">
+  <div class="ec-folha" id="ecFolha" role="dialog" aria-modal="true">
+    <button class="ec-fechar" onclick="closeModal('approvalDetailModal')" aria-label="Fechar">&times;</button>
+    <div id="ecFolhaConteudo"></div>
+  </div>
+</div>
+
+<!-- RETORNO -->
+<div id="approvalResumoModal" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Retorno da aprovação</div>
+      <button class="modal-close" onclick="closeModal('approvalResumoModal')"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <p style="font-size:13px;color:var(--text-secondary);margin-bottom:14px">Copie o texto abaixo e envie para a equipe, ou dispare direto por e-mail.</p>
+    <textarea class="ec-resumo-txt" id="apResumoTxt" readonly></textarea>
+    <div class="form-group" style="margin-top:12px">
+      <label class="form-label">Enviar retorno para (e-mail)</label>
+      <input class="form-control" id="apResumoEmail" placeholder="pessoa@empresa.com.br">
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="apCopiarResumo()">Copiar</button>
+      <button class="btn btn-primary" onclick="apEnviarResumo()">Enviar por e-mail</button>
+    </div>
+  </div>
+</div>
 
 <!-- ==============================
        TRANSCRITOR IA
@@ -2162,62 +2428,97 @@ textarea.form-control{resize:vertical;min-height:80px}
 
 <!-- APPROVAL MODAL -->
 <div id="approvalModal" class="modal-overlay">
-  <div class="modal">
+  <div class="modal modal-lg">
     <div class="modal-header">
-      <div class="modal-title">Enviar Material para Aprovação</div>
+      <div class="modal-title" id="apModalTitle">Enviar Material para Aprovação</div>
       <button class="modal-close" onclick="closeModal('approvalModal')"><i class="fa-solid fa-xmark"></i></button>
     </div>
-    <div class="form-group">
-      <label class="form-label">Nome / Título do Material *</label>
-      <input class="form-control" id="ap_title" placeholder="Ex: Post Instagram - Junho...">
-    </div>
+
     <div class="form-row">
       <div class="form-group">
-        <label class="form-label">Projeto Relacionado</label>
-        <select class="form-control" id="ap_project">
-          <option value="">Nenhum</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Tipo</label>
-        <select class="form-control" id="ap_type">
-          <option value="image">Imagem</option>
-          <option value="video">Vídeo</option>
-          <option value="pdf">PDF</option>
-          <option value="post">Post</option>
-        </select>
-      </div>
-    </div>
-    <div class="form-row">
-      <div class="form-group">
-        <label class="form-label">Responsável</label>
-        <input class="form-control" id="ap_assignee" placeholder="Quem criou...">
-      </div>
-      <div class="form-group">
-        <label class="form-label">Categoria</label>
+        <label class="form-label">Empresa *</label>
         <select class="form-control" id="ap_category">
           <option value="click">Click Impresso</option>
           <option value="impresul">Impresul</option>
-          <option value="geral">Geral</option>
+          <option value="geral">Geral / Grupo</option>
         </select>
       </div>
+      <div class="form-group">
+        <label class="form-label">Formato *</label>
+        <select class="form-control" id="ap_type" onchange="apDims()">
+          <option value="feed">Post feed — 1080×1350 (4:5)</option>
+          <option value="carrossel">Carrossel — 1080×1350 (4:5)</option>
+          <option value="story">Story — 1080×1920 (9:16)</option>
+          <option value="reel">Vídeo — Reels (9:16)</option>
+          <option value="video_monitor">Vídeo — Monitor / TV (16:9)</option>
+          <option value="banner_1500x350">Banner site — 1500×350</option>
+          <option value="banner_1500x1800">Banner site — 1500×1800</option>
+          <option value="pdf">PDF / Documento</option>
+          <option value="impresso">Peça impressa / Outro</option>
+        </select>
+        <div class="ec-dims" id="ap_dims"></div>
+      </div>
     </div>
+
     <div class="form-group">
-      <label class="form-label">Descrição / Contexto</label>
-      <textarea class="form-control" id="ap_desc" placeholder="Contexto do material..." rows="2"></textarea>
+      <label class="form-label">Nome / Título do Material *</label>
+      <input class="form-control" id="ap_title" placeholder="Ex: Banner home — Semana C">
     </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Projeto Relacionado</label>
+        <select class="form-control" id="ap_project"><option value="">Nenhum</option></select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Responsável pela criação</label>
+        <input class="form-control" id="ap_assignee" placeholder="Quem criou...">
+      </div>
+    </div>
+
     <div class="form-group">
-  <label class="form-label">Link do Material (Google Drive, etc.)</label>
-  <input class="form-control" id="ap_url" placeholder="https://...">
-</div>
-<div class="form-group">
-  <label class="form-label">Anexar Imagem para a Miniatura (Capa)</label>
-  <input class="form-control" type="file" id="ap_image" accept="image/*">
-</div>
+      <label class="form-label">Legenda / Contexto</label>
+      <textarea class="form-control" id="ap_desc" placeholder="Legenda que vai ao ar, ou o contexto da peça..." rows="3"></textarea>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Link do material (Drive, Dropbox…)</label>
+        <input class="form-control" id="ap_url" placeholder="https://...">
+      </div>
+      <div class="form-group">
+        <label class="form-label">E-mail de quem vai aprovar</label>
+        <input class="form-control" id="ap_email" placeholder="pessoa@empresa.com.br">
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Link de vídeo avulso (atalho)</label>
+        <input class="form-control" id="ap_video" placeholder="https://... — vira um slide de vídeo">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Link do PDF (prévia)</label>
+        <input class="form-control" id="ap_pdf" placeholder="https://... — mostra a prévia do PDF">
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Slides do carrossel <span id="ap_conta" style="color:var(--text-muted);font-weight:400"></span></label>
+      <div class="ec-imgs" id="ap_imgs"></div>
+      <div class="ec-add-linha">
+        <button type="button" class="ec-add" id="ap_add" onclick="apAddImgs()">+ Imagens</button>
+        <button type="button" class="ec-add vid" id="ap_add_vid" onclick="apAddVideo()">+ Vídeo (link)</button>
+      </div>
+      <input type="file" id="ap_image" accept="image/*" multiple hidden onchange="apReceberImgs(this)">
+      <input type="file" id="ap_capa" accept="image/*" hidden onchange="apReceberCapa(this)">
+      <div class="ec-peso" id="ap_peso"></div>
+    </div>
+
     <input type="hidden" id="ap_id">
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="closeModal('approvalModal')">Cancelar</button>
-      <button class="btn btn-primary" onclick="saveApproval()">Enviar para Aprovação</button>
+      <button class="btn btn-primary" onclick="saveApproval()">Salvar e enviar para aprovação</button>
     </div>
   </div>
 </div>
@@ -3871,210 +4172,639 @@ function deleteInsight(id) {
 }
 
 // ============================================================
-// APPROVALS
+// APPROVALS — layout "Entrega de Conteúdo"
 // ============================================================
 let approvalFilter='all';
-function setApprovalFilter(btn,f){
-  approvalFilter=f;
-  document.querySelectorAll('.filter-chip').forEach(c=>c.classList.remove('active'));
-  btn.classList.add('active');renderApprovals();
+let apAtual=null;    // id da peça aberta na folha
+let apSlideIdx=0;    // slide corrente do carrossel
+let apGaleria=[];    // slides em edição: {t:'img'|'vid', src, poster}
+let apCapaAlvo=-1;   // índice do vídeo que está recebendo capa
+const AP_MAX_SLIDES=15;
+const AP_LIMITE_BYTES=900*1024;   // margem sob o limite de 1 MB do Firestore
+
+const AP_FORMATOS={
+  feed:            {label:'Post feed',     ratio:'4/5',       dim:'1080 × 1350 px', icon:'fa-solid fa-image',          largo:false},
+  carrossel:       {label:'Carrossel',     ratio:'4/5',       dim:'1080 × 1350 px', icon:'fa-solid fa-images',         largo:false},
+  story:           {label:'Story',         ratio:'9/16',      dim:'1080 × 1920 px', icon:'fa-solid fa-mobile-screen',  largo:false},
+  reel:            {label:'Reel',          ratio:'9/16',      dim:'1080 × 1920 px', icon:'fa-solid fa-film',           largo:false},
+  video_monitor:   {label:'Vídeo monitor', ratio:'16/9',      dim:'1920 × 1080 px', icon:'fa-solid fa-tv',             largo:true,  contain:true},
+  banner_1500x350: {label:'Banner site',   ratio:'1500/350',  dim:'1500 × 350 px',  icon:'fa-solid fa-window-maximize',largo:true,  contain:true},
+  banner_1500x1800:{label:'Banner site',   ratio:'1500/1800', dim:'1500 × 1800 px', icon:'fa-solid fa-rectangle-ad',   largo:false},
+  pdf:             {label:'PDF',           ratio:'1/1.414',   dim:'A4 / livre',     icon:'fa-solid fa-file-pdf',       largo:false, pdf:true},
+  impresso:        {label:'Peça impressa', ratio:'4/5',       dim:'—',              icon:'fa-solid fa-print',          largo:false},
+  // compatibilidade com registros antigos
+  image:{label:'Imagem',ratio:'4/5', dim:'—',icon:'fa-solid fa-image',largo:false},
+  video:{label:'Vídeo', ratio:'9/16',dim:'—',icon:'fa-solid fa-film', largo:false},
+  post: {label:'Post',  ratio:'4/5', dim:'—',icon:'fa-brands fa-instagram',largo:false}
+};
+const AP_STATUS={
+  pending :{label:'Pendente',           cls:'',   badge:'badge-orange'},
+  approved:{label:'Aprovado',           cls:'ok', badge:'badge-green'},
+  revision:{label:'Aguardando ajustes', cls:'aj', badge:'badge-yellow'},
+  rejected:{label:'Reprovado',          cls:'no', badge:'badge-red'}
+};
+const AP_EMPRESAS={click:'Click Impresso', impresul:'Impresul', geral:'Geral / Grupo'};
+
+const apEsc = s => String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const apFmt = i => AP_FORMATOS[i.type] || AP_FORMATOS.feed;
+const apKB  = b => b>1024*1024 ? (b/1024/1024).toFixed(2)+' MB' : Math.round(b/1024)+' KB';
+const apB64 = s => (typeof s==='string' && s.startsWith('data:')) ? Math.ceil((s.length-(s.indexOf(',')+1))*0.75) : 0;
+const apPeso = arr => arr.reduce((t,s)=>t+apB64(s.src)+apB64(s.poster),0);
+const apMp4  = u => /\.(mp4|webm|ogg|mov)(\?|$)/i.test(u||'');
+
+// Google Drive / YouTube / Vimeo → URL embutível
+function apEmbed(url){
+  if(!url) return '';
+  const u=String(url);
+  let m=u.match(/drive\.google\.com\/file\/d\/([^/]+)/);
+  if(m) return `https://drive.google.com/file/d/${m[1]}/preview`;
+  m=u.match(/[?&]id=([\w-]+)/);
+  if(m && u.includes('drive.google')) return `https://drive.google.com/file/d/${m[1]}/preview`;
+  m=u.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]+)/);
+  if(m) return `https://www.youtube.com/embed/${m[1]}?rel=0`;
+  m=u.match(/vimeo\.com\/(\d+)/);
+  if(m) return `https://player.vimeo.com/video/${m[1]}`;
+  return u;
 }
 
-function renderApprovals() {
+/* Slides normalizados: aceita o formato novo (objetos), o antigo
+   (array de strings) e o campo `video` solto dos registros antigos. */
+function apSlides(i){
+  const raw = Array.isArray(i.arquivos) ? i.arquivos
+            : (i.thumbnailUrl ? [i.thumbnailUrl] : []);
+  const out = raw.filter(Boolean).map(s => typeof s==='string'
+    ? {t:'img', src:s, poster:''}
+    : {t:(s.t==='vid'?'vid':'img'), src:s.src||'', poster:s.poster||''});
+  if(i.video && !out.some(s=>s.t==='vid')){
+    const capa = out.find(s=>s.t==='img');
+    out.unshift({t:'vid', src:i.video, poster:capa?capa.src:''});
+  }
+  return out.filter(s=>s.src);
+}
+const apCapa = i => { const s=apSlides(i)[0]; return s ? (s.t==='vid' ? s.poster : s.src) : ''; };
+const apNorm = i => ({arquivos:apSlides(i).filter(s=>s.t==='img').map(s=>s.src), video:i.video||'', pdfUrl:i.pdfUrl||''});
+
+function apVisiveis(){
   let items=filterByCategory(DB.approvals);
   if(approvalFilter!=='all') items=items.filter(i=>i.status===approvalFilter);
-  const pend=DB.approvals.filter(i=>i.status==='pending').length;
-  const appr=DB.approvals.filter(i=>i.status==='approved').length;
-  const rej=DB.approvals.filter(i=>i.status==='rejected').length;
-  const rev=DB.approvals.filter(i=>i.status==='revision').length;
-  document.getElementById('approvalStats').innerHTML=`
-    <div class="stat-card orange"><div class="stat-label">Pendentes</div><div class="stat-value">${pend}</div></div>
-    <div class="stat-card green"><div class="stat-label">Aprovados</div><div class="stat-value">${appr}</div></div>
-    <div class="stat-card red"><div class="stat-label">Reprovados</div><div class="stat-value">${rej}</div></div>
-    <div class="stat-card yellow"><div class="stat-label">Em Revisão</div><div class="stat-value">${rev}</div></div>
-  `;
+  return items;
+}
+function ecAba(btn,f){
+  approvalFilter=f;
+  document.querySelectorAll('.ec-aba').forEach(a=>a.setAttribute('aria-selected',String(a===btn)));
+  renderApprovals();
+}
+function setApprovalFilter(btn,f){ ecAba(btn,f); }
 
-  const el=document.getElementById('approvalGrid');
-  if(!items.length){el.innerHTML=`<div class="empty-state" style="grid-column:1/-1"><i class="fa-solid fa-check-double"></i><p>Nenhum material encontrado</p></div>`;return;}
-
-  const typeIcons={image:'fa-solid fa-image',video:'fa-solid fa-film',pdf:'fa-solid fa-file-pdf',post:'fa-brands fa-instagram'};
-  const statusColors={pending:'var(--accent-orange)',approved:'var(--accent-green)',rejected:'var(--accent-red)',revision:'var(--accent-yellow)'};
-  const statusLabels={pending:'Pendente',approved:'Aprovado',rejected:'Reprovado',revision:'Aguardando Ajustes'};
-  const statusBadges={pending:'badge-orange',approved:'badge-green',rejected:'badge-red',revision:'badge-yellow'};
-
-  el.innerHTML=items.map(i=>`
-  <div class="approval-card">
-    <div class="approval-preview" ${i.url ? `onclick="window.open('${i.url}', '_blank')" style="cursor:pointer" title="Clique para abrir o link (Google Drive, etc.)"` : ''}>
-          ${i.thumbnailUrl ? `<img src="${i.thumbnailUrl}" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1;" alt="Capa">` : ``}
-          <div class="approval-preview-icon">
-              <i class="${typeIcons[i.type]||'fa-solid fa-file'}" style="font-size:40px;color:var(--text-muted);opacity:0.5"></i>
-            </div>
-            <div style="position:absolute;top:8px;right:8px">
-              <span class="badge ${statusBadges[i.status]}">${statusLabels[i.status]}</span>
-            </div>
-          </div>
-      <div class="approval-body">
-        <div style="font-weight:700;font-size:13px;margin-bottom:4px">${i.title}</div>
-        <div style="font-size:11px;color:var(--text-muted);margin-bottom:6px">${i.desc||''}</div>
-        <div style="display:flex;gap:6px;flex-wrap:wrap">
-          ${catBadge(i.category)}
-          <span class="badge badge-gray"><i class="fa-solid fa-user"></i> ${i.assignee||'—'}</span>
-          <span class="badge badge-gray"><i class="fa-regular fa-calendar"></i> ${fmtDate(i.created)}</span>
-        </div>
-        ${i.comments?.length?`
-          <div style="margin-top:8px;padding:8px;background:var(--bg-elevated);border-radius:var(--radius-md)">
-            <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px">Último feedback:</div>
-            <div style="font-size:12px">${i.comments[i.comments.length-1].text}</div>
-          </div>`:''
-        }
-      </div>
-      <div class="approval-actions">
-        <button class="btn btn-xs btn-success" onclick="approveItem('${i.id}')" style="flex:1"><i class="fa-solid fa-check"></i>Aprovar</button>
-        <button class="btn btn-xs btn-danger" onclick="rejectItem('${i.id}')" style="flex:1"><i class="fa-solid fa-xmark"></i>Reprovar</button>
-        <button class="btn btn-xs btn-secondary" onclick="requestRevision('${i.id}')" style="flex:1"><i class="fa-solid fa-pen"></i>Ajustes</button>
-        <button class="btn btn-xs btn-ghost" onclick="deleteApproval('${i.id}')" title="Excluir Material"><i class="fa-solid fa-trash"></i></button>
-      </div>
-    </div>`).join('');
+// ---------- mídia ----------
+/* Marcação de um slide. `mini` = versão do card da grade. */
+function apSlideHTML(s, mini){
+  if(s.t==='vid'){
+    const play=`<button class="ec-play ${mini?'pequeno':''}" onclick="apTocar(event,this)" aria-label="Reproduzir vídeo"><i class="fa-solid fa-play"></i></button>`;
+    if(apMp4(s.src))
+      return `<video src="${apEsc(s.src)}" playsinline preload="metadata" ${s.poster?`poster="${apEsc(s.poster)}"`:''} onclick="apTogglePlay(event,this)"></video>${play}`;
+    // player embutido (Drive, YouTube, Vimeo): a moldura só aceita clique depois do play
+    const fundo = s.poster ? `<img src="${apEsc(s.poster)}" alt="">` : '';
+    return `${fundo}<iframe src="${apEsc(apEmbed(s.src))}" loading="lazy" allow="autoplay; fullscreen" allowfullscreen style="${s.poster?'position:absolute;inset:0;opacity:0':''}"></iframe>${play}`;
+  }
+  return `<img src="${apEsc(s.src)}" alt="" loading="lazy">`;
 }
 
-function deleteApproval(id) {
-  if(!confirm('Tem certeza que deseja excluir este material da aprovação?')) return;
-  
-  firebaseDelete('approvals', id);
-  
-  if(!fdb) renderApprovals();
-  
-  showToast('Material excluído com sucesso!', 'info');
+/* Clique no botão de play: some o botão e a mídia começa a tocar. */
+function apTocar(ev, btn){
+  ev.stopPropagation();
+  const box=btn.parentElement;
+  box.classList.add('tocando');
+  const v=box.querySelector('video');
+  if(v){ v.controls=true; apPlay(v); }
+  const f=box.querySelector('iframe');
+  if(f){
+    f.style.opacity='1';
+    f.style.pointerEvents='auto';
+    // reinjeta com autoplay para o player externo já começar
+    if(!/autoplay=1/.test(f.src)) f.src = f.src + (f.src.includes('?')?'&':'?') + 'autoplay=1';
+  }
+  btn.remove();
+}
+function apTogglePlay(ev, v){
+  ev.stopPropagation();
+  if(v.paused){ v.controls=true; apPlay(v); } else v.pause();
+}
+/* play() devolve Promise nos navegadores atuais e undefined em alguns antigos */
+function apPlay(v){
+  try{ const p=v.play(); if(p && typeof p.catch==='function') p.catch(()=>{}); }catch(e){}
 }
 
-function approveItem(id) {
-  const i=DB.approvals.find(i=>i.id===id); if(!i) return;
-  i.status='approved';i.comments.push({author:'Gestor',text:'Material aprovado.',date:today(),type:'approve'});
-  firebaseCreate('approvals',i);
-  if(!fdb) renderApprovals();
-  showToast('Material aprovado!','success');
-  addActivity(`Material "${i.title}" aprovado`,'approval');
-}
-function rejectItem(id) {
-  const reason=prompt('Motivo da reprovação:'); if(!reason) return;
-  const i=DB.approvals.find(i=>i.id===id); if(!i) return;
-  i.status='rejected';i.comments.push({author:'Gestor',text:reason,date:today(),type:'reject'});
-  firebaseCreate('approvals',i);
-  if(!fdb) renderApprovals();
-  showToast('Material reprovado','info');
-}
-function requestRevision(id) {
-  const notes=prompt('Descreva os ajustes necessários:'); if(!notes) return;
-  const i=DB.approvals.find(i=>i.id===id); if(!i) return;
-  i.status='revision';i.comments.push({author:'Gestor',text:notes,date:today(),type:'revision'});
-  firebaseCreate('approvals',i);
-  if(!fdb) renderApprovals();
-  showToast('Ajuste solicitado!','info');
-  addActivity(`Ajuste solicitado em "${i.title}"`, 'approval');
+function apMidiaCard(i){
+  const f=apFmt(i), slides=apSlides(i);
+  if(slides.length) return apSlideHTML(slides[0], true);
+  if(f.pdf && i.pdfUrl) return `<iframe src="${apEsc(apEmbed(i.pdfUrl))}#toolbar=0&navpanes=0" loading="lazy"></iframe>`;
+  return `<div class="ec-card-sem"><i class="${f.icon}"></i><span>${apEsc(f.label)}</span></div>`;
 }
 
-function deleteApproval(id) {
-  if(!confirm('Tem certeza que deseja excluir este material da aprovação?')) return;
-  
-  firebaseDelete('approvals', id);
-  
-  // Atualiza a tela se estiver usando localStorage de backup
-  if(!fdb) renderApprovals();
-  
-  showToast('Material excluído com sucesso!', 'info');
+function apMidiaPalco(i){
+  const f=apFmt(i), slides=apSlides(i);
+  if(slides.length){
+    const total=slides.length, idx=Math.min(apSlideIdx,total-1);
+    const nav = total>1 ? `
+      <span class="ec-contador">${idx+1}/${total}${slides[idx].t==='vid'?' · vídeo':''}</span>
+      <button class="ec-seta esq" onclick="apSlide(-1)" aria-label="Slide anterior" ${idx===0?'disabled':''}>&#8249;</button>
+      <button class="ec-seta dir" onclick="apSlide(1)"  aria-label="Próximo slide"  ${idx===total-1?'disabled':''}>&#8250;</button>
+      <div class="ec-pontos">${slides.map((s,k)=>`<span class="ec-ponto ${k===idx?'on':''}"></span>`).join('')}</div>` : '';
+    return apSlideHTML(slides[idx], false)+nav;
+  }
+  if(i.pdfUrl) return `<iframe src="${apEsc(apEmbed(i.pdfUrl))}" allowfullscreen></iframe>`;
+  return `<div class="ec-card-sem"><i class="${f.icon}"></i><span>Sem prévia</span></div>`;
 }
 
-// Função que converte a imagem e a comprime para não estourar o limite do Firebase
-function fileToBase64(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    
-    reader.onload = (event) => {
-      const img = new Image();
-      img.src = event.target.result;
-      
-      img.onload = () => {
-        const canvas = document.createElement('canvas');
-        // Limita a largura ou altura máxima para 800px
-        const MAX_WIDTH = 800;
-        const MAX_HEIGHT = 800;
-        let width = img.width;
-        let height = img.height;
+// ---------- render ----------
+function renderApprovals(){
+  const todos=filterByCategory(DB.approvals);
+  const items=apVisiveis();
 
-        // Calcula a nova proporção se a imagem for grande
-        if (width > height) {
-          if (width > MAX_WIDTH) {
-            height *= MAX_WIDTH / width;
-            width = MAX_WIDTH;
-          }
-        } else {
-          if (height > MAX_HEIGHT) {
-            width *= MAX_HEIGHT / height;
-            height = MAX_HEIGHT;
-          }
-        }
+  const elTotal=document.getElementById('ecTotal');
+  if(elTotal) elTotal.textContent = todos.length + (todos.length===1?' peça':' peças');
 
-        canvas.width = width;
-        canvas.height = height;
-        
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0, width, height);
+  const ok=todos.filter(i=>i.status==='approved').length;
+  const aj=todos.filter(i=>i.status==='revision').length;
+  const no=todos.filter(i=>i.status==='rejected').length;
+  const barra=document.getElementById('ecBarra');
+  if(barra) barra.style.width=(todos.length? ok/todos.length*100 : 0)+'%';
+  const prog=document.getElementById('ecProgresso');
+  if(prog) prog.textContent = todos.length
+    ? `${ok} de ${todos.length} aprovados`+(aj?` · ${aj} com ajuste`:'')+(no?` · ${no} reprovados`:'')
+    : 'Nenhuma peça nesta entrega';
+  const rod=document.getElementById('ecRodape');
+  if(rod) rod.textContent=[AP_EMPRESAS[DB.settings.category]||'Grupo Impresul', new Date().toLocaleDateString('pt-BR')].join(' · ');
 
-        // Retorna a imagem comprimida como JPEG com 70% de qualidade
-        resolve(canvas.toDataURL('image/jpeg', 0.7));
-      };
-    };
-    reader.onerror = error => reject(error);
-  });
-}
-   
-async function saveApproval() {
-  const title = document.getElementById('ap_title').value.trim();
-  if(!title){showToast('Título é obrigatório','error');return;}
-  const id = document.getElementById('ap_id').value||genId();
-  
-  // Armazena o link original do Google Drive
-  const materialUrl = document.getElementById('ap_url').value.trim();
-  
-  // Captura o arquivo de imagem enviado e converte para string
-  const imgFile = document.getElementById('ap_image').files[0];
-  let thumbnailUrl = ""; 
-  
-  if (imgFile) {
-    thumbnailUrl = await fileToBase64(imgFile);
+  const lista=document.getElementById('ecLista');
+  if(lista){
+    lista.innerHTML = items.length ? items.map((i,k)=>{
+      const f=apFmt(i), slides=apSlides(i), st=AP_STATUS[i.status]||AP_STATUS.pending, capa=apCapa(i);
+      const vids=slides.filter(s=>s.t==='vid').length;
+      const thumb = capa
+        ? `<img class="ec-item-thumb" src="${apEsc(capa)}" loading="lazy" alt="">`
+        : `<span class="ec-item-thumb"><i class="${vids?'fa-solid fa-film':f.icon}"></i></span>`;
+      const det=[];
+      if(slides.length>1) det.push(`${slides.length} slides`);
+      if(vids) det.push(vids===1?'1 vídeo':`${vids} vídeos`);
+      return `<button class="ec-item ${apAtual===i.id?'on':''}" onclick="apAbrir('${i.id}')">
+        <span class="ec-item-n">${String(k+1).padStart(2,'0')}</span>
+        ${thumb}
+        <span class="ec-item-txt">
+          <span class="ec-item-pilar">${apEsc(i.title||'Sem título')}</span>
+          <span class="ec-item-formato">${apEsc([f.label,...det,AP_EMPRESAS[i.category]||'Geral'].join(' · '))}</span>
+        </span>
+        <span class="ec-item-status ${st.cls}"></span>
+      </button>`;
+    }).join('') : `<div style="font-size:12px;color:var(--text-muted);padding:8px">Nada por aqui ainda.</div>`;
   }
 
-  const item = {
-    id,
-    title,
+  const grid=document.getElementById('approvalGrid');
+  if(!grid) return;
+  if(!items.length){
+    grid.style.display='block';
+    grid.innerHTML=`<div class="ec-vazio">Nenhuma peça neste filtro. Clique em <b>Enviar material</b> para adicionar a primeira.</div>`;
+    return;
+  }
+  grid.style.display='grid';
+  grid.innerHTML=items.map((i,k)=>{
+    const f=apFmt(i), slides=apSlides(i), st=AP_STATUS[i.status]||AP_STATUS.pending, emp=i.category||'geral';
+    const rot = slides.length>1 ? `${f.label} · ${slides.length}` : f.label;
+    return `<div class="ec-card ${f.largo?'largo':''}" style="aspect-ratio:${f.ratio}" onclick="apAbrir('${i.id}')" title="${apEsc(i.title||'')}">
+      ${apMidiaCard(i)}
+      <span class="ec-card-n">${String(k+1).padStart(2,'0')}</span>
+      <span class="ec-card-badge">${apEsc(rot)}</span>
+      <span class="ec-card-empresa ${emp}">${apEsc(AP_EMPRESAS[emp]||'Geral')}</span>
+      ${st.cls?`<span class="ec-card-marca ${st.cls}"></span>`:''}
+    </div>`;
+  }).join('');
+}
+
+// ---------- folha ----------
+function apAbrir(id){
+  const i=DB.approvals.find(x=>x.id===id); if(!i) return;
+  apAtual=id; apSlideIdx=0;
+  apPintarFolha();
+  document.getElementById('approvalDetailModal').classList.add('open');
+  renderApprovals();
+}
+function apSlide(d){
+  const i=DB.approvals.find(x=>x.id===apAtual); if(!i) return;
+  const total=apSlides(i).length;
+  apSlideIdx=Math.max(0,Math.min(apSlideIdx+d,total-1));
+  apPintarFolha();
+}
+function apPintarFolha(){
+  const i=DB.approvals.find(x=>x.id===apAtual); if(!i) return;
+  const f=apFmt(i), slides=apSlides(i), st=AP_STATUS[i.status]||AP_STATUS.pending;
+  document.getElementById('ecFolha').classList.toggle('wide', !!f.largo);
+
+  const vids=slides.filter(s=>s.t==='vid').length;
+  const empCls = i.category==='click' ? 'badge-blue' : i.category==='impresul' ? 'badge-purple' : 'badge-gray';
+  const det=[f.label, f.dim];
+  if(slides.length>1) det.push(`${slides.length} slides`);
+  if(vids) det.push(vids===1?'1 vídeo':`${vids} vídeos`);
+
+  document.getElementById('ecFolhaConteudo').innerHTML=`
+    <div class="ec-palco ${f.contain?'contain':''}" style="aspect-ratio:${f.ratio}">${apMidiaPalco(i)}</div>
+    <div class="ec-info">
+      <div class="ec-info-meta">
+        <span class="badge ${empCls}">${apEsc(AP_EMPRESAS[i.category]||'Geral')}</span>
+        <span class="ec-info-dim">${apEsc(det.join(' · '))}</span>
+        <span class="badge ${st.badge}">${apEsc(st.label)}</span>
+      </div>
+      <h2 class="ec-info-titulo">${apEsc(i.title||'Sem título')}</h2>
+      ${i.desc?`<div class="ec-info-rot">Legenda</div><div class="ec-info-legenda">${apEsc(i.desc)}</div>`:''}
+      <div class="ec-aprovacao">
+        <div class="ec-info-rot">Decisão</div>
+        <div class="ec-acoes">
+          <button class="ec-acao ok" aria-pressed="${i.status==='approved'}" onclick="apDecidir('${i.id}','approved')">Aprovar</button>
+          <button class="ec-acao aj" aria-pressed="${i.status==='revision'}" onclick="apDecidir('${i.id}','revision')">Pedir ajuste</button>
+          <button class="ec-acao no" aria-pressed="${i.status==='rejected'}" onclick="apDecidir('${i.id}','rejected')">Reprovar</button>
+        </div>
+        <textarea id="apComentario" placeholder="Comentário sobre esta peça (opcional)">${apEsc(apUltimoComentario(i))}</textarea>
+      </div>
+      <div class="ec-links">
+        ${i.url?`<a href="${apEsc(i.url)}" target="_blank" rel="noopener"><i class="fa-solid fa-up-right-from-square"></i>Abrir material</a>`:''}
+        <button onclick="apEnviarEmail('${i.id}')"><i class="fa-solid fa-envelope"></i>Enviar para aprovação</button>
+        <button onclick="apEditar('${i.id}')"><i class="fa-solid fa-pen"></i>Editar</button>
+        <button class="perigo" onclick="deleteApproval('${i.id}')"><i class="fa-solid fa-trash"></i>Excluir</button>
+      </div>
+    </div>`;
+}
+function apUltimoComentario(i){
+  const c=(i.comments||[]).filter(c=>c.type==='revision'||c.type==='rejected').slice(-1)[0];
+  return c?c.text:'';
+}
+
+function apDecidir(id,status){
+  const i=DB.approvals.find(x=>x.id===id); if(!i) return;
+  const campo=document.getElementById('apComentario');
+  let txt=(campo&&campo.value.trim())||'';
+  if((status==='revision'||status==='rejected') && !txt){
+    txt=prompt(status==='revision'?'Descreva os ajustes necessários:':'Motivo da reprovação:')||'';
+    if(!txt){showToast('Comentário obrigatório para ajuste ou reprovação','warning');return;}
+  }
+  if(i.status===status && status==='approved'){ status='pending'; txt='Aprovação desfeita.'; }
+  i.status=status;
+  i.comments=i.comments||[];
+  i.comments.push({author:'Gestor',text:txt||'Material aprovado.',date:today(),type:status});
+  firebaseCreate('approvals',i);
+  showToast({approved:'Material aprovado!',revision:'Ajuste solicitado!',rejected:'Material reprovado',pending:'Voltou para pendente'}[status],
+            status==='approved'?'success':'info');
+  addActivity(`"${i.title}" — ${AP_STATUS[status].label}`,'approval');
+  apPintarFolha();
+  renderApprovals();
+}
+function approveItem(id){apAtual=id;apDecidir(id,'approved');}
+function rejectItem(id){apAtual=id;apDecidir(id,'rejected');}
+function requestRevision(id){apAtual=id;apDecidir(id,'revision');}
+
+function deleteApproval(id){
+  if(!confirm('Tem certeza que deseja excluir este material da aprovação?')) return;
+  firebaseDelete('approvals',id);
+  closeModal('approvalDetailModal');
+  apAtual=null;
+  renderApprovals();
+  showToast('Material excluído com sucesso!','info');
+}
+
+// ---------- retorno ----------
+function apResumo(){
+  const items=filterByCategory(DB.approvals);
+  if(!items.length){showToast('Nenhuma peça para resumir','warning');return;}
+  const L=[`RETORNO DA APROVAÇÃO — ${new Date().toLocaleDateString('pt-BR')}`,''];
+  const ok=[],aj=[],no=[],pd=[];
+  items.forEach((p,i)=>{
+    const ult=(p.comments||[]).slice(-1)[0];
+    const base=`Peça ${String(i+1).padStart(2,'0')} · ${AP_EMPRESAS[p.category]||'Geral'} · ${p.title||''} (${apFmt(p).label})`;
+    if(p.status==='approved')      ok.push(base);
+    else if(p.status==='revision') aj.push(base+`\n   ajuste: ${ult&&ult.text?ult.text:'(sem detalhe)'}`);
+    else if(p.status==='rejected') no.push(base+`\n   motivo: ${ult&&ult.text?ult.text:'(sem detalhe)'}`);
+    else                           pd.push(base);
+  });
+  if(aj.length){L.push(`AJUSTES (${aj.length})`,aj.join('\n'),'');}
+  if(no.length){L.push(`REPROVADAS (${no.length})`,no.join('\n'),'');}
+  if(pd.length){L.push(`PENDENTES (${pd.length})`,pd.join('\n'),'');}
+  L.push(`APROVADAS (${ok.length} de ${items.length})`, ok.length?ok.join('\n'):'—');
+  document.getElementById('apResumoTxt').value=L.join('\n');
+  document.getElementById('approvalResumoModal').classList.add('open');
+}
+function apCopiarResumo(){
+  const ta=document.getElementById('apResumoTxt');
+  ta.select(); ta.setSelectionRange(0,999999);
+  try{document.execCommand('copy');showToast('Retorno copiado!','success');}
+  catch(e){showToast('Selecione o texto e copie','warning');}
+}
+async function apEnviarResumo(){
+  const to=document.getElementById('apResumoEmail').value.trim();
+  if(!to){showToast('Informe o e-mail do destinatário','error');return;}
+  const txt=document.getElementById('apResumoTxt').value;
+  const html=`<!DOCTYPE html><html><body style="font-family:Arial,sans-serif;background:#f4f6fb;padding:30px;color:#1a1a2e">
+    <div style="max-width:620px;margin:0 auto;background:#fff;border-radius:12px;overflow:hidden">
+      <div style="background:linear-gradient(135deg,#132957,#009FE3);padding:24px 30px">
+        <div style="font-size:20px;font-weight:800;color:#fff">Grupo Impresul</div>
+        <div style="font-size:12px;color:rgba(255,255,255,.85);margin-top:3px">Retorno da aprovação de conteúdos</div>
+      </div>
+      <div style="padding:26px 30px"><pre style="font-family:inherit;font-size:13px;white-space:pre-wrap;margin:0;line-height:1.7">${apEsc(txt)}</pre></div>
+    </div></body></html>`;
+  const ok=await sendRealEmail({to,subject:'Retorno da aprovação de conteúdos — Grupo Impresul',html});
+  if(ok) closeModal('approvalResumoModal');
+}
+
+// ---------- e-mail ----------
+function apLinkAcao(i,acao){
+  const dest=window.__ENV_SMTP_USER||'marketing@impresul.com.br';
+  const rot=acao==='aprovar'?'APROVADO':'AJUSTES';
+  const assunto=encodeURIComponent(`[${rot}] ${i.title} — ${AP_EMPRESAS[i.category]||'Geral'}`);
+  const corpo=encodeURIComponent(acao==='aprovar'
+    ? `Aprovo a peça "${i.title}".\n\n(ref: ${i.id})`
+    : `Peço ajustes na peça "${i.title}".\n\nAjustes necessários:\n- \n\n(ref: ${i.id})`);
+  return `mailto:${dest}?subject=${assunto}&body=${corpo}`;
+}
+function buildApprovalEmailHTML(i){
+  const f=apFmt(i), slides=apSlides(i);
+  const emp=AP_EMPRESAS[i.category]||'Geral';
+  const cor=i.category==='impresul'?'#1D1D1B':'#132957';
+  const capa=apCapa(i);
+  const capaOk=(capa&&/^https?:/i.test(capa))?capa:'';
+  const vid=slides.find(s=>s.t==='vid');
+  const vids=slides.filter(s=>s.t==='vid').length;
+  const det=[f.label,f.dim];
+  if(slides.length>1) det.push(`${slides.length} slides`);
+  if(vids) det.push(vids===1?'1 vídeo':`${vids} vídeos`);
+  const sistema=location.origin+location.pathname+'#aprovacao='+i.id;
+  return `<!DOCTYPE html><html><body style="font-family:Arial,Helvetica,sans-serif;background:#f4f6fb;padding:30px;color:#1a1a2e;margin:0">
+  <div style="max-width:580px;margin:0 auto;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,.1)">
+    <div style="background:linear-gradient(135deg,${cor},#009FE3);padding:26px 30px">
+      <div style="font-size:21px;font-weight:800;color:#fff;letter-spacing:-.5px">Grupo Impresul</div>
+      <div style="font-size:12px;color:rgba(255,255,255,.85);margin-top:3px">Aprovação de conteúdo</div>
+    </div>
+    <div style="padding:26px 30px">
+      <div style="display:inline-block;background:#eef2ff;color:${cor};font-size:11px;font-weight:700;padding:5px 11px;border-radius:99px;letter-spacing:.5px">${apEsc(emp.toUpperCase())}</div>
+      <h2 style="font-size:19px;font-weight:700;margin:12px 0 6px;color:${cor}">${apEsc(i.title||'')}</h2>
+      <p style="font-size:12px;color:#8b96b0;margin:0 0 16px">${apEsc(det.join(' · '))}</p>
+      ${capaOk?`<img src="${apEsc(capaOk)}" alt="" style="width:100%;border-radius:8px;margin-bottom:16px">`:''}
+      ${i.desc?`<div style="background:#f8f9ff;border-radius:8px;padding:14px;font-size:13px;line-height:1.65;white-space:pre-wrap;margin-bottom:18px">${apEsc(i.desc)}</div>`:''}
+      ${i.url?`<p style="font-size:13px;margin:0 0 12px"><a href="${apEsc(i.url)}" style="color:#009FE3;font-weight:600">Abrir o material completo &rarr;</a></p>`:''}
+      ${i.pdfUrl?`<p style="font-size:13px;margin:0 0 12px"><a href="${apEsc(i.pdfUrl)}" style="color:#009FE3;font-weight:600">Ver o PDF &rarr;</a></p>`:''}
+      ${vid?`<p style="font-size:13px;margin:0 0 12px"><a href="${apEsc(vid.src)}" style="color:#009FE3;font-weight:600">Assistir ao vídeo &rarr;</a></p>`:''}
+      ${slides.length>1?`<p style="font-size:13px;margin:0 0 12px"><a href="${apEsc(sistema)}" style="color:#009FE3;font-weight:600">Ver os ${slides.length} slides &rarr;</a></p>`:''}
+      <table style="width:100%;border-collapse:collapse;margin-top:8px"><tr>
+        <td style="padding-right:6px;width:50%"><a href="${apLinkAcao(i,'aprovar')}" style="display:block;text-align:center;background:#22C55E;color:#fff;font-weight:700;font-size:14px;padding:13px;border-radius:8px;text-decoration:none">Aprovar</a></td>
+        <td style="padding-left:6px;width:50%"><a href="${apLinkAcao(i,'ajustes')}" style="display:block;text-align:center;background:#F59E0B;color:#231F00;font-weight:700;font-size:14px;padding:13px;border-radius:8px;text-decoration:none">Pedir ajustes</a></td>
+      </tr></table>
+      <p style="font-size:11px;color:#8b96b0;margin:14px 0 0;line-height:1.6">Os botões abrem seu programa de e-mail com a resposta já escrita — é só enviar.
+      Se preferir, responda esta mensagem. <a href="${apEsc(sistema)}" style="color:#8b96b0">Ver no sistema</a>.</p>
+    </div>
+    <div style="background:#f8f9ff;padding:14px 30px;font-size:11px;color:#8b96b0">Equipe de Marketing — Grupo Impresul</div>
+  </div></body></html>`;
+}
+async function apEnviarEmail(id){
+  const i=DB.approvals.find(x=>x.id===id); if(!i) return;
+  let to=i.approverEmail;
+  if(!to){
+    to=prompt('E-mail de quem vai aprovar:','')||'';
+    if(!to) return;
+    i.approverEmail=to;
+  }
+  const ok=await sendRealEmail({to,subject:`Aprovação: ${i.title} — ${AP_EMPRESAS[i.category]||'Geral'}`,html:buildApprovalEmailHTML(i)});
+  if(ok){
+    i.comments=i.comments||[];
+    i.comments.push({author:'Sistema',text:`Enviado para aprovação: ${to}`,date:today(),type:'email'});
+    i.sentAt=new Date().toISOString();
+    firebaseCreate('approvals',i);
+    renderApprovals();
+    if(apAtual===id) apPintarFolha();
+  }
+}
+async function apEnviarLote(){
+  const pend=filterByCategory(DB.approvals).filter(i=>i.status==='pending'&&i.approverEmail);
+  if(!pend.length){showToast('Nenhuma peça pendente com aprovador definido','warning');return;}
+  if(!confirm(`Enviar ${pend.length} peça(s) pendente(s) por e-mail?`)) return;
+  for(const i of pend){ await apEnviarEmail(i.id); }
+}
+
+// ---------- galeria: imagens + vídeos, até 15 slides ----------
+function apAddImgs(){
+  if(apGaleria.length>=AP_MAX_SLIDES){showToast(`Limite de ${AP_MAX_SLIDES} slides atingido`,'warning');return;}
+  document.getElementById('ap_image').click();
+}
+async function apReceberImgs(input){
+  const escolhidos=Array.from(input.files||[]);
+  input.value='';
+  if(!escolhidos.length) return;
+  const espaco=AP_MAX_SLIDES-apGaleria.length;
+  if(espaco<=0){showToast(`Limite de ${AP_MAX_SLIDES} slides atingido`,'warning');return;}
+  const lote=escolhidos.slice(0,espaco);
+  if(escolhidos.length>espaco) showToast(`Só cabiam mais ${espaco} — o restante foi ignorado`,'warning');
+
+  const btn=document.getElementById('ap_add');
+  btn.disabled=true; btn.textContent='Processando...';
+  for(const f of lote){
+    try{ apGaleria.push({t:'img', src:await fileToBase64(f), poster:''}); }
+    catch(e){ showToast(`Falha ao ler "${f.name}"`,'error'); }
+  }
+  btn.disabled=false;
+  apDesenharGaleria();
+}
+function apAddVideo(){
+  if(apGaleria.length>=AP_MAX_SLIDES){showToast(`Limite de ${AP_MAX_SLIDES} slides atingido`,'warning');return;}
+  const url=(prompt('Link do vídeo (.mp4 direto, Google Drive, YouTube ou Vimeo):','')||'').trim();
+  if(!url) return;
+  if(!/^https?:\/\//i.test(url)){showToast('O link precisa começar com http:// ou https://','error');return;}
+  apGaleria.push({t:'vid', src:url, poster:''});
+  apDesenharGaleria();
+  if(!apMp4(url)) showToast('Player externo: o vídeo roda dentro da moldura do Drive/YouTube','info');
+}
+function apCapaVideo(k){
+  apCapaAlvo=k;
+  document.getElementById('ap_capa').click();
+}
+async function apReceberCapa(input){
+  const f=(input.files||[])[0];
+  input.value='';
+  if(!f || apCapaAlvo<0 || !apGaleria[apCapaAlvo]) return;
+  try{ apGaleria[apCapaAlvo].poster=await fileToBase64(f); apDesenharGaleria(); }
+  catch(e){ showToast('Falha ao ler a capa','error'); }
+  apCapaAlvo=-1;
+}
+function apMoverImg(k,d){
+  const j=k+d;
+  if(j<0||j>=apGaleria.length) return;
+  const t=apGaleria[k]; apGaleria[k]=apGaleria[j]; apGaleria[j]=t;
+  apDesenharGaleria();
+}
+function apRemImg(k){ apGaleria.splice(k,1); apDesenharGaleria(); }
+
+function apDesenharGaleria(){
+  const wrap=document.getElementById('ap_imgs');
+  if(!wrap) return;
+  wrap.innerHTML = apGaleria.map((s,k)=>{
+    const corpo = s.t==='vid'
+      ? (s.poster
+          ? `<img src="${apEsc(s.poster)}" alt="" onclick="apCapaVideo(${k})" style="cursor:pointer" title="Trocar a capa do vídeo">`
+          : `<div class="ec-img-vazio" onclick="apCapaVideo(${k})" title="Clique para definir uma capa"><i class="fa-solid fa-film"></i></div>`)
+      : `<img src="${apEsc(s.src)}" alt="">`;
+    return `<div class="ec-img ${s.t==='vid'?'vid':''}" title="${apEsc(s.t==='vid'?s.src:'')}">
+      ${corpo}
+      <span class="ec-img-n">${k+1}</span>
+      ${s.t==='vid'?'<span class="ec-img-tipo">VÍDEO</span>':''}
+      <div class="ec-img-acoes">
+        <button type="button" onclick="apMoverImg(${k},-1)" ${k===0?'disabled':''} title="Mover para trás">&#8249;</button>
+        <button type="button" class="x" onclick="apRemImg(${k})" title="Remover">&times;</button>
+        <button type="button" onclick="apMoverImg(${k},1)" ${k===apGaleria.length-1?'disabled':''} title="Mover para frente">&#8250;</button>
+      </div>
+    </div>`;
+  }).join('');
+
+  const conta=document.getElementById('ap_conta');
+  if(conta) conta.textContent=`— ${apGaleria.length} de ${AP_MAX_SLIDES}`;
+
+  const cheio=apGaleria.length>=AP_MAX_SLIDES;
+  const btn=document.getElementById('ap_add');
+  if(btn){ btn.disabled=cheio; btn.textContent = cheio ? `Limite de ${AP_MAX_SLIDES}` : '+ Imagens'; }
+  const btnV=document.getElementById('ap_add_vid');
+  if(btnV) btnV.disabled=cheio;
+
+  const peso=apPeso(apGaleria);
+  const vids=apGaleria.filter(s=>s.t==='vid').length;
+  const el=document.getElementById('ap_peso');
+  if(el){
+    el.className='ec-peso'+(peso>AP_LIMITE_BYTES?' cheio':peso>AP_LIMITE_BYTES*0.7?' alerta':'');
+    el.textContent = apGaleria.length
+      ? `O 1º slide é a capa. Use ‹ › para reordenar${vids?'; clique no slide de vídeo para definir a capa dele':''}. `
+        + `Peso das imagens: ${apKB(peso)} de ~${apKB(AP_LIMITE_BYTES)}`
+        + (peso>AP_LIMITE_BYTES?' — acima do limite do banco, remova alguns slides.':'')
+        + (vids?' Vídeos entram por link e não pesam.':'')
+      : 'Misture imagens e vídeos na ordem que quiser. Imagens são enviadas do computador; vídeos entram por link.';
+  }
+}
+
+// Comprime cada imagem para caber no limite do Firestore
+function fileToBase64(file){
+  return new Promise((resolve,reject)=>{
+    const reader=new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload=ev=>{
+      const img=new Image();
+      img.src=ev.target.result;
+      img.onload=()=>{
+        const MAX=860;
+        let w=img.width,h=img.height;
+        if(w>h){ if(w>MAX){h*=MAX/w;w=MAX;} } else { if(h>MAX){w*=MAX/h;h=MAX;} }
+        const c=document.createElement('canvas');
+        c.width=Math.round(w); c.height=Math.round(h);
+        c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+        resolve(c.toDataURL('image/jpeg',0.62));
+      };
+      img.onerror=reject;
+    };
+    reader.onerror=reject;
+  });
+}
+
+// ---------- formulário ----------
+function apDims(){
+  const f=AP_FORMATOS[document.getElementById('ap_type').value];
+  document.getElementById('ap_dims').textContent = f?`Tamanho sugerido: ${f.dim}`:'';
+}
+function apNovo(){
+  ['ap_id','ap_title','ap_desc','ap_url','ap_email','ap_video','ap_pdf','ap_assignee']
+    .forEach(id=>{const e=document.getElementById(id); if(e) e.value='';});
+  document.getElementById('ap_type').value='feed';
+  document.getElementById('ap_category').value='click';
+  document.getElementById('apModalTitle').textContent='Enviar Material para Aprovação';
+  apGaleria=[]; apCapaAlvo=-1; apDesenharGaleria(); apDims();
+  openModal('approvalModal');
+}
+function apEditar(id){
+  const i=DB.approvals.find(x=>x.id===id); if(!i) return;
+  document.getElementById('ap_id').value=i.id;
+  document.getElementById('ap_title').value=i.title||'';
+  document.getElementById('ap_desc').value=i.desc||'';
+  document.getElementById('ap_url').value=i.url||'';
+  document.getElementById('ap_email').value=i.approverEmail||'';
+  document.getElementById('ap_video').value='';
+  document.getElementById('ap_pdf').value=i.pdfUrl||'';
+  document.getElementById('ap_assignee').value=i.assignee||'';
+  document.getElementById('ap_type').value=AP_FORMATOS[i.type]?i.type:'feed';
+  document.getElementById('ap_category').value=i.category||'click';
+  document.getElementById('apModalTitle').textContent='Editar Material';
+  // o vídeo solto dos registros antigos vira um slide de vídeo
+  apGaleria=apSlides(i).slice(0,AP_MAX_SLIDES).map(s=>({t:s.t,src:s.src,poster:s.poster}));
+  apCapaAlvo=-1;
+  apDesenharGaleria(); apDims();
+  closeModal('approvalDetailModal');
+  openModal('approvalModal');
+  const p=document.getElementById('ap_project'); if(p) p.value=i.project||'';
+}
+
+async function saveApproval(){
+  const title=document.getElementById('ap_title').value.trim();
+  if(!title){showToast('Título é obrigatório','error');return;}
+
+  // link avulso de vídeo entra como slide, se ainda não estiver na galeria
+  const soltoV=document.getElementById('ap_video').value.trim();
+  if(soltoV && !apGaleria.some(s=>s.t==='vid'&&s.src===soltoV)){
+    if(apGaleria.length<AP_MAX_SLIDES) apGaleria.push({t:'vid',src:soltoV,poster:''});
+    else showToast('Galeria cheia: o link do vídeo não foi adicionado','warning');
+  }
+
+  const peso=apPeso(apGaleria);
+  if(peso>AP_LIMITE_BYTES){
+    showToast(`Os slides somam ${apKB(peso)} — acima do limite. Remova alguns.`,'error');
+    return;
+  }
+  const id=document.getElementById('ap_id').value||genId();
+  const antigo=DB.approvals.find(x=>x.id===id);
+  const capa=apGaleria.length ? (apGaleria[0].t==='vid'?apGaleria[0].poster:apGaleria[0].src) : '';
+
+  const item={
+    id, title,
     type: document.getElementById('ap_type').value,
     project: document.getElementById('ap_project').value,
     assignee: document.getElementById('ap_assignee').value,
     category: document.getElementById('ap_category').value,
     desc: document.getElementById('ap_desc').value,
-    url: materialUrl,           // Link do Drive guardado com segurança
-    thumbnailUrl: thumbnailUrl, // Imagem local convertida para carregar como miniatura
-    status: 'pending',
-    comments: [],
-    created: today()
+    url: document.getElementById('ap_url').value.trim(),
+    video: '',                       // migrado para os slides
+    pdfUrl: document.getElementById('ap_pdf').value.trim(),
+    approverEmail: document.getElementById('ap_email').value.trim(),
+    arquivos: apGaleria.map(s=>({t:s.t,src:s.src,poster:s.poster||''})),
+    thumbnailUrl: capa||'',
+    status: antigo?antigo.status:'pending',
+    comments: antigo?(antigo.comments||[]):[],
+    created: antigo?antigo.created:today()
   };
-  
-  firebaseCreate('approvals', item);
-  addActivity(`Material "${title}" enviado para aprovação`,'approval');
+
+  firebaseCreate('approvals',item);
+  addActivity(`Material "${title}" ${antigo?'atualizado':'enviado para aprovação'}`,'approval');
   closeModal('approvalModal');
-  
-  if(!fdb) renderApprovals();
-  
-  // Limpeza completa dos campos do formulário (incluindo o input de arquivo)
-  document.getElementById('ap_id').value = '';
-  document.getElementById('ap_title').value = '';
-  document.getElementById('ap_desc').value = '';
-  document.getElementById('ap_url').value = '';
-  document.getElementById('ap_image').value = '';
-  
-  showToast('Material enviado para aprovação!','success');
+  renderApprovals();
+  showToast(antigo?'Material atualizado!':'Material enviado para aprovação!','success');
+
+  if(item.approverEmail && !antigo){
+    if(confirm(`Enviar agora o e-mail de aprovação para ${item.approverEmail}?`)) apEnviarEmail(id);
+  }
 }
+
+// setas do teclado navegam o carrossel da folha
+document.addEventListener('keydown',ev=>{
+  const m=document.getElementById('approvalDetailModal');
+  if(!m||!m.classList.contains('open')) return;
+  if(ev.key==='Escape') closeModal('approvalDetailModal');
+  if(ev.key==='ArrowLeft')  apSlide(-1);
+  if(ev.key==='ArrowRight') apSlide(1);
+});
+
+// abre direto uma peça a partir do link do e-mail (#aprovacao=<id>)
+window.addEventListener('load',()=>{
+  const m=(location.hash||'').match(/aprovacao=([\w-]+)/);
+  if(m){ try{navigate('aprovacoes');}catch(e){} setTimeout(()=>apAbrir(m[1]),700); }
+});
+
 // ============================================================
 // PAUTA OPERACIONAL
 // ============================================================
