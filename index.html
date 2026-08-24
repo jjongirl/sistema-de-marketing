@@ -1963,6 +1963,7 @@ textarea.form-control{resize:vertical;min-height:80px}
     <input type="hidden" id="t_id">
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="closeModal('taskModal')">Cancelar</button>
+      <button class="btn btn-secondary" onclick="taskParaPauta()" title="Cria uma rotina na Pauta Operacional com os dados desta tarefa"><i class="fa-solid fa-rotate"></i>Virar Pauta Operacional</button>
       <button class="btn btn-primary" onclick="saveTask()"><i class="fa-solid fa-check"></i>Salvar Tarefa</button>
     </div>
   </div>
@@ -3154,6 +3155,83 @@ function saveTask() {
   if (!fdb) { renderPage(currentPage); }
   showToast(isEdit?'Tarefa atualizada!':'Tarefa criada!','success');
   resetTaskModal();
+}
+
+// ------------------------------------------------------------
+// Tarefa -> Pauta Operacional
+// Lê o que está no modal (inclusive alterações ainda não salvas),
+// monta a rotina e leva o usuário para a aba já com ela criada.
+// ------------------------------------------------------------
+function taskParaPauta() {
+  const nome = document.getElementById('t_title').value.trim();
+  if(!nome){ showToast('Dê um título para a tarefa antes de virar pauta','error'); return; }
+
+  const assignee = document.getElementById('t_assignee').value.trim() || 'Mariana';
+  const membro = (typeof TEAM !== 'undefined' ? TEAM : []).find(m =>
+    m.name.toLowerCase() === assignee.toLowerCase() ||
+    m.name.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase() ===
+      assignee.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase()
+  );
+
+  // a pauta não tem "urgente"; vira alta
+  const prioTarefa = document.getElementById('t_priority').value;
+  const priority = prioTarefa === 'urgent' ? 'high' : (prioTarefa || 'medium');
+
+  // recorrência da tarefa vira frequência da pauta; sem recorrência, diária útil
+  const rec = document.getElementById('t_recurrence').value;
+  const frequency = rec || 'daily';
+
+  // dias: semanal usa o dia da própria data; mensal e diária usam a regra padrão
+  const dataStr = document.getElementById('t_date').value;
+  let days;
+  if(frequency === 'weekly' && dataStr){
+    const partes = dataStr.split('-');
+    days = [ new Date(Date.UTC(+partes[0], +partes[1]-1, +partes[2])).getUTCDay() ];
+  } else if(frequency === 'monthly'){
+    days = dataStr ? [ new Date(Date.UTC(+dataStr.split('-')[0], +dataStr.split('-')[1]-1, +dataStr.split('-')[2])).getUTCDay() ] : [1];
+  } else {
+    days = [1,2,3,4,5];
+  }
+
+  const hora = document.getElementById('t_time').value || '09:00';
+  // prazo padrão: duas horas depois do horário de início
+  const hh = Math.min(23, parseInt(hora.split(':')[0],10) + 2);
+  const limite = String(hh).padStart(2,'0') + ':' + (hora.split(':')[1] || '00');
+
+  // as etiquetas da tarefa viram os itens do checklist
+  const tags = document.getElementById('t_tags').value.split(',').map(x=>x.trim()).filter(Boolean);
+  const checklist = tags.length ? tags : ['Executar','Revisar','Concluir'];
+
+  const nomeExiste = (DB.pautas||[]).some(x => (x.name||'').toLowerCase() === nome.toLowerCase());
+  if(nomeExiste && !confirm('Já existe uma pauta com esse nome. Criar mesmo assim?')) return;
+
+  const pauta = {
+    id: genId(),
+    name: nome,
+    desc: document.getElementById('t_desc').value || '',
+    assignee: membro ? membro.name : assignee,
+    email: membro ? membro.email : '',
+    category: document.getElementById('t_category').value || 'geral',
+    priority: priority,
+    frequency: frequency,
+    days: days,
+    time: hora,
+    deadlineTime: limite,
+    checklist: checklist,
+    checklistDone: checklist.map(()=>false),
+    observations: '',
+    status: 'pending',
+    executions: [],
+    origem: 'tarefa'
+  };
+
+  firebaseCreate('pautas', pauta);
+  addActivity('Tarefa virou pauta operacional: "' + nome + '"','task');
+  closeModal('taskModal');
+  if(typeof resetTaskModal === 'function') resetTaskModal();
+  showToast('Pauta criada para ' + pauta.assignee + ' — confira a frequência e os horários','success');
+  if(typeof updateBadges === 'function') updateBadges();
+  navigate('pauta');
 }
 
 function deleteTask(id) {
