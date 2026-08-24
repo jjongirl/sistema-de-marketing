@@ -749,6 +749,15 @@ textarea.form-control{resize:vertical;min-height:80px}
 .ec-acao.ok[aria-pressed="true"]{background:var(--accent-green);color:#06210F}
 .ec-acao.aj[aria-pressed="true"]{background:var(--accent-yellow);color:#231F00}
 .ec-acao.no[aria-pressed="true"]{background:var(--accent-red);color:#fff}
+.ec-acao-full{
+  width:100%;display:flex;align-items:center;justify-content:center;gap:8px;
+  padding:11px 8px;border-radius:10px;border:1px dashed var(--border-strong);
+  font-size:13px;font-weight:600;background:transparent;color:var(--text-secondary);
+  margin-bottom:12px;transition:all var(--trans);
+}
+.ec-acao-full:hover{border-style:solid;border-color:#009FE3;color:#009FE3;background:var(--bg-hover)}
+.ec-acao-full:disabled{opacity:.5;cursor:not-allowed}
+.ec-acao-full.destaque{border-style:solid;border-color:#009FE3;color:#009FE3}
 .ec-aprovacao textarea{
   width:100%;min-height:80px;resize:vertical;padding:12px 14px;
   border:1px solid var(--border-default);border-radius:10px;font-size:13px;
@@ -4423,6 +4432,9 @@ function apPintarFolha(){
           <button class="ec-acao aj" aria-pressed="${i.status==='revision'}" onclick="apDecidir('${i.id}','revision')">Pedir ajuste</button>
           <button class="ec-acao no" aria-pressed="${i.status==='rejected'}" onclick="apDecidir('${i.id}','rejected')">Reprovar</button>
         </div>
+        <button class="ec-acao-full ${(i.status==='revision'||i.status==='rejected')?'destaque':''}" onclick="apAjusteFeito('${i.id}')" title="Avisa por e-mail quem pediu o ajuste que a peça já foi corrigida">
+          <i class="fa-solid fa-paper-plane"></i>Ajuste feito — avisar por e-mail
+        </button>
         <textarea id="apComentario" placeholder="Comentário sobre esta peça (opcional)">${apEsc(apUltimoComentario(i))}</textarea>
       </div>
       <div class="ec-links">
@@ -4579,6 +4591,88 @@ async function apEnviarEmail(id){
     if(apAtual===id) apPintarFolha();
   }
 }
+// ---------- aviso de ajuste feito ----------
+function apPedidoOriginal(i){
+  const c=(i.comments||[]).filter(c=>c.type==='revision'||c.type==='rejected').slice(-1)[0];
+  return c&&c.text?c.text:'';
+}
+function buildAjusteFeitoEmailHTML(i,nota){
+  const f=apFmt(i), slides=apSlides(i);
+  const emp=AP_EMPRESAS[i.category]||'Geral';
+  const cor=i.category==='impresul'?'#1D1D1B':'#132957';
+  const capa=apCapa(i);
+  const capaOk=(capa&&/^https?:/i.test(capa))?capa:'';
+  const vid=slides.find(s=>s.t==='vid');
+  const vids=slides.filter(s=>s.t==='vid').length;
+  const pedido=apPedidoOriginal(i);
+  const det=[f.label,f.dim];
+  if(slides.length>1) det.push(`${slides.length} slides`);
+  if(vids) det.push(vids===1?'1 vídeo':`${vids} vídeos`);
+  const sistema=location.origin+location.pathname+'#aprovacao='+i.id;
+  return `<!DOCTYPE html><html><body style="font-family:Arial,Helvetica,sans-serif;background:#f4f6fb;padding:30px;color:#1a1a2e;margin:0">
+  <div style="max-width:580px;margin:0 auto;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,.1)">
+    <div style="background:linear-gradient(135deg,${cor},#009FE3);padding:26px 30px">
+      <div style="font-size:21px;font-weight:800;color:#fff;letter-spacing:-.5px">Grupo Impresul</div>
+      <div style="font-size:12px;color:rgba(255,255,255,.85);margin-top:3px">Ajuste realizado — nova versão para aprovação</div>
+    </div>
+    <div style="padding:26px 30px">
+      <div style="background:#e7f8ef;border:1px solid #22C55E;border-radius:8px;padding:11px 14px;margin-bottom:16px;font-size:13px;color:#12703F">
+        <strong>O ajuste que você pediu foi feito.</strong> A peça abaixo já está atualizada.
+      </div>
+      <div style="display:inline-block;background:#eef2ff;color:${cor};font-size:11px;font-weight:700;padding:5px 11px;border-radius:99px;letter-spacing:.5px">${apEsc(emp.toUpperCase())}</div>
+      <h2 style="font-size:19px;font-weight:700;margin:12px 0 6px;color:${cor}">${apEsc(i.title||'')}</h2>
+      <p style="font-size:12px;color:#8b96b0;margin:0 0 16px">${apEsc(det.join(' · '))}</p>
+      ${capaOk?`<img src="${apEsc(capaOk)}" alt="" style="width:100%;border-radius:8px;margin-bottom:16px">`:''}
+      ${pedido?`<div style="border-left:3px solid #F59E0B;background:#fffaf0;border-radius:0 8px 8px 0;padding:12px 14px;font-size:13px;line-height:1.6;margin-bottom:12px">
+        <div style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#8b96b0;margin-bottom:5px">Você havia pedido</div>
+        <div style="white-space:pre-wrap;color:#4a5568">${apEsc(pedido)}</div>
+      </div>`:''}
+      ${nota?`<div style="border-left:3px solid #22C55E;background:#f6fdf9;border-radius:0 8px 8px 0;padding:12px 14px;font-size:13px;line-height:1.6;margin-bottom:12px">
+        <div style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#8b96b0;margin-bottom:5px">O que foi alterado</div>
+        <div style="white-space:pre-wrap;color:#4a5568">${apEsc(nota)}</div>
+      </div>`:''}
+      ${i.desc?`<div style="background:#f8f9ff;border-radius:8px;padding:14px;font-size:13px;line-height:1.65;white-space:pre-wrap;margin-bottom:18px">${apEsc(i.desc)}</div>`:''}
+      ${i.url?`<p style="font-size:13px;margin:0 0 12px"><a href="${apEsc(i.url)}" style="color:#009FE3;font-weight:600">Abrir o material completo &rarr;</a></p>`:''}
+      ${i.pdfUrl?`<p style="font-size:13px;margin:0 0 12px"><a href="${apEsc(i.pdfUrl)}" style="color:#009FE3;font-weight:600">Ver o PDF &rarr;</a></p>`:''}
+      ${vid?`<p style="font-size:13px;margin:0 0 12px"><a href="${apEsc(vid.src)}" style="color:#009FE3;font-weight:600">Assistir ao vídeo &rarr;</a></p>`:''}
+      ${slides.length>1?`<p style="font-size:13px;margin:0 0 12px"><a href="${apEsc(sistema)}" style="color:#009FE3;font-weight:600">Ver os ${slides.length} slides &rarr;</a></p>`:''}
+      <table style="width:100%;border-collapse:collapse;margin-top:8px"><tr>
+        <td style="padding-right:6px;width:50%"><a href="${apLinkAcao(i,'aprovar')}" style="display:block;text-align:center;background:#22C55E;color:#fff;font-weight:700;font-size:14px;padding:13px;border-radius:8px;text-decoration:none">Aprovar</a></td>
+        <td style="padding-left:6px;width:50%"><a href="${apLinkAcao(i,'ajustes')}" style="display:block;text-align:center;background:#F59E0B;color:#231F00;font-weight:700;font-size:14px;padding:13px;border-radius:8px;text-decoration:none">Pedir novo ajuste</a></td>
+      </tr></table>
+      <p style="font-size:11px;color:#8b96b0;margin:14px 0 0;line-height:1.6">Os botões abrem seu programa de e-mail com a resposta já escrita — é só enviar.
+      Se preferir, responda esta mensagem. <a href="${apEsc(sistema)}" style="color:#8b96b0">Ver no sistema</a>.</p>
+    </div>
+    <div style="background:#f8f9ff;padding:14px 30px;font-size:11px;color:#8b96b0">Equipe de Marketing — Grupo Impresul</div>
+  </div></body></html>`;
+}
+async function apAjusteFeito(id){
+  const i=DB.approvals.find(x=>x.id===id); if(!i) return;
+  let to=i.approverEmail;
+  if(!to){
+    to=(prompt('E-mail de quem pediu o ajuste:','')||'').trim();
+    if(!to) return;
+    i.approverEmail=to;
+  }
+  const nota=prompt(`Avisar ${to} que o ajuste foi feito.\n\nO que foi alterado? (opcional — deixe em branco para enviar só o aviso)`,'');
+  if(nota===null) return;
+  const texto=nota.trim();
+  const ok=await sendRealEmail({
+    to,
+    subject:`Ajuste feito: ${i.title} — ${AP_EMPRESAS[i.category]||'Geral'}`,
+    html:buildAjusteFeitoEmailHTML(i,texto)
+  });
+  if(!ok) return;
+  i.status='pending';
+  i.comments=i.comments||[];
+  i.comments.push({author:'Marketing',text:`Ajuste feito e reenviado para ${to}.${texto?` Alterações: ${texto}`:''}`,date:today(),type:'adjusted'});
+  i.sentAt=new Date().toISOString();
+  firebaseCreate('approvals',i);
+  addActivity(`"${i.title}" — ajuste feito, aprovador avisado`,'approval');
+  renderApprovals();
+  if(apAtual===id) apPintarFolha();
+}
+
 async function apEnviarLote(){
   const pend=filterByCategory(DB.approvals).filter(i=>i.status==='pending'&&i.approverEmail);
   if(!pend.length){showToast('Nenhuma peça pendente com aprovador definido','warning');return;}
