@@ -11,6 +11,7 @@
 <!-- Firebase compat SDKs -->
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
 <style>
 /* ============================================================
    CSS VARIABLES & THEME
@@ -589,6 +590,46 @@ textarea.form-control{resize:vertical;min-height:80px}
 .insight-title{font-size:13px;font-weight:600;margin-bottom:6px}
 .insight-body{font-size:12px;color:var(--text-secondary);line-height:1.6;margin-bottom:10px}
 .insight-actions{display:flex;gap:6px;flex-wrap:wrap}
+
+/* --- prévia de mídia (Instagram, YouTube, TikTok, Vimeo, Drive, img/vídeo) --- */
+.ins-media{
+  position:relative;margin:0 0 10px;border-radius:var(--radius-md);
+  overflow:hidden;background:#000;border:1px solid var(--border-subtle);
+}
+.ins-media-frame{position:relative;width:100%;overflow:hidden;background:#0d0d0d}
+.ins-media-frame iframe,.ins-media-frame video,.ins-media-frame img{
+  position:absolute;inset:0;width:100%;height:100%;border:0;display:block;object-fit:cover;background:#0d0d0d;
+}
+.ins-media-frame.fit img,.ins-media-frame.fit video{object-fit:contain}
+.ins-play{
+  position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(180deg,rgba(0,0,0,.15),rgba(0,0,0,.55));cursor:pointer;border:0;width:100%;
+}
+.ins-play i{
+  width:46px;height:46px;border-radius:50%;background:rgba(0,0,0,.62);
+  display:flex;align-items:center;justify-content:center;color:#fff;font-size:16px;
+  backdrop-filter:blur(4px);transition:transform var(--trans);
+}
+.ins-media:hover .ins-play i{transform:scale(1.12)}
+.ins-media-skeleton{
+  position:absolute;inset:0;display:flex;flex-direction:column;gap:6px;
+  align-items:center;justify-content:center;color:var(--text-muted);font-size:11px;background:#0d0d0d;
+}
+.ins-media-bar{
+  display:flex;align-items:center;gap:8px;padding:6px 10px;
+  background:var(--bg-card);border-top:1px solid var(--border-subtle);font-size:11px;
+}
+.ins-media-bar .ins-src{display:flex;align-items:center;gap:5px;font-weight:600;color:var(--text-secondary)}
+.ins-media-bar .spacer{flex:1}
+.ins-media-bar a,.ins-media-bar button{
+  color:var(--text-muted);background:none;border:0;cursor:pointer;font-size:11px;
+  text-decoration:none;padding:2px 4px;border-radius:4px;transition:color var(--trans);
+}
+.ins-media-bar a:hover,.ins-media-bar button:hover{color:var(--text-primary)}
+.ins-media-lb .modal{max-width:860px;padding-top:14px}
+.ins-media-lb .ins-media{margin:0}
+.ins-preview-hint{font-size:11px;color:var(--text-muted);margin-top:6px;line-height:1.5}
+
 
 /* ============================================================
    APROVAÇÕES — layout "Entrega de Conteúdo" na pele do sistema
@@ -1212,9 +1253,124 @@ textarea.form-control{resize:vertical;min-height:80px}
 .ed-loading{text-align:center;padding:60px 24px;color:var(--text-muted)}
 .ed-loading i{font-size:32px;margin-bottom:14px;display:block;color:var(--accent-blue)}
 @media(max-width:700px){.ed-grid{grid-template-columns:1fr}}
+
+/* ============================================================
+   LOGIN
+============================================================ */
+.login-gate{
+  position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;
+  background:var(--bg-body,#0b0d12);padding:24px;
+}
+.login-box{
+  width:100%;max-width:380px;text-align:center;
+  background:var(--bg-card);border:1px solid var(--border-subtle);
+  border-radius:var(--radius-lg);padding:38px 30px;box-shadow:var(--shadow-lg,0 20px 60px rgba(0,0,0,.5));
+}
+.login-logo{
+  width:54px;height:54px;margin:0 auto 16px;border-radius:16px;
+  background:linear-gradient(135deg,var(--accent-magenta,#e6007e),var(--accent-blue,#009FE3));
+  display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:19px;
+}
+.login-box h1{font-size:19px;font-weight:700;margin:0 0 4px}
+.login-box p{font-size:12px;color:var(--text-secondary);margin:0 0 24px}
+.login-campo{
+  width:100%;background:var(--bg-body,#0b0d12);border:1px solid var(--border-subtle);
+  color:var(--text-primary);border-radius:var(--radius-md);padding:12px 13px;
+  font-size:14px;font-family:inherit;margin-bottom:9px;transition:border-color var(--trans);
+}
+.login-campo:focus{outline:0;border-color:var(--accent-blue,#009FE3)}
+.login-campo::placeholder{color:var(--text-muted)}
+.login-senha-wrap{position:relative}
+.login-olho{
+  position:absolute;right:6px;top:6px;background:none;border:0;cursor:pointer;
+  color:var(--text-muted);padding:7px 9px;border-radius:6px;font-size:13px;
+}
+.login-olho:hover{color:var(--text-primary)}
+.login-btn{
+  width:100%;display:flex;align-items:center;justify-content:center;gap:10px;
+  background:linear-gradient(135deg,var(--accent-magenta,#e6007e),var(--accent-blue,#009FE3));
+  color:#fff;border:0;border-radius:var(--radius-md);margin-top:4px;
+  padding:13px;font-size:14px;font-weight:700;cursor:pointer;transition:all var(--trans);
+}
+.login-btn:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 6px 18px rgba(0,0,0,.3)}
+.login-btn:disabled{opacity:.55;cursor:wait}
+.login-link{
+  background:none;border:0;color:var(--text-muted);font-size:12px;cursor:pointer;
+  font-family:inherit;margin-top:10px;text-decoration:underline;padding:4px;
+}
+.login-link:hover{color:var(--accent-blue,#009FE3)}
+.login-erro{
+  font-size:12px;color:var(--accent-red,#ef4444);margin-top:14px;min-height:16px;line-height:1.5;
+}
+.login-rodape{font-size:11px;color:var(--text-muted);margin-top:20px;line-height:1.6}
+.sidebar-sair{
+  background:none;border:0;color:var(--text-muted);cursor:pointer;font-size:13px;
+  padding:6px;border-radius:6px;transition:color var(--trans);
+}
+.sidebar-sair:hover{color:var(--accent-red,#ef4444)}
+.user-avatar img{width:100%;height:100%;border-radius:inherit;object-fit:cover}
+
+/* ============================================================
+   REGISTRO DE ALTERACOES
+============================================================ */
+.reg-linha{
+  display:flex;gap:12px;align-items:flex-start;padding:11px 14px;
+  border-bottom:1px solid var(--border-subtle);font-size:12.5px;
+}
+.reg-linha:last-child{border-bottom:0}
+.reg-linha:hover{background:var(--bg-hover,rgba(255,255,255,.02))}
+.reg-ico{
+  width:28px;height:28px;flex:0 0 28px;border-radius:8px;
+  display:flex;align-items:center;justify-content:center;font-size:11px;
+}
+.reg-corpo{flex:1;min-width:0;line-height:1.6}
+.reg-quem{font-weight:600}
+.reg-item{color:var(--text-primary);font-weight:600}
+.reg-campos{color:var(--text-secondary)}
+.reg-quando{font-size:11px;color:var(--text-muted);white-space:nowrap;padding-top:2px}
+.reg-filtros{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;align-items:center}
+.reg-filtros select,.reg-filtros input{
+  background:var(--bg-card);border:1px solid var(--border-subtle);color:var(--text-primary);
+  border-radius:var(--radius-md);padding:7px 10px;font-size:12px;font-family:inherit;
+}
+.reg-filtros input{flex:1;min-width:180px}
+.ap-autoria{font-size:11px;color:var(--text-muted);line-height:1.7}
+.ap-link-box{
+  display:flex;gap:6px;align-items:center;background:var(--bg-card);
+  border:1px solid var(--border-subtle);border-radius:var(--radius-md);
+  padding:8px 10px;font-size:11px;color:var(--text-secondary);margin-top:8px;
+}
+.ap-link-box input{
+  flex:1;background:none;border:0;color:var(--text-secondary);font-size:11px;
+  font-family:monospace;min-width:0;
+}
 </style>
 </head>
 <body>
+
+<!-- ============ PORTAO DE LOGIN ============ -->
+<div id="loginGate" class="login-gate">
+  <div class="login-box">
+    <div class="login-logo">GI</div>
+    <h1>Grupo Impresul</h1>
+    <p>Central Operacional de Marketing</p>
+    <form id="loginForm" onsubmit="authEntrar(event)" autocomplete="on">
+      <input class="login-campo" type="email" id="loginEmail" placeholder="E-mail"
+             autocomplete="username" required>
+      <div class="login-senha-wrap">
+        <input class="login-campo" type="password" id="loginSenha" placeholder="Senha"
+               autocomplete="current-password" required>
+        <button type="button" class="login-olho" onclick="authVerSenha(this)" tabindex="-1"
+                title="Mostrar senha"><i class="fa-solid fa-eye"></i></button>
+      </div>
+      <button type="submit" class="login-btn" id="loginBtn">Entrar</button>
+    </form>
+    <div class="login-erro" id="loginErro"></div>
+    <button class="login-link" onclick="authRecuperar()">Esqueci minha senha</button>
+    <div class="login-rodape" id="loginRodape">Acesso restrito à equipe. As contas são criadas pelo administrador.</div>
+  </div>
+</div>
+
 <div class="app-layout">
 
 <!-- SIDEBAR -->
@@ -1254,6 +1410,7 @@ textarea.form-control{resize:vertical;min-height:80px}
     <div class="nav-item" onclick="navigate('editorial')"><i class="fa-solid fa-calendar-check"></i>Calendário Editorial</div>
     <div class="nav-item" onclick="navigate('cobranca')"><i class="fa-solid fa-bell-concierge"></i>Outros Setores<span class="nav-badge" id="badge-cobranca">0</span></div>
     <div class="nav-item" onclick="navigate('insights')"><i class="fa-solid fa-lightbulb"></i>Insights & Ref.</div>
+    <div class="nav-item" onclick="navigate('registro')"><i class="fa-solid fa-clock-rotate-left"></i>Registro</div>
 
     <div class="nav-section-label">Estúdios de Criação</div>
     
@@ -1280,8 +1437,14 @@ textarea.form-control{resize:vertical;min-height:80px}
     <div class="user-avatar" id="userAvatarSidebar">GI</div>
     <div class="user-info">
       <div class="user-name" id="userNameSidebar">Grupo Impresul</div>
-      <div class="user-role">Equipe de Marketing</div>
+      <div class="user-role" id="userRoleSidebar">Equipe de Marketing</div>
     </div>
+    <button class="sidebar-sair" onclick="authTrocarSenha()" title="Trocar minha senha">
+      <i class="fa-solid fa-key"></i>
+    </button>
+    <button class="sidebar-sair" onclick="authSair()" title="Sair da conta">
+      <i class="fa-solid fa-right-from-bracket"></i>
+    </button>
     <button class="theme-toggle" onclick="toggleTheme()" title="Alternar Tema">
       <i class="fa-solid fa-moon" id="themeIcon"></i>
     </button>
@@ -1656,6 +1819,30 @@ textarea.form-control{resize:vertical;min-height:80px}
     </div>
 
     <div id="cobrancaContent"></div>
+  </section>
+
+  <!-- ==============================
+       REGISTRO DE ALTERACOES
+  ============================== -->
+  <section class="page-content" id="page-registro">
+    <div class="section-header">
+      <div>
+        <div class="section-title">Registro de Alterações</div>
+        <div class="section-subtitle">Quem criou, editou ou excluiu cada item, em cada aba</div>
+      </div>
+    </div>
+    <div class="reg-filtros">
+      <select id="regAba" onchange="renderRegistro()"><option value="all">Todas as abas</option></select>
+      <select id="regUser" onchange="renderRegistro()"><option value="all">Todas as pessoas</option></select>
+      <select id="regAcao" onchange="renderRegistro()">
+        <option value="all">Tudo</option>
+        <option value="criou">Só criações</option>
+        <option value="editou">Só edições</option>
+        <option value="excluiu">Só exclusões</option>
+      </select>
+      <input type="text" id="regBusca" placeholder="Buscar por item..." oninput="renderRegistro()">
+    </div>
+    <div class="card" style="padding:0;overflow:hidden" id="regLista"></div>
   </section>
 
   <!-- ==============================
@@ -2413,6 +2600,13 @@ textarea.form-control{resize:vertical;min-height:80px}
       <label class="form-label">Conteúdo / Anotação</label>
       <textarea class="form-control" id="ins_body" placeholder="Escreva aqui sua ideia, anotação ou cole o link..." rows="3"></textarea>
     </div>
+    <div class="form-group">
+      <label class="form-label">Link da mídia (opcional)</label>
+      <input class="form-control" id="ins_link" oninput="insPreviewModal()"
+             placeholder="Cole o link do post/Reels do Instagram, YouTube, TikTok, Vimeo, Drive ou de uma imagem/vídeo">
+      <div class="ins-preview-hint" id="ins_link_hint">Instagram, YouTube, TikTok, Vimeo, Google Drive ou link direto de imagem/vídeo. A prévia aparece aqui e no card.</div>
+      <div id="ins_link_preview" style="margin-top:8px"></div>
+    </div>
     <div class="form-row">
       <div class="form-group">
         <label class="form-label">Tags</label>
@@ -2432,6 +2626,17 @@ textarea.form-control{resize:vertical;min-height:80px}
       <button class="btn btn-ghost" onclick="closeModal('insightModal')">Cancelar</button>
       <button class="btn btn-primary" onclick="saveInsight()">Salvar Insight</button>
     </div>
+  </div>
+</div>
+
+<!-- INSIGHT MEDIA LIGHTBOX -->
+<div id="insMediaModal" class="modal-overlay ins-media-lb">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="insMediaTitle">Prévia</div>
+      <button class="modal-close" onclick="closeInsMedia()"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div id="insMediaBody"></div>
   </div>
 </div>
 
@@ -2802,7 +3007,7 @@ try {
 // ============================================================
 const DB = {
   tasks: [], projects: [], metas: [], pending: [],
-  insights: [], approvals: [], pautas: [], pautaHistory: [],
+  insights: [], approvals: [], pautas: [], pautaHistory: [], audit: [],
   cobrancas: [], cobrancaHistory: [],
   activity: [], notifications: [],
   settings: { theme: 'dark', category: 'all' }
@@ -2851,7 +3056,17 @@ async function fbSaveSettings() {
 
 // Compat: funções antigas que o código chama
 const save = () => { lsSave(); /* Firebase é escrito individualmente por operação */ };
-const lsSave = () => { try { localStorage.setItem('grupoimpresul_data', JSON.stringify(DB)); } catch(e){} };
+const lsSave = () => {
+  try {
+    // Com Firebase ativo, o localStorage e so um cache de leitura rapida:
+    // aprovacoes (imagens em base64) e o registro ficam de fora para nao
+    // estourar a cota de ~5 MB do navegador.
+    const dados = fdb ? (({approvals, audit, ...resto}) => resto)(DB) : DB;
+    localStorage.setItem('grupoimpresul_data', JSON.stringify(dados));
+  } catch(e){
+    console.warn('[localStorage] cota excedida — cache desativado nesta sessão');
+  }
+};
 const load = () => {
   try {
     const d = localStorage.getItem('grupoimpresul_data');
@@ -2883,6 +3098,7 @@ function initFirebaseListeners() {
       .orderBy('__createdAt', 'desc')
       .onSnapshot(snapshot => {
         DB[colName] = snapshot.docs.map(d => d.data());
+        auditGuardar(colName, DB[colName]);
         // Re-render página atual ao receber mudanças de outro usuário
         renderPage(currentPage);
         updateBadges();
@@ -2893,6 +3109,7 @@ function initFirebaseListeners() {
         // Se a coleção não tiver índice para orderBy, tenta sem
         COL(colName).onSnapshot(snap => {
           DB[colName] = snap.docs.map(d => d.data());
+          auditGuardar(colName, DB[colName]);
           renderPage(currentPage);
           updateBadges();
           lsSave();
@@ -2908,6 +3125,15 @@ function initFirebaseListeners() {
     }
   });
 
+  // Registro de alteracoes (limitado para nao pesar)
+  COL(AUDIT_COL).orderBy('__createdAt','desc').limit(500).onSnapshot(snap=>{
+    DB.audit = snap.docs.map(d=>d.data());
+    if(currentPage==='registro') renderRegistro();
+  }, err=>console.warn('[audit]', err.message));
+
+  // Decisoes vindas do link publico de aprovacao
+  apEscutarPublicas();
+
   showToast('🔴 Conectado em tempo real ao Firebase', 'success');
 }
 
@@ -2915,7 +3141,18 @@ function initFirebaseListeners() {
 // OPERAÇÕES CRUD FIREBASE (substituem mutações diretas no DB)
 // ============================================================
 async function firebaseCreate(colName, item) {
-  const itemWithMeta = { ...item, __createdAt: Date.now(), __updatedAt: Date.now() };
+  const anterior = (AUDIT_PREV[colName]||{})[item.id];
+  const acao = anterior ? 'editou' : 'criou';
+  const campos = anterior ? auditCampos(anterior, item) : [];
+  if (acao === 'criou' || campos.length) auditRegistrar(colName, item, acao, campos);
+
+  const itemWithMeta = {
+    ...item,
+    __createdAt: item.__createdAt || Date.now(),
+    __updatedAt: Date.now(),
+    __createdBy: item.__createdBy || authNome(),
+    __updatedBy: authNome()
+  };
   if (fdb) {
     await fbSet(colName, item.id, itemWithMeta);
   } else {
@@ -2929,13 +3166,18 @@ async function firebaseUpdate(colName, id, updates) {
   const arr = DB[colName] || [];
   const idx = arr.findIndex(i => i.id === id);
   if (idx >= 0) {
-    arr[idx] = { ...arr[idx], ...updates, __updatedAt: Date.now() };
+    const anterior = (AUDIT_PREV[colName]||{})[id] || JSON.stringify(arr[idx]);
+    arr[idx] = { ...arr[idx], ...updates, __updatedAt: Date.now(), __updatedBy: authNome() };
+    const campos = auditCampos(anterior, arr[idx]);
+    if (campos.length) auditRegistrar(colName, arr[idx], 'editou', campos);
     if (fdb) await fbSet(colName, id, arr[idx]);
     else lsSave();
   }
 }
 
 async function firebaseDelete(colName, id) {
+  const alvo = (DB[colName] || []).find(i => i.id === id);
+  if (alvo) auditRegistrar(colName, alvo, 'excluiu', []);
   if (fdb) {
     await fbDelete(colName, id);
   }
@@ -3034,6 +3276,7 @@ const pageLabels = {
   editorial:'Calendário Editorial',
   cobranca:'Outros Setores & Cobrança Imediata',
   insights:'Insights & Referências',
+  registro:'Registro de Alterações',
   relatorios:'Relatórios',
   instagram:'Instagram Analytics'
 };
@@ -3058,7 +3301,7 @@ function renderPage(p) {
     projetos:renderProjects, metas:renderMetas,
     pauta:renderPauta, cobranca:renderCobranca,
     editorial:renderEditorial,
-    insights:renderInsights,
+    insights:renderInsights, registro:renderRegistro,
     aprovacoes:renderApprovals, relatorios:renderReports, instagram:renderInstagram
   };
   if (fns[p]) fns[p]();
@@ -3991,6 +4234,7 @@ function toggleMeta(id) {
   if(!fdb){ renderMetas(); if(currentPage==='dashboard')renderDashMetas(); }
 }
 function deleteMeta(id) {
+  if(!confirm('Excluir esta meta?')) return;
   firebaseDelete('metas', id);
   if(!fdb) renderMetas();
 }
@@ -4103,6 +4347,154 @@ const insightTypeConfig={
   note:{icon:'fa-solid fa-note-sticky',color:'var(--accent-teal)',bg:'rgba(20,184,166,0.12)',label:'Nota'}
 };
 
+/* ------------------------------------------------------------------
+   PRÉVIA DE MÍDIA — reconhece a plataforma pelo link e monta o embed
+------------------------------------------------------------------ */
+const insEsc = s => String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+function insMedia(url){
+  const u=String(url||'').trim();
+  if(!/^https?:\/\//i.test(u)) return null;
+  let m;
+
+  // YouTube (watch, youtu.be, shorts)
+  if((m=u.match(/(?:youtube\.com\/(?:watch\?v=|shorts\/|embed\/|live\/)|youtu\.be\/)([\w-]{6,})/))){
+    const id=m[1], vert=/shorts\//.test(u);
+    return {kind:'youtube',label:'YouTube',icon:'fa-brands fa-youtube',color:'#ff0033',url:u,
+            embed:`https://www.youtube.com/embed/${id}?rel=0&modestbranding=1`,
+            thumb:`https://i.ytimg.com/vi/${id}/hqdefault.jpg`,
+            pad: vert?'150%':'56.25%', padFull: vert?'120%':'56.25%'};
+  }
+  // Instagram (post, reel, tv)
+  if((m=u.match(/instagram\.com\/(p|reel|reels|tv)\/([\w-]+)/))){
+    const tipo=(m[1]==='reels'?'reel':m[1]), id=m[2];
+    return {kind:'instagram',label:'Instagram',icon:'fa-brands fa-instagram',color:'#e6007e',url:u,
+            embed:`https://www.instagram.com/${tipo}/${id}/embed/captioned/`,
+            thumb:'', auto:true, pad:'128%', padFull:'112%'};
+  }
+  // TikTok
+  if((m=u.match(/tiktok\.com\/(?:.*\/video\/|embed\/v2\/|v\/)(\d+)/))){
+    return {kind:'tiktok',label:'TikTok',icon:'fa-brands fa-tiktok',color:'#25f4ee',url:u,
+            embed:`https://www.tiktok.com/embed/v2/${m[1]}`, thumb:'', auto:true, pad:'150%', padFull:'130%'};
+  }
+  // Vimeo
+  if((m=u.match(/vimeo\.com\/(?:video\/)?(\d+)/))){
+    return {kind:'vimeo',label:'Vimeo',icon:'fa-brands fa-vimeo',color:'#19b7ea',url:u,
+            embed:`https://player.vimeo.com/video/${m[1]}`, thumb:'', auto:true, pad:'56.25%', padFull:'56.25%'};
+  }
+  // Google Drive
+  if((m=u.match(/drive\.google\.com\/file\/d\/([^/]+)/)) || (u.includes('drive.google') && (m=u.match(/[?&]id=([\w-]+)/)))){
+    return {kind:'drive',label:'Google Drive',icon:'fa-brands fa-google-drive',color:'#4285f4',url:u,
+            embed:`https://drive.google.com/file/d/${m[1]}/preview`, thumb:'', auto:true, pad:'70%', padFull:'62%'};
+  }
+  // Arquivo de imagem direto
+  if(/\.(jpe?g|png|gif|webp|avif|svg)(\?|$)/i.test(u))
+    return {kind:'image',label:'Imagem',icon:'fa-solid fa-image',color:'var(--accent-green)',url:u,src:u,pad:'75%',padFull:'62%',fit:true};
+  // Arquivo de vídeo direto
+  if(/\.(mp4|webm|ogg|mov|m4v)(\?|$)/i.test(u))
+    return {kind:'video',label:'Vídeo',icon:'fa-solid fa-film',color:'var(--accent-purple)',url:u,src:u,pad:'56.25%',padFull:'56.25%',fit:true};
+
+  let host=''; try{ host=new URL(u).hostname.replace(/^www\./,''); }catch(e){}
+  return {kind:'link',label:host||'Link',icon:'fa-solid fa-link',color:'var(--accent-blue)',url:u,thumb:'',pad:'0',padFull:'0'};
+}
+
+/* ctx: 'card' (grid, carrega ao aparecer na tela) | 'full' (lightbox) */
+function insMediaHtml(md, ctx='card', id=''){
+  if(!md) return '';
+  const full = ctx==='full';
+  const pad  = full ? md.padFull : md.pad;
+  let inner='';
+
+  if(md.kind==='link'){
+    inner=`<div class="ins-media-skeleton" style="position:static;padding:18px 12px">
+             <i class="${md.icon}" style="font-size:18px;color:${md.color}"></i>
+             <span style="word-break:break-all;text-align:center">${insEsc(md.url)}</span>
+           </div>`;
+    return `<div class="ins-media">${inner}
+      <div class="ins-media-bar"><span class="ins-src"><i class="${md.icon}" style="color:${md.color}"></i>${insEsc(md.label)}</span>
+      <span class="spacer"></span><a href="${insEsc(md.url)}" target="_blank" rel="noopener"><i class="fa-solid fa-arrow-up-right-from-square"></i> abrir</a></div></div>`;
+  }
+
+  if(md.kind==='image'){
+    inner=`<img src="${insEsc(md.src)}" loading="lazy" alt="">`;
+  } else if(md.kind==='video'){
+    inner=`<video src="${insEsc(md.src)}" controls preload="metadata" playsinline></video>`;
+  } else if(md.thumb && !full){
+    // thumbnail + play: só carrega o player depois do clique
+    inner=`<img src="${insEsc(md.thumb)}" loading="lazy" alt="">
+           <button class="ins-play" onclick="insPlay(this,'${insEsc(md.embed)}')"><i class="fa-solid fa-play"></i></button>`;
+  } else if(full){
+    inner=`<iframe src="${insEsc(md.embed)}" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen scrolling="no"></iframe>`;
+  } else {
+    // embed sem thumbnail (Instagram/TikTok/Vimeo/Drive): carrega ao entrar na tela
+    inner=`<div class="ins-media-skeleton"><i class="${md.icon}" style="font-size:20px;color:${md.color}"></i><span>carregando prévia…</span></div>
+           <iframe class="ins-lazy" data-src="${insEsc(md.embed)}" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen scrolling="no" style="opacity:0;transition:opacity .25s" onload="this.style.opacity=1"></iframe>`;
+  }
+
+  const bar = `<div class="ins-media-bar">
+      <span class="ins-src"><i class="${md.icon}" style="color:${md.color}"></i>${insEsc(md.label)}</span>
+      <span class="spacer"></span>
+      ${full?'':`<button onclick="openInsMedia('${id}')" title="Ampliar"><i class="fa-solid fa-expand"></i> ampliar</button>`}
+      <a href="${insEsc(md.url)}" target="_blank" rel="noopener" title="Abrir original"><i class="fa-solid fa-arrow-up-right-from-square"></i> origem</a>
+    </div>`;
+
+  return `<div class="ins-media">
+    <div class="ins-media-frame${md.fit?' fit':''}" style="padding-top:${pad}">${inner}</div>
+    ${bar}
+  </div>`;
+}
+
+function insPlay(btn, embed){
+  const frame=btn.closest('.ins-media-frame');
+  frame.innerHTML=`<iframe src="${embed}${embed.includes('?')?'&':'?'}autoplay=1" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe>`;
+}
+
+/* carrega os embeds só quando o card aparece na tela */
+let insObserver=null;
+function insLazyLoad(){
+  if(!('IntersectionObserver' in window)){
+    document.querySelectorAll('iframe.ins-lazy[data-src]').forEach(f=>{f.src=f.dataset.src;f.removeAttribute('data-src');});
+    return;
+  }
+  if(!insObserver){
+    insObserver=new IntersectionObserver(es=>{
+      es.forEach(e=>{
+        if(e.isIntersecting && e.target.dataset.src){
+          e.target.src=e.target.dataset.src;
+          e.target.removeAttribute('data-src');
+          insObserver.unobserve(e.target);
+        }
+      });
+    },{rootMargin:'250px'});
+  }
+  document.querySelectorAll('iframe.ins-lazy[data-src]').forEach(f=>insObserver.observe(f));
+}
+
+function openInsMedia(id){
+  const i=DB.insights.find(x=>x.id===id); if(!i) return;
+  const md=insMedia(i.link||i.body);
+  if(!md) return;
+  document.getElementById('insMediaTitle').textContent=i.title||md.label;
+  document.getElementById('insMediaBody').innerHTML=insMediaHtml(md,'full',id);
+  document.getElementById('insMediaModal').classList.add('open');
+}
+function closeInsMedia(){
+  document.getElementById('insMediaBody').innerHTML='';
+  document.getElementById('insMediaModal').classList.remove('open');
+}
+
+/* prévia ao vivo dentro do modal de cadastro */
+let insPreviewTimer=null;
+function insPreviewModal(){
+  clearTimeout(insPreviewTimer);
+  insPreviewTimer=setTimeout(()=>{
+    const box=document.getElementById('ins_link_preview');
+    const url=document.getElementById('ins_link').value.trim();
+    const md=insMedia(url);
+    box.innerHTML = md ? insMediaHtml(md,'full') : '';
+  },500);
+}
+
 function renderInsights() {
   let items=filterByCategory(DB.insights);
   if(insightFilter!=='all') items=items.filter(i=>i.type===insightFilter);
@@ -4114,6 +4506,7 @@ function renderInsights() {
   el.innerHTML=items.map(i=>{
     const cfg=insightTypeConfig[i.type]||insightTypeConfig.note;
     const isLink=i.type==='link'&&i.body?.startsWith('http');
+    const md=insMedia(i.link || (i.body?.trim().startsWith('http')?i.body.trim():''));
     return `
     <div class="insight-card">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
@@ -4128,6 +4521,7 @@ function renderInsights() {
         </div>
       </div>
       <div class="insight-title">${i.title}</div>
+      ${md?insMediaHtml(md,'card',i.id):''}
       <div class="insight-body">${isLink?`<a href="${i.body}" target="_blank" style="color:var(--accent-blue);word-break:break-all">${i.body}</a>`:i.body||''}</div>
       ${i.tags?.length?`<div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:10px">${i.tags.map(t=>`<span class="badge badge-gray">${t}</span>`).join('')}</div>`:''}
       <div class="insight-actions">
@@ -4137,6 +4531,7 @@ function renderInsights() {
       </div>
     </div>`;
   }).join('');
+  insLazyLoad();
 }
 
 function toggleFavorite(id) {
@@ -4157,12 +4552,14 @@ function saveInsight() {
   if(!title){showToast('Título é obrigatório','error');return;}
   const id=document.getElementById('ins_id').value||genId();
   const tags=document.getElementById('ins_tags').value.split(',').map(s=>s.trim()).filter(Boolean);
-  const item={id,type:document.getElementById('ins_type').value,title,body:document.getElementById('ins_body').value,tags,category:document.getElementById('ins_category').value,favorite:false,created:today()};
+  const prev=DB.insights.find(x=>x.id===id);
+  const item={id,type:document.getElementById('ins_type').value,title,body:document.getElementById('ins_body').value,link:document.getElementById('ins_link').value.trim(),tags,category:document.getElementById('ins_category').value,favorite:prev?!!prev.favorite:false,created:prev?.created||today()};
   firebaseCreate('insights',item);
   closeModal('insightModal');
   if(!fdb) renderInsights();
   document.getElementById('ins_id').value='';
-  ['ins_title','ins_body','ins_tags'].forEach(i=>document.getElementById(i).value='');
+  ['ins_title','ins_body','ins_tags','ins_link'].forEach(i=>document.getElementById(i).value='');
+  document.getElementById('ins_link_preview').innerHTML='';
   showToast('Insight salvo!','success');
 }
 function editInsight(id) {
@@ -4171,11 +4568,14 @@ function editInsight(id) {
   document.getElementById('ins_type').value=i.type;
   document.getElementById('ins_title').value=i.title;
   document.getElementById('ins_body').value=i.body||'';
+  document.getElementById('ins_link').value=i.link||'';
   document.getElementById('ins_tags').value=i.tags?.join(', ')||'';
   document.getElementById('ins_category').value=i.category;
+  insPreviewModal();
   openModal('insightModal');
 }
 function deleteInsight(id) {
+  if(!confirm('Excluir este insight? A ação não pode ser desfeita.')) return;
   firebaseDelete('insights',id);
   if(!fdb) renderInsights();
 }
@@ -4437,8 +4837,18 @@ function apPintarFolha(){
         </button>
         <textarea id="apComentario" placeholder="Comentário sobre esta peça (opcional)">${apEsc(apUltimoComentario(i))}</textarea>
       </div>
+      ${i.publicToken?`
+      <div class="ec-info-rot" style="margin-top:14px">Link do cliente</div>
+      <div class="ap-link-box">
+        <i class="fa-solid fa-link"></i>
+        <input readonly value="${apEsc(apUrlPublica(i.publicToken))}" onclick="this.select()">
+        <button onclick="apGerarLink('${i.id}')" title="Copiar link"><i class="fa-solid fa-copy"></i></button>
+        <button onclick="apRevogarLink('${i.id}')" title="Desativar link" style="color:var(--accent-red)"><i class="fa-solid fa-ban"></i></button>
+      </div>`:''}
+      ${apAutoriaHTML(i)}
       <div class="ec-links">
         ${i.url?`<a href="${apEsc(i.url)}" target="_blank" rel="noopener"><i class="fa-solid fa-up-right-from-square"></i>Abrir material</a>`:''}
+        <button onclick="apGerarLink('${i.id}')"><i class="fa-solid fa-link"></i>${i.publicToken?'Copiar link do cliente':'Gerar link do cliente'}</button>
         <button onclick="apEnviarEmail('${i.id}')"><i class="fa-solid fa-envelope"></i>Enviar para aprovação</button>
         <button onclick="apEditar('${i.id}')"><i class="fa-solid fa-pen"></i>Editar</button>
         <button class="perigo" onclick="deleteApproval('${i.id}')"><i class="fa-solid fa-trash"></i>Excluir</button>
@@ -4461,7 +4871,7 @@ function apDecidir(id,status){
   if(i.status===status && status==='approved'){ status='pending'; txt='Aprovação desfeita.'; }
   i.status=status;
   i.comments=i.comments||[];
-  i.comments.push({author:'Gestor',text:txt||'Material aprovado.',date:today(),type:status});
+  i.comments.push({author:authNome(),text:txt||'Material aprovado.',date:today(),type:status});
   firebaseCreate('approvals',i);
   showToast({approved:'Material aprovado!',revision:'Ajuste solicitado!',rejected:'Material reprovado',pending:'Voltou para pendente'}[status],
             status==='approved'?'success':'info');
@@ -4535,7 +4945,7 @@ function apLinkAcao(i,acao){
     : `Peço ajustes na peça "${i.title}".\n\nAjustes necessários:\n- \n\n(ref: ${i.id})`);
   return `mailto:${dest}?subject=${assunto}&body=${corpo}`;
 }
-function buildApprovalEmailHTML(i){
+function buildApprovalEmailHTML(i, linkPublico){
   const f=apFmt(i), slides=apSlides(i);
   const emp=AP_EMPRESAS[i.category]||'Geral';
   const cor=i.category==='impresul'?'#1D1D1B':'#132957';
@@ -4546,7 +4956,6 @@ function buildApprovalEmailHTML(i){
   const det=[f.label,f.dim];
   if(slides.length>1) det.push(`${slides.length} slides`);
   if(vids) det.push(vids===1?'1 vídeo':`${vids} vídeos`);
-  const sistema=location.origin+location.pathname+'#aprovacao='+i.id;
   return `<!DOCTYPE html><html><body style="font-family:Arial,Helvetica,sans-serif;background:#f4f6fb;padding:30px;color:#1a1a2e;margin:0">
   <div style="max-width:580px;margin:0 auto;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,.1)">
     <div style="background:linear-gradient(135deg,${cor},#009FE3);padding:26px 30px">
@@ -4562,13 +4971,17 @@ function buildApprovalEmailHTML(i){
       ${i.url?`<p style="font-size:13px;margin:0 0 12px"><a href="${apEsc(i.url)}" style="color:#009FE3;font-weight:600">Abrir o material completo &rarr;</a></p>`:''}
       ${i.pdfUrl?`<p style="font-size:13px;margin:0 0 12px"><a href="${apEsc(i.pdfUrl)}" style="color:#009FE3;font-weight:600">Ver o PDF &rarr;</a></p>`:''}
       ${vid?`<p style="font-size:13px;margin:0 0 12px"><a href="${apEsc(vid.src)}" style="color:#009FE3;font-weight:600">Assistir ao vídeo &rarr;</a></p>`:''}
-      ${slides.length>1?`<p style="font-size:13px;margin:0 0 12px"><a href="${apEsc(sistema)}" style="color:#009FE3;font-weight:600">Ver os ${slides.length} slides &rarr;</a></p>`:''}
+      ${(slides.length>1&&linkPublico)?`<p style="font-size:13px;margin:0 0 12px"><a href="${apEsc(linkPublico)}" style="color:#009FE3;font-weight:600">Ver os ${slides.length} slides &rarr;</a></p>`:''}
+      ${linkPublico ? `
+      <a href="${apEsc(linkPublico)}" style="display:block;text-align:center;background:linear-gradient(135deg,${cor},#009FE3);color:#fff;font-weight:700;font-size:15px;padding:15px;border-radius:8px;text-decoration:none;margin-top:8px">Ver a peça e responder &rarr;</a>
+      <p style="font-size:11px;color:#8b96b0;margin:14px 0 0;line-height:1.6">O botão abre uma página com a peça em tamanho real, onde você aprova, pede ajustes ou reprova em um clique. Não precisa de senha nem de cadastro.</p>`
+      : `
       <table style="width:100%;border-collapse:collapse;margin-top:8px"><tr>
         <td style="padding-right:6px;width:50%"><a href="${apLinkAcao(i,'aprovar')}" style="display:block;text-align:center;background:#22C55E;color:#fff;font-weight:700;font-size:14px;padding:13px;border-radius:8px;text-decoration:none">Aprovar</a></td>
         <td style="padding-left:6px;width:50%"><a href="${apLinkAcao(i,'ajustes')}" style="display:block;text-align:center;background:#F59E0B;color:#231F00;font-weight:700;font-size:14px;padding:13px;border-radius:8px;text-decoration:none">Pedir ajustes</a></td>
       </tr></table>
       <p style="font-size:11px;color:#8b96b0;margin:14px 0 0;line-height:1.6">Os botões abrem seu programa de e-mail com a resposta já escrita — é só enviar.
-      Se preferir, responda esta mensagem. <a href="${apEsc(sistema)}" style="color:#8b96b0">Ver no sistema</a>.</p>
+      Se preferir, responda esta mensagem.</p>`}
     </div>
     <div style="background:#f8f9ff;padding:14px 30px;font-size:11px;color:#8b96b0">Equipe de Marketing — Grupo Impresul</div>
   </div></body></html>`;
@@ -4581,10 +4994,11 @@ async function apEnviarEmail(id){
     if(!to) return;
     i.approverEmail=to;
   }
-  const ok=await sendRealEmail({to,subject:`Aprovação: ${i.title} — ${AP_EMPRESAS[i.category]||'Geral'}`,html:buildApprovalEmailHTML(i)});
+  const linkPublico=await apGerarLink(id,true);
+  const ok=await sendRealEmail({to,subject:`Aprovação: ${i.title} — ${AP_EMPRESAS[i.category]||'Geral'}`,html:buildApprovalEmailHTML(i,linkPublico)});
   if(ok){
     i.comments=i.comments||[];
-    i.comments.push({author:'Sistema',text:`Enviado para aprovação: ${to}`,date:today(),type:'email'});
+    i.comments.push({author:authNome(),text:`Enviado para aprovação: ${to}`,date:today(),type:'email'});
     i.sentAt=new Date().toISOString();
     firebaseCreate('approvals',i);
     renderApprovals();
@@ -6109,6 +6523,402 @@ function demandToCalendar(id, idx) {
   showToast('Preencha a data e hora para agendar','info');
 }
 
+
+// ============================================================
+// AUTENTICACAO  (Firebase Auth + Google)
+// ============================================================
+// Filtro opcional de dominio. Deixe '' para aceitar qualquer e-mail
+// cadastrado pelo administrador (recomendado se a equipe usa e-mails
+// de dominios diferentes). Se preencher, so entram e-mails desse dominio.
+const AUTH_DOMINIO = '';
+
+const AUTH_ERROS={
+  'auth/invalid-email'            :'E-mail inválido.',
+  'auth/missing-password'         :'Digite a senha.',
+  'auth/user-disabled'            :'Esta conta foi desativada pelo administrador.',
+  'auth/user-not-found'           :'Não existe conta com esse e-mail.',
+  'auth/wrong-password'           :'Senha incorreta.',
+  'auth/invalid-credential'       :'E-mail ou senha incorretos.',
+  'auth/invalid-login-credentials':'E-mail ou senha incorretos.',
+  'auth/too-many-requests'        :'Muitas tentativas seguidas. Aguarde alguns minutos.',
+  'auth/network-request-failed'   :'Sem conexão com a internet.',
+  'auth/operation-not-allowed'    :'Login por e-mail/senha não está ativado no Firebase.'
+};
+const authMsgErro = e => AUTH_ERROS[e.code] || ('Não foi possível entrar. ('+(e.code||e.message)+')');
+
+let fauth = null;
+let CURRENT_USER = null;
+const authNome  = () => (AUDIT_ATOR || CURRENT_USER?.nome  || 'Sistema');
+const authEmail = () => (CURRENT_USER?.email || '');
+
+function authGate(msg){
+  const g=document.getElementById('loginGate');
+  if(g) g.style.display='flex';
+  const e=document.getElementById('loginErro');
+  if(e) e.textContent=msg||'';
+  const er=document.getElementById('loginErro');
+  if(er) er.style.color='';
+  const r=document.getElementById('loginRodape');
+  if(r) r.textContent = AUTH_DOMINIO
+    ? 'Acesso restrito a contas @'+AUTH_DOMINIO
+    : 'Acesso restrito à equipe. As contas são criadas pelo administrador.';
+}
+
+function authPintarUsuario(){
+  if(!CURRENT_USER) return;
+  const av=document.getElementById('userAvatarSidebar');
+  const nm=document.getElementById('userNameSidebar');
+  const rl=document.getElementById('userRoleSidebar');
+  const iniciais=CURRENT_USER.nome.split(/\s+/).slice(0,2).map(x=>x[0]||'').join('').toUpperCase();
+  if(av) av.innerHTML = CURRENT_USER.foto
+    ? '<img src="'+apEsc(CURRENT_USER.foto)+'" alt="">'
+    : apEsc(iniciais||'GI');
+  if(nm) nm.textContent = CURRENT_USER.nome;
+  if(rl) rl.textContent = CURRENT_USER.email || 'Equipe de Marketing';
+}
+
+function authVerSenha(btn){
+  const c=document.getElementById('loginSenha');
+  const ver = c.type==='password';
+  c.type = ver ? 'text' : 'password';
+  btn.innerHTML = '<i class="fa-solid fa-eye'+(ver?'-slash':'')+'"></i>';
+  c.focus();
+}
+
+async function authEntrar(ev){
+  if(ev) ev.preventDefault();
+  if(!fauth){ authGate('Firebase não configurado.'); return; }
+  const email=(document.getElementById('loginEmail').value||'').trim().toLowerCase();
+  const senha= document.getElementById('loginSenha').value||'';
+  if(!email || !senha){ authGate('Preencha e-mail e senha.'); return; }
+
+  const bt=document.getElementById('loginBtn');
+  bt.disabled=true; bt.textContent='Entrando…';
+  authGate('');
+  try{
+    await fauth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+    await fauth.signInWithEmailAndPassword(email, senha);
+    // o onAuthStateChanged assume daqui
+  }catch(err){
+    authGate(authMsgErro(err));
+    document.getElementById('loginSenha').value='';
+  }finally{
+    bt.disabled=false; bt.textContent='Entrar';
+  }
+}
+
+async function authRecuperar(){
+  if(!fauth) return;
+  const campo=document.getElementById('loginEmail');
+  const email=(campo.value||'').trim().toLowerCase();
+  if(!email){
+    authGate('Digite seu e-mail no campo acima e clique aqui de novo.');
+    campo.focus();
+    return;
+  }
+  try{
+    await fauth.sendPasswordResetEmail(email);
+    authGate('');
+    document.getElementById('loginErro').style.color='var(--accent-green)';
+    document.getElementById('loginErro').textContent=
+      'Enviamos um link de redefinição para '+email+'. Confira a caixa de entrada e o spam.';
+  }catch(err){
+    document.getElementById('loginErro').style.color='';
+    authGate(authMsgErro(err));
+  }
+}
+
+// Nome de exibicao: e o que aparece no Registro de Alteracoes.
+function authNomeSugerido(email){
+  return (email.split('@')[0]||'')
+    .replace(/[._-]+/g,' ')
+    .replace(/\b\w/g, c=>c.toUpperCase())
+    .trim();
+}
+async function authGarantirNome(user){
+  if(user.displayName) return user.displayName;
+  const sugestao=authNomeSugerido(user.email||'');
+  let nome='';
+  try{
+    nome=(prompt(
+      'Primeiro acesso: como você quer aparecer no Registro de Alterações?',
+      sugestao
+    )||'').trim();
+  }catch(e){}
+  nome=nome||sugestao||'Equipe';
+  try{ await user.updateProfile({displayName:nome}); }catch(e){}
+  return nome;
+}
+
+function authTrocarSenha(){
+  if(!fauth || !CURRENT_USER?.email) return;
+  if(!confirm('Enviar um link de troca de senha para '+CURRENT_USER.email+'?')) return;
+  fauth.sendPasswordResetEmail(CURRENT_USER.email)
+    .then(()=>showToast('Link de troca de senha enviado para o seu e-mail','success'))
+    .catch(e=>showToast(authMsgErro(e),'error'));
+}
+
+function authSair(){
+  if(!confirm('Sair do sistema?')) return;
+  if(fauth) fauth.signOut().then(()=>location.reload());
+  else location.reload();
+}
+
+function authIniciar(){
+  // Sem Firebase: modo offline, sem login (dados so no localStorage)
+  if(!fdb || !window.firebase || !firebase.auth){
+    CURRENT_USER={nome:'Modo offline',email:'',foto:''};
+    authPintarUsuario();
+    const g=document.getElementById('loginGate'); if(g) g.style.display='none';
+    init();
+    return;
+  }
+  fauth = firebase.auth();
+  fauth.onAuthStateChanged(async user=>{
+    if(!user){ authGate(''); return; }
+    const email=(user.email||'').toLowerCase();
+    if(AUTH_DOMINIO && !email.endsWith('@'+AUTH_DOMINIO)){
+      await fauth.signOut();
+      authGate('A conta '+email+' não pertence ao domínio autorizado.');
+      return;
+    }
+    const nome = await authGarantirNome(user);
+    CURRENT_USER={ nome, email, foto: user.photoURL || '' };
+    authPintarUsuario();
+    const g=document.getElementById('loginGate'); if(g) g.style.display='none';
+    if(!window.__appIniciado){ window.__appIniciado=true; init(); }
+  });
+}
+
+// ============================================================
+// REGISTRO DE ALTERACOES (auditoria)
+// ============================================================
+const AUDIT_COL='audit';
+let AUDIT_ATOR=null;   // sobrescreve o autor (ex.: decisao vinda do link publico)
+
+const AUDIT_ABAS={
+  tasks:'Tarefas', projects:'Projetos', metas:'Metas do Dia',
+  pending:'Pendências', insights:'Insights & Referências',
+  approvals:'Aprovações', pautas:'Pauta Operacional',
+  pautaHistory:'Pauta Operacional', cobrancas:'Outros Setores',
+  cobrancaHistory:'Outros Setores'
+};
+const AUDIT_IGNORAR=new Set([
+  '__createdAt','__updatedAt','__createdBy','__updatedBy',
+  'id','comments','executions','reminders','history'
+]);
+const AUDIT_CAMPOS={
+  title:'título', name:'nome', text:'texto', desc:'descrição', body:'conteúdo',
+  status:'status', priority:'prioridade', assignee:'responsável',
+  responsible:'responsável', deadline:'prazo', deadlineDate:'prazo',
+  deadlineTime:'horário limite', date:'data', time:'horário',
+  category:'empresa', progress:'progresso', tags:'tags', link:'link da mídia',
+  type:'tipo', arquivos:'slides', done:'concluído', checklist:'checklist',
+  favorite:'favorito', approverEmail:'e-mail do aprovador', email:'e-mail',
+  frequency:'frequência', observations:'observações', project:'projeto',
+  url:'link', pdfUrl:'PDF', publicToken:'link do cliente', days:'dias'
+};
+
+const AUDIT_PREV={};
+function auditGuardar(col, arr){
+  const m={};
+  (arr||[]).forEach(x=>{ if(x && x.id) m[x.id]=JSON.stringify(x); });
+  AUDIT_PREV[col]=m;
+}
+function auditTitulo(it){
+  const t=(it&&(it.title||it.name||it.text||it.desc)||'').toString().trim();
+  return t ? t.slice(0,70) : '(sem título)';
+}
+function auditCampos(antesStr, depois){
+  let antes; try{ antes=JSON.parse(antesStr); }catch(e){ return []; }
+  const chaves=new Set([...Object.keys(antes||{}),...Object.keys(depois||{})]);
+  const mud=[];
+  chaves.forEach(k=>{
+    if(AUDIT_IGNORAR.has(k)) return;
+    if(JSON.stringify(antes[k])!==JSON.stringify(depois[k])) mud.push(AUDIT_CAMPOS[k]||k);
+  });
+  return mud;
+}
+async function auditRegistrar(col, item, acao, campos){
+  if(col===AUDIT_COL || col==='activity' || col==='notifications') return;
+  const reg={
+    id:genId(), col, aba:AUDIT_ABAS[col]||col,
+    docId:(item&&item.id)||'', titulo:auditTitulo(item),
+    acao, campos:campos||[],
+    usuario:authNome(), email:authEmail(),
+    quando:new Date().toISOString(), __createdAt:Date.now()
+  };
+  DB.audit=DB.audit||[];
+  DB.audit.unshift(reg);
+  if(DB.audit.length>800) DB.audit.length=800;
+  if(fdb){ try{ await COL(AUDIT_COL).doc(reg.id).set(reg); }catch(e){} }
+  if(currentPage==='registro') renderRegistro();
+}
+
+// ---------- tela do registro ----------
+function regPreencherFiltros(items){
+  const abas=[...new Set(items.map(r=>r.aba))].sort();
+  const users=[...new Set(items.map(r=>r.usuario))].sort();
+  [['regAba',abas,'Todas as abas'],['regUser',users,'Todas as pessoas']].forEach(([id,vals,todos])=>{
+    const el=document.getElementById(id); if(!el) return;
+    const atual=el.value;
+    el.innerHTML='<option value="all">'+todos+'</option>'+
+      vals.map(v=>'<option value="'+apEsc(v)+'">'+apEsc(v)+'</option>').join('');
+    if(vals.includes(atual)) el.value=atual;
+  });
+}
+const REG_ICO={
+  criou  :{i:'fa-solid fa-plus',   c:'var(--accent-green)',  bg:'rgba(34,197,94,.14)'},
+  editou :{i:'fa-solid fa-pen',    c:'var(--accent-blue)',   bg:'rgba(0,159,227,.14)'},
+  excluiu:{i:'fa-solid fa-trash',  c:'var(--accent-red)',    bg:'rgba(239,68,68,.14)'}
+};
+function regQuando(iso){
+  const d=new Date(iso), ag=new Date();
+  const min=Math.round((ag-d)/60000);
+  if(min<1) return 'agora';
+  if(min<60) return min+' min';
+  if(d.toDateString()===ag.toDateString()) return 'hoje '+d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+  return d.toLocaleDateString('pt-BR')+' '+d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+}
+function renderRegistro(){
+  const todos=(DB.audit||[]).slice().sort((a,b)=>(b.__createdAt||0)-(a.__createdAt||0));
+  regPreencherFiltros(todos);
+  const fa=document.getElementById('regAba')?.value||'all';
+  const fu=document.getElementById('regUser')?.value||'all';
+  const fc=document.getElementById('regAcao')?.value||'all';
+  const q=(document.getElementById('regBusca')?.value||'').toLowerCase();
+
+  let items=todos;
+  if(fa!=='all') items=items.filter(r=>r.aba===fa);
+  if(fu!=='all') items=items.filter(r=>r.usuario===fu);
+  if(fc!=='all') items=items.filter(r=>r.acao===fc);
+  if(q) items=items.filter(r=>(r.titulo||'').toLowerCase().includes(q)||(r.usuario||'').toLowerCase().includes(q));
+
+  const el=document.getElementById('regLista'); if(!el) return;
+  if(!items.length){
+    el.innerHTML='<div class="empty-state" style="padding:40px"><i class="fa-solid fa-clock-rotate-left"></i><p>Nenhuma alteração registrada ainda</p></div>';
+    return;
+  }
+  el.innerHTML=items.slice(0,400).map(r=>{
+    const ic=REG_ICO[r.acao]||REG_ICO.editou;
+    const campos=(r.campos&&r.campos.length)
+      ? ' <span class="reg-campos">('+apEsc(r.campos.slice(0,5).join(', '))+(r.campos.length>5?'…':'')+')</span>'
+      : '';
+    const verbo={criou:'criou',editou:'alterou',excluiu:'excluiu'}[r.acao]||r.acao;
+    return '<div class="reg-linha">'+
+      '<div class="reg-ico" style="background:'+ic.bg+';color:'+ic.c+'"><i class="'+ic.i+'"></i></div>'+
+      '<div class="reg-corpo">'+
+        '<span class="reg-quem">'+apEsc(r.usuario)+'</span> '+verbo+' '+
+        '<span class="reg-item">'+apEsc(r.titulo)+'</span>'+campos+
+        '<div style="font-size:11px;color:var(--text-muted);margin-top:1px">'+apEsc(r.aba)+'</div>'+
+      '</div>'+
+      '<div class="reg-quando">'+regQuando(r.quando)+'</div>'+
+    '</div>';
+  }).join('');
+}
+
+// ============================================================
+// LINK PUBLICO DE APROVACAO
+// ============================================================
+const AP_PUB_COL='aprovacoes_publicas';
+const AP_PUB_DIAS=30;
+const AP_PUB_MAPA={aprovado:'approved', ajustes:'revision', reprovado:'rejected'};
+
+function apUrlPublica(token){
+  const base=location.origin+location.pathname.replace(/[^/]*$/,'');
+  return base+'aprovacao.html?t='+token;
+}
+function apToken(){
+  if(window.crypto && crypto.randomUUID) return crypto.randomUUID();
+  const a=new Uint8Array(16); (crypto||{}).getRandomValues?.(a);
+  return Array.from(a,b=>b.toString(16).padStart(2,'0')).join('')||genId()+genId();
+}
+
+async function apGerarLink(id, silencioso){
+  const i=DB.approvals.find(x=>x.id===id);
+  if(!i) return '';
+  if(!fdb){ showToast('É preciso estar conectado ao Firebase para gerar o link','error'); return ''; }
+  const f=apFmt(i), slides=apSlides(i);
+  const token=i.publicToken||apToken();
+  const doc={
+    token, refId:i.id,
+    titulo:i.title||'', empresa:AP_EMPRESAS[i.category]||'Geral',
+    tipo:f.label, dim:f.dim, ratio:f.ratio, contain:!!f.contain,
+    legenda:i.desc||'',
+    slides:slides.map(s=>({t:s.t, src:s.src, poster:s.poster||''})),
+    status:'pendente', comentarioCliente:'', decididoEm:null,
+    criadoEm:new Date().toISOString(),
+    expiraEmMs: Date.now()+AP_PUB_DIAS*24*60*60*1000,
+    enviadoPor: authNome()
+  };
+  try{
+    await fdb.collection(AP_PUB_COL).doc(token).set(doc);
+  }catch(e){
+    showToast('Não foi possível gerar o link: '+e.message,'error');
+    return '';
+  }
+  if(i.publicToken!==token){ i.publicToken=token; firebaseCreate('approvals',i); }
+  const url=apUrlPublica(token);
+  if(!silencioso){
+    try{ await navigator.clipboard.writeText(url); showToast('Link do cliente copiado!','success'); }
+    catch(e){ prompt('Copie o link:', url); }
+    apPintarFolha();
+  }
+  return url;
+}
+
+async function apRevogarLink(id){
+  const i=DB.approvals.find(x=>x.id===id);
+  if(!i||!i.publicToken) return;
+  if(!confirm('Desativar o link enviado ao cliente? Quem tiver o endereço não conseguirá mais abrir.')) return;
+  try{ await fdb.collection(AP_PUB_COL).doc(i.publicToken).delete(); }catch(e){}
+  i.publicToken='';
+  firebaseCreate('approvals',i);
+  showToast('Link desativado','info');
+  apPintarFolha();
+}
+
+const AP_PUB_VISTOS=new Set();
+function apEscutarPublicas(){
+  if(!fdb) return;
+  fdb.collection(AP_PUB_COL).onSnapshot(snap=>{
+    snap.docs.forEach(d=>{
+      const pub=d.data();
+      if(!pub || pub.status==='pendente' || !pub.decididoEm) return;
+      const chave=pub.token+'|'+pub.decididoEm;
+      if(AP_PUB_VISTOS.has(chave)) return;
+      AP_PUB_VISTOS.add(chave);
+      const i=DB.approvals.find(x=>x.id===pub.refId);
+      if(!i) return;
+      const novo=AP_PUB_MAPA[pub.status];
+      if(!novo || i.status===novo) return;
+      i.status=novo;
+      i.comments=i.comments||[];
+      i.comments.push({
+        author:'Cliente (link)',
+        text:pub.comentarioCliente||AP_STATUS[novo].label,
+        date:today(), type:novo
+      });
+      AUDIT_ATOR='Cliente (link público)';
+      firebaseCreate('approvals',i);
+      AUDIT_ATOR=null;
+      addActivity('"'+i.title+'" — '+AP_STATUS[novo].label+' pelo cliente','approval');
+      showToast('Cliente respondeu: '+i.title+' — '+AP_STATUS[novo].label,
+                novo==='approved'?'success':'warning');
+      renderApprovals();
+      if(apAtual===i.id) apPintarFolha();
+    });
+  }, err=>console.warn('[aprovacoes publicas]', err.message));
+}
+
+function apAutoriaHTML(i){
+  const partes=[];
+  if(i.__createdBy) partes.push('Criado por '+apEsc(i.__createdBy));
+  if(i.__updatedBy && i.__updatedAt)
+    partes.push('última alteração por '+apEsc(i.__updatedBy)+' em '+new Date(i.__updatedAt).toLocaleString('pt-BR'));
+  return partes.length ? '<div class="ap-autoria">'+partes.join(' · ')+'</div>' : '';
+}
+
 // ============================================================
 // INIT
 // ============================================================
@@ -6187,7 +6997,7 @@ setTimeout(() => {
 }, 30000);
 }
 
-init();
+authIniciar();
 
 // ============================================================
 // INSTAGRAM ANALYTICS

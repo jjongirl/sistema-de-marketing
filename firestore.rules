@@ -1,23 +1,77 @@
-// firestore.rules
-// Regras de segurança do Firestore para o Grupo Impresul OpsHub
-// IMPORTANTE: Em produção, adicione autenticação Firebase Auth e restrinja
-// acesso por usuário. Por enquanto, libera leitura/escrita para o workspace.
+// firestore.rules — Grupo Impresul OpsHub
+// Publique em: Firebase Console > Firestore Database > Regras > Publicar
+//
+// Duas zonas:
+//   1) /teams/impresul/**      → só quem tem conta criada pelo administrador
+//   2) /aprovacoes_publicas/** → cliente sem login, com token no link,
+//                                podendo mudar APENAS a própria decisão
 
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Workspace do Grupo Impresul
-    match /teams/impresul {
-      allow read, write: if true;  // TODO: restringir por auth
+    // ── helpers ────────────────────────────────────────────────
+    //
+    // ATENÇÃO: com login por e-mail/senha, esta função confia que
+    // SÓ O ADMINISTRADOR cria contas. Para isso é obrigatório
+    // desativar o autocadastro:
+    //   Firebase Console > Authentication > Settings > User actions
+    //   > desmarcar "Enable create (sign-up)"
+    // Sem esse passo, qualquer pessoa pode criar uma conta sozinha
+    // e passar por esta regra.
+    function daEquipe() {
+      return request.auth != null;
+    }
 
-      // Todas as subcoleções do workspace
+    // ── Alternativa mais rígida (lista de permissão) ───────────
+    // Se preferir controlar pessoa a pessoa, troque a função acima
+    // por esta e crie um documento em /equipe/{uid} para cada
+    // integrante (o UID aparece em Authentication > Users):
+    //
+    // function daEquipe() {
+    //   return request.auth != null
+    //       && exists(/databases/$(database)/documents/equipe/$(request.auth.uid));
+    // }
+    //
+    // match /equipe/{uid} {
+    //   allow read: if request.auth != null && request.auth.uid == uid;
+    //   allow write: if false;   // só pelo console do Firebase
+    // }
+
+    // ── 1. Workspace interno ───────────────────────────────────
+    match /teams/impresul {
+      allow read, write: if daEquipe();
+
       match /{collection}/{docId} {
-        allow read, write: if true;  // TODO: restringir por auth
+        allow read, write: if daEquipe();
       }
     }
 
-    // Bloqueia tudo mais
+    // ── 2. Aprovações públicas (link do cliente) ───────────────
+    match /aprovacoes_publicas/{token} {
+
+      // qualquer pessoa com o link consegue ver a peça
+      allow read: if true;
+
+      // só a equipe cria, reenvia ou desativa o link
+      allow create, delete, update: if daEquipe();
+
+      // o cliente (sem login) registra a decisão UMA vez:
+      //  · a peça ainda precisa estar pendente
+      //  · o link não pode ter expirado
+      //  · só três campos podem mudar
+      //  · o status precisa ser um dos três previstos
+      allow update: if request.auth == null
+        && resource.data.status == 'pendente'
+        && request.time.toMillis() < resource.data.expiraEmMs
+        && request.resource.data.diff(resource.data).affectedKeys()
+             .hasOnly(['status', 'comentarioCliente', 'decididoEm'])
+        && request.resource.data.status in ['aprovado', 'ajustes', 'reprovado']
+        && request.resource.data.comentarioCliente is string
+        && request.resource.data.comentarioCliente.size() < 2000;
+    }
+
+    // ── 3. Tudo o mais fica bloqueado ──────────────────────────
     match /{document=**} {
       allow read, write: if false;
     }

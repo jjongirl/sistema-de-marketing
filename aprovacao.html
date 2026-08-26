@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Aprovação de conteúdo — Grupo Impresul</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<style>
+:root{
+  --bg:#0b0d12; --card:#141821; --linha:#232936; --linha2:#2f3648;
+  --txt:#eef1f6; --txt2:#98a2b8; --txt3:#6b7488;
+  --azul:#009FE3; --magenta:#e6007e;
+  --ok:#22C55E; --aj:#F59E0B; --no:#EF4444;
+  --r:14px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:Inter,system-ui,-apple-system,sans-serif;
+  background:var(--bg);color:var(--txt);
+  min-height:100vh;padding:28px 18px 60px;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:620px;margin:0 auto}
+
+/* topo */
+.topo{display:flex;align-items:center;gap:11px;margin-bottom:26px}
+.marca{
+  width:38px;height:38px;border-radius:11px;flex:0 0 38px;
+  background:linear-gradient(135deg,var(--magenta),var(--azul));
+  display:flex;align-items:center;justify-content:center;
+  font-weight:800;font-size:14px;color:#fff;
+}
+.marca-txt{font-size:14px;font-weight:700;line-height:1.3}
+.marca-sub{font-size:11px;color:var(--txt3)}
+
+/* peca */
+.peca{background:var(--card);border:1px solid var(--linha);border-radius:var(--r);overflow:hidden}
+.palco{position:relative;background:#05070b;display:flex;align-items:center;justify-content:center}
+.palco img,.palco video,.palco iframe{width:100%;height:100%;display:block;object-fit:cover;border:0}
+.palco.contain img,.palco.contain video{object-fit:contain}
+.nav-seta{
+  position:absolute;top:50%;transform:translateY(-50%);
+  width:36px;height:36px;border-radius:50%;border:0;cursor:pointer;
+  background:rgba(0,0,0,.62);color:#fff;font-size:15px;
+  display:flex;align-items:center;justify-content:center;backdrop-filter:blur(6px);
+}
+.nav-seta:hover{background:rgba(0,0,0,.85)}
+.nav-seta.esq{left:10px} .nav-seta.dir{right:10px}
+.contador{
+  position:absolute;bottom:10px;left:50%;transform:translateX(-50%);
+  background:rgba(0,0,0,.65);color:#fff;font-size:11px;font-weight:600;
+  padding:4px 11px;border-radius:99px;backdrop-filter:blur(6px);
+}
+.pontos{display:flex;gap:5px;justify-content:center;padding:12px 0 0}
+.ponto{width:6px;height:6px;border-radius:50%;background:var(--linha2);cursor:pointer;border:0;padding:0}
+.ponto.on{background:var(--azul);width:18px;border-radius:99px}
+
+.info{padding:20px}
+.tags{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:11px}
+.tag{font-size:10.5px;font-weight:700;letter-spacing:.4px;padding:4px 10px;border-radius:99px;text-transform:uppercase}
+.tag.emp{background:rgba(0,159,227,.14);color:var(--azul)}
+.tag.fmt{background:rgba(255,255,255,.06);color:var(--txt2)}
+h1{font-size:19px;font-weight:700;line-height:1.35;margin-bottom:6px}
+.dim{font-size:11.5px;color:var(--txt3)}
+.rot{font-size:10.5px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--txt3);margin:20px 0 7px}
+.legenda{
+  font-size:13.5px;line-height:1.7;color:var(--txt2);white-space:pre-wrap;
+  background:rgba(255,255,255,.03);border-radius:10px;padding:14px;
+}
+
+/* decisao */
+.decisao{margin-top:24px}
+.botoes{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.bt{
+  border:1px solid var(--linha2);background:transparent;color:var(--txt);
+  border-radius:11px;padding:13px 8px;font-size:12.5px;font-weight:600;
+  cursor:pointer;font-family:inherit;transition:all .16s;
+  display:flex;flex-direction:column;align-items:center;gap:6px;
+}
+.bt span{font-size:17px;line-height:1}
+.bt:hover{transform:translateY(-1px)}
+.bt.ok.sel,.bt.ok:hover{background:var(--ok);border-color:var(--ok);color:#04240f}
+.bt.aj.sel,.bt.aj:hover{background:var(--aj);border-color:var(--aj);color:#241a00}
+.bt.no.sel,.bt.no:hover{background:var(--no);border-color:var(--no);color:#fff}
+textarea{
+  width:100%;margin-top:12px;background:var(--bg);border:1px solid var(--linha2);
+  color:var(--txt);border-radius:11px;padding:13px;font-size:13.5px;
+  font-family:inherit;resize:vertical;min-height:92px;line-height:1.6;
+}
+textarea:focus{outline:0;border-color:var(--azul)}
+.enviar{
+  width:100%;margin-top:12px;border:0;border-radius:11px;padding:15px;
+  background:linear-gradient(135deg,var(--magenta),var(--azul));color:#fff;
+  font-size:14.5px;font-weight:700;cursor:pointer;font-family:inherit;transition:opacity .16s;
+}
+.enviar:disabled{opacity:.4;cursor:not-allowed}
+.aviso{font-size:11.5px;color:var(--txt3);margin-top:11px;line-height:1.6;text-align:center}
+
+/* estados */
+.estado{text-align:center;padding:70px 24px}
+.estado-ico{font-size:42px;margin-bottom:16px}
+.estado h2{font-size:18px;font-weight:700;margin-bottom:8px}
+.estado p{font-size:13.5px;color:var(--txt2);line-height:1.7;max-width:380px;margin:0 auto}
+.selo{
+  display:flex;align-items:center;gap:11px;padding:15px;border-radius:11px;
+  font-size:13.5px;font-weight:600;margin-top:4px;
+}
+.selo.ok{background:rgba(34,197,94,.12);color:var(--ok)}
+.selo.aj{background:rgba(245,158,11,.12);color:var(--aj)}
+.selo.no{background:rgba(239,68,68,.12);color:var(--no)}
+.selo-txt{font-weight:400;color:var(--txt2);font-size:12.5px;margin-top:3px;line-height:1.6}
+.rodape{text-align:center;font-size:11px;color:var(--txt3);margin-top:26px;line-height:1.7}
+@media(max-width:420px){ .botoes{grid-template-columns:1fr} .bt{flex-direction:row;justify-content:center} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topo">
+    <div class="marca">GI</div>
+    <div>
+      <div class="marca-txt">Grupo Impresul</div>
+      <div class="marca-sub">Aprovação de conteúdo</div>
+    </div>
+  </div>
+  <div id="app">
+    <div class="estado"><div class="estado-ico">⏳</div><h2>Carregando…</h2></div>
+  </div>
+  <div class="rodape">Este link é pessoal. Não é preciso senha nem cadastro.</div>
+</div>
+
+<script>
+// ============================================================
+// CONFIG — precisa ser o MESMO projeto Firebase do sistema
+// ============================================================
+const FIREBASE_CONFIG = {
+  apiKey:            "AIzaSyB7z_KP8emFNkAO_YSd3RyLRfUqP4AZ7Lw",
+  authDomain:        "sistema-de-marketing.firebaseapp.com",
+  projectId:         "sistema-de-marketing",
+  storageBucket:     "sistema-de-marketing.firebasestorage.app",
+  messagingSenderId: "26513400008",
+  appId:             "1:26513400008:web:40c496aac7ee86d45605fd"
+};
+const COLECAO = 'aprovacoes_publicas';
+
+firebase.initializeApp(FIREBASE_CONFIG);
+const db = firebase.firestore();
+
+const esc = s => String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const app = document.getElementById('app');
+const token = new URLSearchParams(location.search).get('t') || '';
+
+let PECA = null, slide = 0, escolha = '';
+
+const ROTULOS = {
+  aprovado :{txt:'Aprovado',            cls:'ok', ico:'✓'},
+  ajustes  :{txt:'Ajustes solicitados', cls:'aj', ico:'✎'},
+  reprovado:{txt:'Reprovado',           cls:'no', ico:'✕'}
+};
+
+function estado(ico, titulo, texto){
+  app.innerHTML = '<div class="estado"><div class="estado-ico">'+ico+'</div>'+
+    '<h2>'+esc(titulo)+'</h2><p>'+esc(texto)+'</p></div>';
+}
+
+function embutir(url){
+  const u = String(url||'');
+  let m;
+  if((m=u.match(/(?:youtube\.com\/(?:watch\?v=|shorts\/|embed\/)|youtu\.be\/)([\w-]{6,})/)))
+    return 'https://www.youtube.com/embed/'+m[1]+'?rel=0';
+  if((m=u.match(/vimeo\.com\/(?:video\/)?(\d+)/)))
+    return 'https://player.vimeo.com/video/'+m[1];
+  if((m=u.match(/drive\.google\.com\/file\/d\/([^/]+)/)))
+    return 'https://drive.google.com/file/d/'+m[1]+'/preview';
+  return u;
+}
+const ehArquivoVideo = u => /\.(mp4|webm|ogg|mov|m4v)(\?|$)/i.test(u||'');
+
+function slideHTML(s){
+  if(!s) return '';
+  if(s.t === 'vid'){
+    return ehArquivoVideo(s.src)
+      ? '<video src="'+esc(s.src)+'" controls playsinline preload="metadata"'+(s.poster?' poster="'+esc(s.poster)+'"':'')+'></video>'
+      : '<iframe src="'+esc(embutir(s.src))+'" allow="autoplay; fullscreen" allowfullscreen></iframe>';
+  }
+  return '<img src="'+esc(s.src)+'" alt="">';
+}
+
+function irPara(n){
+  const total = (PECA.slides||[]).length;
+  slide = (n + total) % total;
+  pintar();
+}
+function marcar(op){
+  escolha = op;
+  document.querySelectorAll('.bt').forEach(b=>b.classList.toggle('sel', b.dataset.op===op));
+  document.getElementById('btEnviar').disabled = false;
+  const ta = document.getElementById('comentario');
+  ta.placeholder = op==='aprovado'
+    ? 'Quer deixar algum recado? (opcional)'
+    : 'Descreva o que precisa ser ajustado — quanto mais específico, melhor.';
+  if(op!=='aprovado') ta.focus();
+}
+
+function pintar(){
+  const p = PECA;
+  const slides = p.slides || [];
+  const varios = slides.length > 1;
+  const decidido = p.status && p.status !== 'pendente';
+
+  const det = [p.tipo, p.dim].filter(Boolean);
+  if(varios) det.push(slides.length + ' slides');
+
+  let bloco;
+  if(decidido){
+    const r = ROTULOS[p.status] || ROTULOS.aprovado;
+    bloco = '<div class="rot">Sua resposta</div>'+
+      '<div class="selo '+r.cls+'"><div style="font-size:20px">'+r.ico+'</div><div>'+r.txt+
+      (p.comentarioCliente ? '<div class="selo-txt">'+esc(p.comentarioCliente)+'</div>' : '')+
+      '<div class="selo-txt">Registrado em '+new Date(p.decididoEm).toLocaleString('pt-BR')+'</div>'+
+      '</div></div>'+
+      '<p class="aviso">A equipe de marketing já foi avisada. Para mudar a resposta, fale com quem enviou este link.</p>';
+  } else {
+    bloco = '<div class="decisao">'+
+      '<div class="rot">Sua decisão</div>'+
+      '<div class="botoes">'+
+        '<button class="bt ok" data-op="aprovado"  onclick="marcar(\'aprovado\')"><span>✓</span>Aprovar</button>'+
+        '<button class="bt aj" data-op="ajustes"   onclick="marcar(\'ajustes\')"><span>✎</span>Pedir ajuste</button>'+
+        '<button class="bt no" data-op="reprovado" onclick="marcar(\'reprovado\')"><span>✕</span>Reprovar</button>'+
+      '</div>'+
+      '<textarea id="comentario" placeholder="Escolha uma opção acima"></textarea>'+
+      '<button class="enviar" id="btEnviar" disabled onclick="enviar()">Enviar resposta</button>'+
+      '<p class="aviso">A resposta é registrada uma vez só. Confira antes de enviar.</p>'+
+    '</div>';
+  }
+
+  app.innerHTML =
+    '<div class="peca">'+
+      '<div class="palco'+(p.contain?' contain':'')+'" style="aspect-ratio:'+(p.ratio||'4/5')+'">'+
+        slideHTML(slides[slide])+
+        (varios
+          ? '<button class="nav-seta esq" onclick="irPara('+(slide-1)+')">‹</button>'+
+            '<button class="nav-seta dir" onclick="irPara('+(slide+1)+')">›</button>'+
+            '<div class="contador">'+(slide+1)+' / '+slides.length+'</div>'
+          : '')+
+      '</div>'+
+      (varios ? '<div class="pontos">'+slides.map((_,k)=>
+          '<button class="ponto'+(k===slide?' on':'')+'" onclick="irPara('+k+')"></button>').join('')+'</div>' : '')+
+      '<div class="info">'+
+        '<div class="tags"><span class="tag emp">'+esc(p.empresa||'Geral')+'</span>'+
+          (p.tipo?'<span class="tag fmt">'+esc(p.tipo)+'</span>':'')+'</div>'+
+        '<h1>'+esc(p.titulo||'Sem título')+'</h1>'+
+        '<div class="dim">'+esc(det.join(' · '))+'</div>'+
+        (p.legenda ? '<div class="rot">Legenda</div><div class="legenda">'+esc(p.legenda)+'</div>' : '')+
+        bloco+
+      '</div>'+
+    '</div>';
+}
+
+async function enviar(){
+  if(!escolha) return;
+  const txt = (document.getElementById('comentario').value || '').trim();
+  if(escolha !== 'aprovado' && !txt){
+    alert('Escreva o que precisa ser ajustado antes de enviar — sem isso a equipe não sabe o que corrigir.');
+    document.getElementById('comentario').focus();
+    return;
+  }
+  const bt = document.getElementById('btEnviar');
+  bt.disabled = true;
+  bt.textContent = 'Enviando…';
+  try{
+    await db.collection(COLECAO).doc(token).update({
+      status: escolha,
+      comentarioCliente: txt,
+      decididoEm: new Date().toISOString()
+    });
+    PECA.status = escolha;
+    PECA.comentarioCliente = txt;
+    PECA.decididoEm = new Date().toISOString();
+    pintar();
+    window.scrollTo({top:0, behavior:'smooth'});
+  }catch(e){
+    bt.disabled = false;
+    bt.textContent = 'Enviar resposta';
+    alert('Não foi possível registrar a resposta. Verifique a conexão e tente de novo.\n\n('+(e.code||e.message)+')');
+  }
+}
+
+async function carregar(){
+  if(!token){
+    estado('🔗','Link incompleto','O endereço não tem o código da peça. Confira se o link foi copiado inteiro.');
+    return;
+  }
+  try{
+    const doc = await db.collection(COLECAO).doc(token).get();
+    if(!doc.exists){
+      estado('🔒','Link não encontrado','Este link foi desativado ou já não está mais disponível. Fale com quem enviou.');
+      return;
+    }
+    PECA = doc.data();
+    if(PECA.expiraEmMs && Date.now() > PECA.expiraEmMs){
+      estado('⌛','Link expirado','Este link passou da validade. Peça um novo à equipe de marketing.');
+      return;
+    }
+    document.title = (PECA.titulo || 'Aprovação') + ' — Grupo Impresul';
+    pintar();
+  }catch(e){
+    estado('⚠️','Não foi possível abrir','Houve um erro ao carregar a peça. Tente novamente em instantes.');
+    console.error(e);
+  }
+}
+
+carregar();
+</script>
+</body>
+</html>
