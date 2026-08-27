@@ -2708,6 +2708,13 @@ textarea.form-control{resize:vertical;min-height:80px}
 
     <div class="form-row">
       <div class="form-group">
+        <label class="form-label">WhatsApp de quem vai aprovar</label>
+        <input class="form-control" id="ap_phone" placeholder="(51) 99999-9999">
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
         <label class="form-label">Link de vídeo avulso (atalho)</label>
         <input class="form-control" id="ap_video" placeholder="https://... — vira um slide de vídeo">
       </div>
@@ -2762,6 +2769,12 @@ textarea.form-control{resize:vertical;min-height:80px}
       <div class="form-group">
         <label class="form-label">E-mail do Responsável</label>
         <input class="form-control" id="pa_email" type="email" placeholder="email@empresa.com">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">WhatsApp do Responsável</label>
+        <input class="form-control" id="pa_phone" placeholder="(51) 99999-9999">
       </div>
     </div>
     <div class="form-row-3">
@@ -2855,6 +2868,12 @@ textarea.form-control{resize:vertical;min-height:80px}
         <div class="form-group" style="margin-bottom:0">
           <label class="form-label">E-mail do Responsável *</label>
           <input class="form-control" id="cb_email" type="email" placeholder="email@empresa.com.br">
+        </div>
+      </div>
+      <div class="form-row" style="margin-top:12px">
+        <div class="form-group" style="margin-bottom:0">
+          <label class="form-label">WhatsApp do Responsável</label>
+          <input class="form-control" id="cb_phone" placeholder="(51) 99999-9999">
         </div>
       </div>
     </div>
@@ -4850,6 +4869,7 @@ function apPintarFolha(){
         ${i.url?`<a href="${apEsc(i.url)}" target="_blank" rel="noopener"><i class="fa-solid fa-up-right-from-square"></i>Abrir material</a>`:''}
         <button onclick="apGerarLink('${i.id}')"><i class="fa-solid fa-link"></i>${i.publicToken?'Copiar link do cliente':'Gerar link do cliente'}</button>
         <button onclick="apEnviarEmail('${i.id}')"><i class="fa-solid fa-envelope"></i>Enviar para aprovação</button>
+        <button onclick="apEnviarWhats('${i.id}')" style="color:#25D366"><i class="fa-brands fa-whatsapp"></i>Enviar no WhatsApp</button>
         <button onclick="apEditar('${i.id}')"><i class="fa-solid fa-pen"></i>Editar</button>
         <button class="perigo" onclick="deleteApproval('${i.id}')"><i class="fa-solid fa-trash"></i>Excluir</button>
       </div>
@@ -5219,7 +5239,7 @@ function apDims(){
   document.getElementById('ap_dims').textContent = f?`Tamanho sugerido: ${f.dim}`:'';
 }
 function apNovo(){
-  ['ap_id','ap_title','ap_desc','ap_url','ap_email','ap_video','ap_pdf','ap_assignee']
+  ['ap_id','ap_title','ap_desc','ap_url','ap_email','ap_phone','ap_video','ap_pdf','ap_assignee']
     .forEach(id=>{const e=document.getElementById(id); if(e) e.value='';});
   document.getElementById('ap_type').value='feed';
   document.getElementById('ap_category').value='click';
@@ -5234,6 +5254,7 @@ function apEditar(id){
   document.getElementById('ap_desc').value=i.desc||'';
   document.getElementById('ap_url').value=i.url||'';
   document.getElementById('ap_email').value=i.approverEmail||'';
+  document.getElementById('ap_phone').value=i.approverPhone||'';
   document.getElementById('ap_video').value='';
   document.getElementById('ap_pdf').value=i.pdfUrl||'';
   document.getElementById('ap_assignee').value=i.assignee||'';
@@ -5280,6 +5301,7 @@ async function saveApproval(){
     video: '',                       // migrado para os slides
     pdfUrl: document.getElementById('ap_pdf').value.trim(),
     approverEmail: document.getElementById('ap_email').value.trim(),
+    approverPhone: document.getElementById('ap_phone').value.trim(),
     arquivos: apGaleria.map(s=>({t:s.t,src:s.src,poster:s.poster||''})),
     thumbnailUrl: capa||'',
     status: antigo?antigo.status:'pending',
@@ -5388,6 +5410,7 @@ function pautaCardHTML(p) {
       <div style="display:flex;gap:6px">
         <button class="btn btn-xs btn-success" onclick="markPautaDone('${p.id}')"><i class="fa-solid fa-check"></i>Marcar como Feito</button>
         <button class="btn btn-xs btn-secondary" onclick="simulateEmailSend('${p.id}')"><i class="fa-solid fa-envelope"></i>Enviar Lembrete</button>
+        <button class="btn btn-xs" style="background:#25D366;color:#fff;border-color:#25D366" onclick="enviarPautaWhats('${p.id}')"><i class="fa-brands fa-whatsapp"></i>WhatsApp</button>
         <button class="btn btn-xs btn-ghost" onclick="editPauta('${p.id}')"><i class="fa-solid fa-pen"></i></button>
         <button class="btn btn-xs btn-ghost" onclick="deletePauta('${p.id}')"><i class="fa-solid fa-trash"></i></button>
       </div>
@@ -5455,7 +5478,7 @@ function savePauta() {
   const isEdit=DB.pautas.some(p=>p.id===id);
   const days=[...document.querySelectorAll('.day-btn.active')].map(b=>Number(b.dataset.day));
   const checklist=document.getElementById('pa_checklist').value.split('\n').map(s=>s.trim()).filter(Boolean);
-  const pauta={id,name,desc:document.getElementById('pa_desc').value,assignee,email:document.getElementById('pa_email').value,category:document.getElementById('pa_category').value,priority:document.getElementById('pa_priority').value,frequency:document.getElementById('pa_frequency').value,days,time:document.getElementById('pa_time').value,deadlineTime:document.getElementById('pa_deadline_time').value,checklist,checklistDone:checklist.map(()=>false),observations:'',status:'pending',executions:[]};
+  const pauta={id,name,desc:document.getElementById('pa_desc').value,assignee,email:document.getElementById('pa_email').value,phone:document.getElementById('pa_phone').value.trim(),category:document.getElementById('pa_category').value,priority:document.getElementById('pa_priority').value,frequency:document.getElementById('pa_frequency').value,days,time:document.getElementById('pa_time').value,deadlineTime:document.getElementById('pa_deadline_time').value,checklist,checklistDone:checklist.map(()=>false),observations:'',status:'pending',executions:[]};
   firebaseCreate('pautas',pauta);
   closeModal('pautaModal');
   if(!fdb) renderPauta();
@@ -5471,6 +5494,7 @@ function editPauta(id) {
   document.getElementById('pa_desc').value=p.desc||'';
   document.getElementById('pa_assignee').value=p.assignee;
   document.getElementById('pa_email').value=p.email||'';
+  document.getElementById('pa_phone').value=p.phone||'';
   document.getElementById('pa_category').value=p.category;
   document.getElementById('pa_priority').value=p.priority;
   document.getElementById('pa_frequency').value=p.frequency;
@@ -5735,6 +5759,181 @@ async function sendRealEmail({to, subject, html}) {
   }
 }
 
+// ============================================================
+// WHATSAPP — abre a conversa com a mensagem já escrita (wa.me)
+// Não envia sozinho: monta o texto e abre o WhatsApp para conferir e enviar.
+// ============================================================
+function waNormalizarFone(fone) {
+  let d = String(fone||'').replace(/\D/g,'');
+  if(!d) return '';
+  if(d.startsWith('0')) d = d.replace(/^0+/,'');
+  if(d.length <= 11) d = '55' + d;   // sem DDI informado, assume Brasil
+  return d;
+}
+function waFoneValido(fone) {
+  const d = waNormalizarFone(fone);
+  return d.length >= 12 && d.length <= 13;
+}
+// janela: window aberto ANTES de um await, para o navegador não bloquear o pop-up
+function waAbrir(fone, texto, janela) {
+  const num = waNormalizarFone(fone);
+  if(!num){ if(janela) janela.close(); showToast('Sem número de WhatsApp cadastrado','error'); return false; }
+  if(!waFoneValido(num) && !confirm(`O número "${fone}" parece incompleto. Abrir mesmo assim?`)){ if(janela) janela.close(); return false; }
+  const url = 'https://wa.me/' + num + '?text=' + encodeURIComponent(texto);
+  const win = janela || window.open(url, '_blank');
+  if(!win){ showToast('O navegador bloqueou a janela. Libere os pop-ups deste site.','error'); return false; }
+  if(janela) janela.location.href = url;
+  showToast('WhatsApp aberto com a mensagem pronta — é só enviar','success');
+  return true;
+}
+function waEmpresa(cat) {
+  return cat==='click' ? 'Click Impresso' : cat==='impresul' ? 'Impresul' : 'Geral';
+}
+
+function waMsgPauta(p, isResend) {
+  const L = [];
+  L.push(isResend ? '*Grupo Impresul — Lembrete (reenvio)*' : '*Grupo Impresul — Lembrete de pauta*');
+  L.push('');
+  L.push(`Oi, ${p.assignee}! Lembrete da atividade de hoje:`);
+  L.push('');
+  L.push(`*${p.name}*`);
+  if(p.desc) L.push(p.desc);
+  L.push('');
+  L.push(`Empresa: ${waEmpresa(p.category)}`);
+  if(p.time) L.push(`Horário: ${p.time}`);
+  if(p.deadlineTime) L.push(`Prazo: até ${p.deadlineTime}`);
+  if((p.checklist||[]).length){
+    L.push('');
+    L.push('Checklist:');
+    p.checklist.forEach(it => L.push(`• ${it}`));
+  }
+  L.push('');
+  L.push('Quando terminar, marca como feito no sistema.');
+  return L.join('\n');
+}
+
+function waMsgCobranca(c, isResend) {
+  const L = [];
+  L.push(isResend ? '*Grupo Impresul — Cobrança (reenvio)*' : '*Grupo Impresul — Cobrança*');
+  L.push('');
+  L.push(`Oi, ${c.responsible}! Tudo bem?`);
+  L.push('');
+  L.push(`*${c.name}*`);
+  if(c.desc) L.push(c.desc);
+  L.push('');
+  L.push(`Empresa: ${waEmpresa(c.category)}`);
+  if(c.deadlineDate) L.push(`Prazo: ${fmtDate(c.deadlineDate)}${c.deadlineTime?' às '+c.deadlineTime:''}`);
+  else if(c.deadlineTime) L.push(`Prazo: até ${c.deadlineTime}`);
+  if((c.checklist||[]).length){
+    L.push('');
+    L.push('O que precisamos:');
+    c.checklist.forEach(it => L.push(`• ${it}`));
+  }
+  if(c.observations){ L.push(''); L.push(`Obs.: ${c.observations}`); }
+  L.push('');
+  L.push(isResend ? 'Consegue nos dar um retorno hoje?' : 'Qualquer dúvida é só chamar. Obrigado!');
+  L.push('— Marketing, Grupo Impresul');
+  return L.join('\n');
+}
+
+function waMsgAprovacao(i, link) {
+  const f = apFmt(i), slides = apSlides(i);
+  const vids = slides.filter(s=>s.t==='vid').length;
+  const det = [f.label, f.dim].filter(Boolean);
+  if(slides.length>1) det.push(`${slides.length} slides`);
+  if(vids) det.push(vids===1?'1 vídeo':`${vids} vídeos`);
+  const L = [];
+  L.push('*Grupo Impresul — Aprovação de conteúdo*');
+  L.push('');
+  L.push(`Olá! Segue a peça para aprovação:`);
+  L.push('');
+  L.push(`*${i.title||''}*`);
+  L.push(`${waEmpresa(i.category)} · ${det.join(' · ')}`);
+  if(i.desc){ L.push(''); L.push(i.desc); }
+  L.push('');
+  if(link){
+    L.push('Abrir para aprovar ou pedir ajustes:');
+    L.push(link);
+    L.push('');
+    L.push('A página abre a peça em tamanho real. Não precisa de senha nem cadastro.');
+  } else if(i.url){
+    L.push('Material completo:');
+    L.push(i.url);
+    L.push('');
+    L.push('Pode responder por aqui mesmo aprovando ou pedindo ajustes.');
+  } else {
+    L.push('Pode responder por aqui mesmo aprovando ou pedindo ajustes.');
+  }
+  return L.join('\n');
+}
+
+function enviarPautaWhats(id, isResend) {
+  const p = DB.pautas.find(p => p.id === id); if(!p) return;
+  let fone = p.phone;
+  if(!fone){
+    fone = prompt(`WhatsApp de ${p.assignee} (com DDD):`, '') || '';
+    if(!fone) return;
+    p.phone = fone.trim();
+    firebaseCreate('pautas', p);
+  }
+  if(!waAbrir(fone, waMsgPauta(p, isResend))) return;
+  const notif = {id:genId(), text:`💬 Lembrete de WhatsApp aberto para ${p.assignee} (${fone}): "${p.name}"`, type:'info', read:false, time:new Date().toISOString()};
+  firebaseCreate('notifications', notif);
+  addActivity(`Lembrete por WhatsApp para ${p.assignee}: "${p.name}"`, 'task');
+  if(!fdb){ renderPauta(); renderNotifPanel(); }
+}
+
+function sendCobrancaWhats(id, isResend) {
+  const c = (DB.cobrancas||[]).find(c => c.id === id); if(!c) return;
+  let fone = c.phone;
+  if(!fone){
+    fone = prompt(`WhatsApp de ${c.responsible} (com DDD):`, '') || '';
+    if(!fone) return;
+    c.phone = fone.trim();
+  }
+  if(!waAbrir(fone, waMsgCobranca(c, isResend))) return;
+
+  const now = new Date();
+  const timeStr = now.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+  const dateStr = now.toLocaleDateString('pt-BR');
+  if(!c.reminders) c.reminders = [];
+  c.reminders.push({ type: isResend?'resend-whats':'whats', time:`${dateStr} ${timeStr}`, to:c.phone });
+  firebaseCreate('cobrancas', c);
+
+  firebaseCreate('cobrancaHistory', {
+    id: genId(), cobrancaId: id, name: c.name,
+    responsible: c.responsible, email: c.phone,
+    date: today(), time: timeStr, status: 'sent', type: 'whatsapp', isResend
+  });
+  firebaseCreate('notifications', {
+    id: genId(),
+    text: `${isResend?'\u{1F504} Reenvio':'\u{1F4AC} Cobrança'} por WhatsApp para ${c.responsible} (${c.phone}): "${c.name}"`,
+    type:'info', read:false, time:new Date().toISOString()
+  });
+  addActivity(`${isResend?'Reenvio':'Cobrança'} por WhatsApp para ${c.responsible}: "${c.name}"`, 'task');
+  if(!fdb){ renderCobrancaContent(); renderNotifPanel(); }
+}
+
+async function apEnviarWhats(id) {
+  const i = DB.approvals.find(x => x.id === id); if(!i) return;
+  let fone = i.approverPhone;
+  if(!fone){
+    fone = prompt('WhatsApp de quem vai aprovar (com DDD):', '') || '';
+    if(!fone) return;
+    i.approverPhone = fone.trim();
+  }
+  // abre a janela ainda dentro do clique, senão o navegador bloqueia depois do await
+  const janela = window.open('', '_blank');
+  const link = await apGerarLink(id, true);
+  if(!waAbrir(i.approverPhone, waMsgAprovacao(i, link), janela)) return;
+  i.comments = i.comments || [];
+  i.comments.push({author:authNome(), text:`Enviado por WhatsApp: ${i.approverPhone}`, date:today(), type:'email'});
+  i.sentAt = new Date().toISOString();
+  firebaseCreate('approvals', i);
+  renderApprovals();
+  if(typeof apAtual!=='undefined' && apAtual===id) apPintarFolha();
+}
+
 function buildPautaEmailHTML(p, isResend) {
   const cat = p.category==='click'?'Click Impresso':p.category==='impresul'?'Impresul':'Geral';
   const freqMap={daily:'Diária',weekly:'Semanal',monthly:'Mensal',custom:'Personalizada',once:'Uma vez'};
@@ -5976,6 +6175,8 @@ function cobrancaCardHTML(c) {
       ${c.status !== 'done' ? `<button class="btn btn-sm btn-success" onclick="openCobrancaDone('${c.id}')"><i class="fa-solid fa-check"></i>Marcar como Feito</button>` : `<span class="badge badge-green" style="padding:6px 10px"><i class="fa-solid fa-check-double"></i> Concluído ${c.doneTime ? 'às '+c.doneTime : ''}</span>`}
       <button class="btn btn-sm btn-secondary" onclick="sendCobrancaEmail('${c.id}', false)"><i class="fa-solid fa-envelope"></i>Enviar Lembrete</button>
       <button class="btn btn-sm btn-secondary" onclick="sendCobrancaEmail('${c.id}', true)"><i class="fa-solid fa-envelope-circle-check"></i>Forçar Reenvio</button>
+      <button class="btn btn-sm" style="background:#25D366;color:#fff;border-color:#25D366" onclick="sendCobrancaWhats('${c.id}', false)"><i class="fa-brands fa-whatsapp"></i>WhatsApp</button>
+      <button class="btn btn-sm" style="background:transparent;color:#25D366;border-color:#25D366" onclick="sendCobrancaWhats('${c.id}', true)"><i class="fa-brands fa-whatsapp"></i>Reenviar no Zap</button>
       ${c.status !== 'done' ? `<button class="btn btn-sm btn-secondary" onclick="setCobrancaStatus('${c.id}','in_progress')"><i class="fa-solid fa-spinner"></i>Marcar Em Andamento</button>` : ''}
     </div>
   </div>`;
@@ -6070,8 +6271,8 @@ function renderCobrancaHistory() {
     el.innerHTML = `<div class="empty-state"><i class="fa-solid fa-history"></i><p>Sem histórico ainda</p></div>`;
     return;
   }
-  const typeIcons = { completion: 'fa-solid fa-check-circle', email: 'fa-solid fa-envelope' };
-  const typeColors = { completion: 'var(--accent-green)', email: 'var(--accent-blue)' };
+  const typeIcons = { completion: 'fa-solid fa-check-circle', email: 'fa-solid fa-envelope', whatsapp: 'fa-brands fa-whatsapp' };
+  const typeColors = { completion: 'var(--accent-green)', email: 'var(--accent-blue)', whatsapp: '#25D366' };
   el.innerHTML = `<div style="display:flex;flex-direction:column;gap:8px">
     ${hist.map(h => `
       <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:var(--radius-md)">
@@ -6173,7 +6374,7 @@ function renderCobrancaPerformance() {
 function openCobrancaModal() {
   document.getElementById('cobrancaModalTitle').textContent = 'Nova Cobrança / Atividade de Outro Setor';
   document.getElementById('cb_id').value = '';
-  ['cb_name','cb_desc','cb_responsible','cb_email','cb_observations'].forEach(id => { const el = document.getElementById(id); if(el) el.value=''; });
+  ['cb_name','cb_desc','cb_responsible','cb_email','cb_phone','cb_observations'].forEach(id => { const el = document.getElementById(id); if(el) el.value=''; });
   document.getElementById('cb_time').value = '09:00';
   document.getElementById('cb_resend_time').value = '14:00';
   document.getElementById('cb_deadline_date').value = '';
@@ -6198,6 +6399,7 @@ function saveCobranca() {
   const item = {
     id, name, desc: document.getElementById('cb_desc').value,
     responsible, email,
+    phone: document.getElementById('cb_phone').value.trim(),
     category: document.getElementById('cb_category').value,
     priority: document.getElementById('cb_priority').value,
     frequency: document.getElementById('cb_frequency').value,
@@ -6228,6 +6430,7 @@ function editCobranca(id) {
   document.getElementById('cb_desc').value = c.desc || '';
   document.getElementById('cb_responsible').value = c.responsible;
   document.getElementById('cb_email').value = c.email;
+  document.getElementById('cb_phone').value = c.phone || '';
   document.getElementById('cb_category').value = c.category;
   document.getElementById('cb_priority').value = c.priority;
   document.getElementById('cb_frequency').value = c.frequency;
@@ -6715,6 +6918,7 @@ const AUDIT_CAMPOS={
   category:'empresa', progress:'progresso', tags:'tags', link:'link da mídia',
   type:'tipo', arquivos:'slides', done:'concluído', checklist:'checklist',
   favorite:'favorito', approverEmail:'e-mail do aprovador', email:'e-mail',
+  approverPhone:'WhatsApp do aprovador', phone:'WhatsApp',
   frequency:'frequência', observations:'observações', project:'projeto',
   url:'link', pdfUrl:'PDF', publicToken:'link do cliente', days:'dias'
 };
