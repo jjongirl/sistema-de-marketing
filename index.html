@@ -1786,9 +1786,9 @@ textarea.form-control{resize:vertical;min-height:80px}
     <div class="stat-grid" id="pautaStats" style="margin-bottom:20px"></div>
 
     <div class="tab-underline">
-      <button class="tab-u active" onclick="setPautaTab('today',this)">Hoje</button>
-      <button class="tab-u" onclick="setPautaTab('all',this)">Todas</button>
-      <button class="tab-u" onclick="setPautaTab('overdue',this)">Atrasadas</button>
+      <button class="tab-u active" onclick="setPautaTab('all',this)">Todas</button>
+      <button class="tab-u" onclick="setPautaTab('open',this)">Em aberto</button>
+      <button class="tab-u" onclick="setPautaTab('closed',this)">Encerradas</button>
       <button class="tab-u" onclick="setPautaTab('history',this)">Histórico</button>
     </div>
 
@@ -1814,11 +1814,10 @@ textarea.form-control{resize:vertical;min-height:80px}
 
     <!-- Tabs -->
     <div class="tab-underline">
-      <button class="tab-u active" onclick="setCobrancaTab('today',this)">Hoje</button>
-      <button class="tab-u" onclick="setCobrancaTab('all',this)">Todas</button>
-      <button class="tab-u" onclick="setCobrancaTab('overdue',this)">Atrasadas</button>
+      <button class="tab-u active" onclick="setCobrancaTab('all',this)">Todas</button>
+      <button class="tab-u" onclick="setCobrancaTab('open',this)">Em aberto</button>
+      <button class="tab-u" onclick="setCobrancaTab('closed',this)">Encerradas</button>
       <button class="tab-u" onclick="setCobrancaTab('history',this)">Histórico</button>
-      <button class="tab-u" onclick="setCobrancaTab('performance',this)">Performance</button>
     </div>
 
     <div id="cobrancaContent"></div>
@@ -2241,6 +2240,11 @@ textarea.form-control{resize:vertical;min-height:80px}
         <button class="filter-chip active" data-v="13">3 meses</button>
         <button class="filter-chip" data-v="26">6 meses</button>
         <button class="filter-chip" data-v="52">12 meses</button>
+      </div></div>
+      <div class="ed-fgroup"><span class="ed-flabel">Marca</span><div class="ed-chips" data-g="marca">
+        <button class="filter-chip active" data-v="">Todas</button>
+        <button class="filter-chip" data-v="Click Impresso">Click Impresso</button>
+        <button class="filter-chip" data-v="Impresul">Impresul</button>
       </div></div>
       <div class="ed-fgroup"><span class="ed-flabel">Canal</span><div class="ed-chips" data-g="canal">
         <button class="filter-chip active" data-v="">Todos</button>
@@ -2675,15 +2679,32 @@ textarea.form-control{resize:vertical;min-height:80px}
       <div class="form-group">
         <label class="form-label">Formato *</label>
         <select class="form-control" id="ap_type" onchange="apDims()">
-          <option value="feed">Post feed — 1080×1350 (4:5)</option>
-          <option value="carrossel">Carrossel — 1080×1350 (4:5)</option>
-          <option value="story">Story — 1080×1920 (9:16)</option>
-          <option value="reel">Vídeo — Reels (9:16)</option>
-          <option value="video_monitor">Vídeo — Monitor / TV (16:9)</option>
-          <option value="banner_1500x350">Banner site — 1500×350</option>
-          <option value="banner_1500x1800">Banner site — 1500×1800</option>
-          <option value="pdf">PDF / Documento</option>
-          <option value="impresso">Peça impressa / Outro</option>
+          <optgroup label="Feed">
+            <option value="feed">Post feed — 1080×1350 (4:5)</option>
+            <option value="carrossel">Carrossel — 1080×1350 (4:5)</option>
+            <option value="story">Story — 1080×1920 (9:16)</option>
+          </optgroup>
+          <optgroup label="Vídeos">
+            <option value="reel">Reels — 1080×1920 (9:16)</option>
+            <option value="video_monitor">Monitor / TV — 1920×1080 (16:9)</option>
+          </optgroup>
+          <optgroup label="Banners de site">
+            <option value="banner_1500x350">1500×350</option>
+            <option value="banner_1500x1800">1500×1800</option>
+          </optgroup>
+          <optgroup label="Outros">
+            <option value="pdf">PDF / Documento</option>
+            <option value="impresso">Peça impressa / Outro</option>
+          </optgroup>
+          <optgroup label="LinkedIn">
+            <option value="li_paisagem">Imagem paisagem 1200×627 (ideal p/ links)</option>
+            <option value="li_quadrado">Imagem quadrada 1080×1080 (1:1)</option>
+            <option value="li_vertical">Imagem vertical 1080×1350 (4:5)</option>
+            <option value="li_carrossel_1x1">Carrossel PDF 1080×1080</option>
+            <option value="li_carrossel_16x9">Carrossel PDF 1920×1080</option>
+            <option value="li_video_16x9">Vídeo nativo 1920×1080 (paisagem)</option>
+            <option value="li_video_9x16">Vídeo nativo 1080×1920 (vertical)</option>
+          </optgroup>
         </select>
         <div class="ec-dims" id="ap_dims"></div>
       </div>
@@ -4634,6 +4655,14 @@ const AP_FORMATOS={
   banner_1500x350: {label:'Banner site',   ratio:'1500/350',  dim:'1500 × 350 px',  icon:'fa-solid fa-window-maximize',largo:true,  contain:true},
   banner_1500x1800:{label:'Banner site',   ratio:'1500/1800', dim:'1500 × 1800 px', icon:'fa-solid fa-rectangle-ad',   largo:false},
   pdf:             {label:'PDF',           ratio:'1/1.414',   dim:'A4 / livre',     icon:'fa-solid fa-file-pdf',       largo:false, pdf:true},
+  // ---- LinkedIn ----
+  li_paisagem:     {label:'LinkedIn paisagem',      ratio:'1200/627',  dim:'1200 × 627 px',   icon:'fa-brands fa-linkedin', largo:true, contain:true},
+  li_quadrado:     {label:'LinkedIn quadrado',      ratio:'1/1',       dim:'1080 × 1080 px',  icon:'fa-brands fa-linkedin', largo:false},
+  li_vertical:     {label:'LinkedIn vertical',      ratio:'4/5',       dim:'1080 × 1350 px',  icon:'fa-brands fa-linkedin', largo:false},
+  li_carrossel_1x1:{label:'LinkedIn carrossel PDF', ratio:'1/1',       dim:'1080 × 1080 px',  icon:'fa-brands fa-linkedin', largo:false, pdf:true},
+  li_carrossel_16x9:{label:'LinkedIn carrossel PDF',ratio:'16/9',      dim:'1920 × 1080 px',  icon:'fa-brands fa-linkedin', largo:true, contain:true, pdf:true},
+  li_video_16x9:   {label:'LinkedIn vídeo',         ratio:'16/9',      dim:'1920 × 1080 px',  icon:'fa-brands fa-linkedin', largo:true, contain:true},
+  li_video_9x16:   {label:'LinkedIn vídeo vertical',ratio:'9/16',      dim:'1080 × 1920 px',  icon:'fa-brands fa-linkedin', largo:false},
   impresso:        {label:'Peça impressa', ratio:'4/5',       dim:'—',              icon:'fa-solid fa-print',          largo:false},
   // compatibilidade com registros antigos
   image:{label:'Imagem',ratio:'4/5', dim:'—',icon:'fa-solid fa-image',largo:false},
@@ -5353,8 +5382,10 @@ window.addEventListener('load',()=>{
 // ============================================================
 // PAUTA OPERACIONAL
 // ============================================================
-let pautaTabCurrent='today';
-function setPautaTab(t,btn){pautaTabCurrent=t;document.querySelectorAll('.tab-u').forEach(b=>b.classList.remove('active'));btn.classList.add('active');renderPautaContent();}
+let pautaTabCurrent='all';
+// Encerrada = feita ou marcada como não realizada. Em aberto = todo o resto.
+const PAUTA_ENCERRADA=['done','not_done'];
+function setPautaTab(t,btn){pautaTabCurrent=t;document.querySelectorAll('#page-pauta .tab-u').forEach(b=>b.classList.remove('active'));btn.classList.add('active');renderPautaContent();}
 
 function renderPauta() {
   const pautas=filterByCategory(DB.pautas);
@@ -5372,9 +5403,9 @@ function renderPauta() {
 function renderPautaContent() {
   let items;
   const all=filterByCategory(DB.pautas);
-  if(pautaTabCurrent==='today') items=getTodayPautas();
-  else if(pautaTabCurrent==='overdue') items=all.filter(p=>p.status==='overdue');
-  else if(pautaTabCurrent==='history') {renderPautaHistory();return;}
+  if(pautaTabCurrent==='history') {renderPautaHistory();return;}
+  else if(pautaTabCurrent==='open')   items=all.filter(p=>!PAUTA_ENCERRADA.includes(p.status));
+  else if(pautaTabCurrent==='closed') items=all.filter(p=> PAUTA_ENCERRADA.includes(p.status));
   else items=all;
 
   const el=document.getElementById('pautaContent');
@@ -5466,7 +5497,9 @@ function markPautaDone(id) {
   const histItem={id:genId(),name:p.name,assignee:p.assignee,date:today(),status:'done',completedAt:new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}),obs:obs||''};
   firebaseCreate('pautas',p);
   firebaseCreate('pautaHistory',histItem);
-  if(!fdb) renderPauta();
+  const tarefa=pautaTarefaExistente(p.id);
+  if(tarefa && tarefa.status!=='done') firebaseCreate('tasks',{...tarefa,status:'done'});
+  if(!fdb) renderPage(currentPage);
   showToast(`"${p.name}" marcada como feita!`,'success');
 }
 
@@ -5485,6 +5518,51 @@ async function simulateEmailSend(id) {
   if(!fdb) renderNotifPanel();
 }
 
+// ------------------------------------------------------------
+// Pauta Operacional -> Tarefas
+// Toda pauta cadastrada entra automaticamente na aba Tarefas.
+// A tarefa fica amarrada pelo campo pautaId, então editar a pauta
+// atualiza a tarefa existente em vez de criar outra.
+// ------------------------------------------------------------
+function pautaTarefaExistente(pautaId){
+  return (DB.tasks||[]).find(t => t.pautaId === pautaId);
+}
+function pautaMontaTarefa(p, anterior){
+  const freqLabels={daily:'Diária',weekly:'Semanal',monthly:'Mensal',custom:'Personalizada'};
+  const checklist=p.checklist||[];
+  const desc=[
+    p.desc||'',
+    checklist.length ? 'CHECKLIST:\n' + checklist.map(i=>'• '+i).join('\n') : '',
+    'ROTINA: ' + (freqLabels[p.frequency]||p.frequency||'—') +
+      (p.time ? ' · ' + p.time + (p.deadlineTime ? ' → ' + p.deadlineTime : '') : '')
+  ].filter(Boolean).join('\n\n');
+
+  return {
+    id: anterior ? anterior.id : genId(),
+    title: p.name,
+    desc,
+    date: (anterior && anterior.date) || today(),
+    time: p.time || '',
+    priority: p.priority || 'medium',
+    status: (anterior && anterior.status) || 'pending',
+    category: p.category || 'click',
+    assignee: p.assignee || '',
+    color: p.category === 'impresul' ? '#E6007E' : '#009FE3',
+    tags: ['pauta'].concat(p.frequency ? [freqLabels[p.frequency]||p.frequency] : []),
+    project: (anterior && anterior.project) || '',
+    recurrence: ['daily','weekly','monthly'].includes(p.frequency) ? p.frequency : '',
+    addCal: true,
+    origem: 'pauta',
+    pautaId: p.id
+  };
+}
+function pautaSincronizaTarefa(p){
+  const anterior = pautaTarefaExistente(p.id);
+  const tarefa = pautaMontaTarefa(p, anterior);
+  firebaseCreate('tasks', tarefa);
+  return !anterior;   // true = tarefa nova
+}
+
 function savePauta() {
   const name=document.getElementById('pa_name').value.trim();
   const assignee=document.getElementById('pa_assignee').value.trim();
@@ -5495,10 +5573,13 @@ function savePauta() {
   const checklist=document.getElementById('pa_checklist').value.split('\n').map(s=>s.trim()).filter(Boolean);
   const pauta={id,name,desc:document.getElementById('pa_desc').value,assignee,email:document.getElementById('pa_email').value,phone:document.getElementById('pa_phone').value.trim(),category:document.getElementById('pa_category').value,priority:document.getElementById('pa_priority').value,frequency:document.getElementById('pa_frequency').value,days,time:document.getElementById('pa_time').value,deadlineTime:document.getElementById('pa_deadline_time').value,checklist,checklistDone:checklist.map(()=>false),observations:'',status:'pending',executions:[]};
   firebaseCreate('pautas',pauta);
+  const tarefaNova = pautaSincronizaTarefa(pauta);
+  if(tarefaNova) addActivity(`Pauta virou tarefa: "${name}"`,'task');
   closeModal('pautaModal');
-  if(!fdb) renderPauta();
+  if(!fdb) renderPage(currentPage);
+  if(typeof updateBadges === 'function') updateBadges();
   document.getElementById('pa_id').value='';
-  showToast(isEdit?'Pauta atualizada!':'Pauta criada!','success');
+  showToast(isEdit ? 'Pauta e tarefa atualizadas!' : 'Pauta criada e já está nas tarefas!','success');
 }
 
 function editPauta(id) {
@@ -6051,7 +6132,7 @@ function checkPautasOverdue() {
 // ============================================================
 // COBRANÇA — OUTROS SETORES
 // ============================================================
-let cobrancaTabCurrent = 'today';
+let cobrancaTabCurrent = 'all';
 
 function setCobrancaTab(t, btn) {
   cobrancaTabCurrent = t;
@@ -6097,10 +6178,11 @@ function renderCobrancaContent() {
   if (cobrancaTabCurrent === 'history') { renderCobrancaHistory(); return; }
   if (cobrancaTabCurrent === 'performance') { renderCobrancaPerformance(); return; }
 
+  const todas = filterByCategory(DB.cobrancas || []);
   let items;
-  if (cobrancaTabCurrent === 'today') items = getCobrancasHoje();
-  else if (cobrancaTabCurrent === 'overdue') items = filterByCategory(DB.cobrancas || []).filter(c => c.status === 'overdue');
-  else items = filterByCategory(DB.cobrancas || []);
+  if (cobrancaTabCurrent === 'open')        items = todas.filter(c => !PAUTA_ENCERRADA.includes(c.status));
+  else if (cobrancaTabCurrent === 'closed') items = todas.filter(c =>  PAUTA_ENCERRADA.includes(c.status));
+  else items = todas;
 
   if (!items.length) {
     el.innerHTML = `<div class="empty-state"><i class="fa-solid fa-bell-concierge"></i><p>Nenhuma cobrança encontrada</p></div>`;
@@ -7759,7 +7841,7 @@ function copyAiOutput(id) {
 // ============================================================
 const ED = {
   B: null, carregando: false, erro: null, GRADE: null,
-  F: { janela:'13', canal:'', formato:'', responsavel:'', regiao:'', pilar:'', flag:'', q:'' },
+  F: { janela:'13', marca:'', canal:'', formato:'', responsavel:'', regiao:'', pilar:'', flag:'', q:'' },
   LI_DEFAULT: { cadencia:{'Impresul':3,'Click Impresso':2}, dias:{'Impresul':[2,3,4],'Click Impresso':[2,4]} },
   DIAS: ['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado'],
   MESES: ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'],
@@ -7959,6 +8041,7 @@ function edPrazo(p, hojeUTC){
 }
 function edPassa(i){
   const F = ED.F;
+  if(F.marca && i.marca!==F.marca) return false;
   if(F.canal && i.canal!==F.canal) return false;
   if(F.formato && i.formato!==F.formato) return false;
   if(F.responsavel && i.responsavel!==F.responsavel) return false;
@@ -7969,7 +8052,7 @@ function edPassa(i){
   if(F.flag==='data' && !i.dataComemorativa) return false;
   if(F.flag==='prazo'&& !(i._prazo && i._prazo.crit)) return false;
   if(F.q){
-    const t=(i.titulo+' '+i.ideia+' '+i.gancho+' '+i.cta+' '+i.dataComemorativa+' '+i.pilar+' '+i.canal+' '+i.formato+' '+edBR(i.data)).toLowerCase();
+    const t=(i.titulo+' '+i.ideia+' '+i.gancho+' '+i.cta+' '+i.dataComemorativa+' '+i.pilar+' '+i.marca+' '+i.canal+' '+i.formato+' '+edBR(i.data)).toLowerCase();
     if(t.indexOf(F.q.toLowerCase())===-1) return false;
   }
   return true;
