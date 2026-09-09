@@ -1251,7 +1251,7 @@ textarea.form-control{resize:vertical;min-height:80px}
 .ed-resp{font-size:10.5px;font-weight:700;border-radius:20px;padding:3px 10px;white-space:nowrap}
 .ed-resp-felix{background:rgba(34,197,94,.14);color:#5FD98F;border:1px solid rgba(34,197,94,.35)}
 .ed-resp-mariana{background:rgba(168,85,247,.16);color:#C4A2FF;border:1px solid rgba(168,85,247,.38)}
-.ed-resp-raquel{background:rgba(255,237,0,.1);color:var(--accent-yellow);border:1px solid rgba(255,237,0,.28)}
+.ed-resp-victor{background:rgba(255,237,0,.1);color:var(--accent-yellow);border:1px solid rgba(255,237,0,.28)}
 .ed-resp-laura{background:rgba(10,102,194,.16);color:#6CB4F5;border:1px solid rgba(10,102,194,.4)}
 .ed-loading{text-align:center;padding:60px 24px;color:var(--text-muted)}
 .ed-loading i{font-size:32px;margin-bottom:14px;display:block;color:var(--accent-blue)}
@@ -2267,7 +2267,7 @@ textarea.form-control{resize:vertical;min-height:80px}
         <button class="filter-chip active" data-v="">Todos</button>
         <button class="filter-chip" data-v="Félix">Félix</button>
         <button class="filter-chip" data-v="Mariana">Mariana</button>
-        <button class="filter-chip" data-v="Raquel">Raquel</button>
+        <button class="filter-chip" data-v="Victor">Victor</button>
         <button class="filter-chip" data-v="Laura">Laura</button>
       </div></div>
       <div class="ed-fgroup"><span class="ed-flabel">Recorte</span><div class="ed-chips" data-g="regiao">
@@ -3073,7 +3073,7 @@ const TEAM = [
   {name:'Mariana', email:'mariana@impresul.com.br'},
   {name:'Laura',   email:'laura@impresul.com.br'},
   {name:'Felix',   email:'matheusfelix@impresul.com.br'},
-  {name:'Raquel',  email:'raquel@impresul.com.br'},
+  {name:'Victor',  email:'victor@impresul.com.br'},
   {name:'Andréia', email:'andreia@impresul.com.br'},
 ];
 
@@ -3265,7 +3265,7 @@ function seedData() {
     {id:genId(),title:'Editar Reels da semana',desc:'Editar vídeos para publicação',date:td,time:'14:00',priority:'urgent',status:'in_progress',category:'click',assignee:'Felix',color:'#E6007E',tags:['video','reels'],project:'',recurrence:'',addCal:true},
     {id:genId(),title:'Revisar artes de banner',desc:'Conferir artes da Impresul',date:future,time:'10:00',priority:'medium',status:'pending',category:'impresul',assignee:'Laura',color:'#A855F7',tags:['design'],project:'',recurrence:'',addCal:true},
     {id:genId(),title:'Relatório de engajamento',desc:'Preparar relatório mensal',date:yest,time:'18:00',priority:'high',status:'done',category:'click',assignee:'Mariana',color:'#22C55E',tags:['relatório'],project:'',recurrence:'',addCal:false},
-    {id:genId(),title:'Campanha Google Ads',desc:'Configurar nova campanha',date:td,time:'11:00',priority:'high',status:'review',category:'impresul',assignee:'Raquel',color:'#F97316',tags:['ads','trafego'],project:'',recurrence:'',addCal:true},
+    {id:genId(),title:'Campanha Google Ads',desc:'Configurar nova campanha',date:td,time:'11:00',priority:'high',status:'review',category:'impresul',assignee:'Victor',color:'#F97316',tags:['ads','trafego'],project:'',recurrence:'',addCal:true},
   ];
   DB.projects = [
     {id:genId(),name:'Campanha Junho - Click',client:'Click Impresso',category:'click',assignee:'Mariana',deadline:future,status:'in_progress',progress:60,desc:'Campanha completa de junho para redes sociais',checklist:['Briefing aprovado','Artes criadas','Posts agendados','Relatório final'],demands:[]},
@@ -3294,7 +3294,7 @@ function seedData() {
   DB.pautas = [
     {id:genId(),name:'Postar Stories Click Impresso',desc:'Publicar stories diários no Instagram da Click',assignee:'Mariana',email:'mariana@impresul.com.br',category:'click',priority:'high',frequency:'daily',days:[1,2,3,4,5],time:'09:00',deadlineTime:'11:00',checklist:['Criar imagem','Revisar texto','Publicar'],observations:'',status:'pending',executions:[]},
     {id:genId(),name:'Responder DMs e Comentários',desc:'Engajamento diário nas redes sociais',assignee:'Felix',email:'matheusfelix@impresul.com.br',category:'click',priority:'medium',frequency:'daily',days:[1,2,3,4,5,6],time:'10:00',deadlineTime:'12:00',checklist:['Verificar DMs','Responder comentários','Registrar leads'],observations:'',status:'pending',executions:[]},
-    {id:genId(),name:'Relatório Semanal de Performance',desc:'Compilar dados de redes e tráfego',assignee:'Raquel',email:'raquel@impresul.com.br',category:'geral',priority:'high',frequency:'weekly',days:[5],time:'16:00',deadlineTime:'18:00',checklist:['Extrair dados','Analisar resultados','Enviar para gestão'],observations:'',status:'pending',executions:[]},
+    {id:genId(),name:'Relatório Semanal de Performance',desc:'Compilar dados de redes e tráfego',assignee:'Victor',email:'victor@impresul.com.br',category:'geral',priority:'high',frequency:'weekly',days:[5],time:'16:00',deadlineTime:'18:00',checklist:['Extrair dados','Analisar resultados','Enviar para gestão'],observations:'',status:'pending',executions:[]},
   ];
   DB.activity = [
     {text:'Mariana criou a tarefa "Criar posts de junho"',time:new Date().toISOString(),type:'task'},
@@ -7887,12 +7887,12 @@ function edResp(p){
     // LinkedIn: Laura assina texto, enquete e artigo (estratégia + publicação);
     // criativos seguem a mesma divisão do Instagram
     if(p.formato==='Vídeo') return 'Félix';
-    if(p.impulsionar==='Sim' || /Conversão/.test(p.pilar||'')) return 'Raquel';
+    if(p.impulsionar==='Sim' || /Conversão/.test(p.pilar||'')) return 'Victor';
     if(p.formato==='Carrossel PDF' || p.formato==='Imagem') return 'Mariana';
     return 'Laura';
   }
   if(p.formato==='Reel') return 'Félix';
-  if(p.impulsionar==='Sim' || p.pilar==='Conversão') return 'Raquel';
+  if(p.impulsionar==='Sim' || p.pilar==='Conversão') return 'Victor';
   return 'Mariana';
 }
 // as abas Click / Impresul da sidebar mandam na marca
@@ -8318,7 +8318,7 @@ async function edDiagnostico(){
 
 // ---------- peça do calendário -> tarefa no Kanban ----------
 // Nomes da equipe como estão cadastrados no sistema (sem acento no Felix).
-const ED_ASSIGNEE = {'Félix':'Felix','Felix':'Felix','Mariana':'Mariana','Raquel':'Raquel','Laura':'Laura'};
+const ED_ASSIGNEE = {'Félix':'Felix','Felix':'Felix','Mariana':'Mariana','Victor':'Victor','Laura':'Laura'};
 
 function edTaskKey(i){ return 'ed|' + edKey(i.data) + '|' + i.marca + '|' + (i.canal==='LinkedIn'?'LinkedIn|':'') + i.titulo; }
 function edJaTem(i){
