@@ -352,7 +352,7 @@ img{max-width:100%}
 .modal-footer{display:flex;justify-content:flex-end;gap:8px;margin-top:22px;padding-top:18px;border-top:1px solid var(--border-subtle)}
 
 /* Forms */
-.form-group{margin-bottom:16px}
+.form-group{margin-bottom:16px;min-width:0}
 .form-label{display:block;font-size:11px;font-weight:600;color:var(--text-secondary);margin-bottom:6px;letter-spacing:0.3px}
 .form-control{
   width:100%;padding:9px 12px;
@@ -758,6 +758,60 @@ textarea.form-control{resize:vertical;min-height:80px}
   background:rgba(0,0,0,.5);color:#fff;font-size:17px;line-height:1;
 }
 .ec-palco{position:relative;aspect-ratio:4/5;background:#0A0E14;border-radius:16px 16px 0 0;overflow:hidden}
+/* ícone de rede: mostra como o corte circular vai ficar */
+.ec-palco.circulo img,.ec-palco.circulo video{
+  border-radius:50%;
+  -webkit-mask-image:radial-gradient(circle at 50% 50%, #000 49.6%, transparent 50%);
+  mask-image:radial-gradient(circle at 50% 50%, #000 49.6%, transparent 50%);
+}
+.ec-palco.circulo::after{
+  content:'';position:absolute;inset:0;z-index:3;pointer-events:none;border-radius:50%;
+  box-shadow:0 0 0 1px rgba(255,255,255,.22) inset;
+}
+.ec-card.circulo img,.ec-card.circulo video{border-radius:50%}
+
+/* aviso de área segura abaixo do seletor de formato */
+.ap-nota{
+  display:flex;align-items:flex-start;gap:6px;margin-top:6px;
+  font-size:11px;line-height:1.45;color:var(--accent-yellow);text-transform:none;letter-spacing:0;
+}
+.ap-nota i{margin-top:2px;opacity:.8}
+
+/* ---- CAMPOS DE E-MAIL COM LISTA SALVA ---- */
+.mail-linha{display:flex;gap:6px;align-items:flex-start}
+.mail-linha .form-control{flex:1;min-width:0}
+.mail-bt{
+  flex:0 0 auto;height:42px;width:42px;border-radius:var(--radius-md);appearance:none;-webkit-appearance:none;
+  border:1px solid var(--border-default);background:var(--bg-elevated);
+  color:var(--text-secondary);font-size:13px;transition:all var(--trans);
+}
+.mail-bt:hover{border-color:var(--accent-blue);color:var(--accent-blue);background:var(--bg-hover)}
+.mail-chips{
+  display:flex;flex-wrap:nowrap;overflow-x:auto;overflow-y:hidden;gap:5px;margin-top:7px;
+  align-items:center;padding-bottom:3px;scrollbar-width:thin;scrollbar-color:var(--border-default) transparent;
+  max-width:100%;min-width:0;width:100%;overscroll-behavior-x:contain;
+}
+.mail-chips::-webkit-scrollbar{height:4px}
+.mail-chips::-webkit-scrollbar-track{background:transparent}
+.mail-chips::-webkit-scrollbar-thumb{background:var(--border-default);border-radius:99px}
+.mail-chips:empty{display:none}
+.mail-chips-rot{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);margin-right:2px;flex:0 0 auto}
+.mail-chip{
+  display:inline-flex;align-items:center;flex:0 0 auto;max-width:100%;
+  border:1px solid var(--border-default);background:var(--bg-elevated);border-radius:99px;overflow:hidden;
+  transition:border-color var(--trans),background var(--trans);
+}
+.mail-chip:hover{border-color:var(--accent-blue);background:var(--bg-hover)}
+.mail-chip .usar,.mail-chip .x{
+  background:transparent;border:0;appearance:none;-webkit-appearance:none;font-family:inherit;
+}
+.mail-chip .usar{
+  padding:4px 10px;font-size:11.5px;color:var(--text-secondary);
+  max-width:210px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;transition:color var(--trans);
+}
+.mail-chip .usar:hover{color:var(--accent-blue)}
+.mail-chip .x{padding:4px 9px 4px 2px;font-size:10px;color:var(--text-muted);transition:color var(--trans)}
+.mail-chip .x:hover{color:var(--accent-red)}
 .ec-palco img,.ec-palco video{width:100%;height:100%;object-fit:cover}
 .ec-palco.contain img,.ec-palco.contain video{object-fit:contain}
 .ec-palco iframe{width:100%;height:100%;border:0;background:#fff}
@@ -1951,7 +2005,12 @@ textarea.form-control{resize:vertical;min-height:80px}
     <textarea class="ec-resumo-txt" id="apResumoTxt" readonly></textarea>
     <div class="form-group" style="margin-top:12px">
       <label class="form-label">Enviar retorno para (e-mail)</label>
-      <input class="form-control" id="apResumoEmail" placeholder="pessoa@empresa.com.br">
+      <div class="mail-linha">
+        <input class="form-control" id="apResumoEmail" list="dl_emails" data-multi="1"
+               placeholder="pessoa@empresa.com.br — separe vários por vírgula">
+        <button type="button" class="mail-bt" onclick="mailGuardar('apResumoEmail')" title="Salvar este e-mail na lista"><i class="fa-solid fa-bookmark"></i></button>
+      </div>
+      <div class="mail-chips" data-mail-chips="apResumoEmail"></div>
     </div>
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="apCopiarResumo()">Copiar</button>
@@ -2692,6 +2751,26 @@ textarea.form-control{resize:vertical;min-height:80px}
             <option value="banner_1500x350">1500×350</option>
             <option value="banner_1500x1800">1500×1800</option>
           </optgroup>
+          <optgroup label="Capas de Reels / vídeo">
+            <option value="capa_reel">Capa de Reels — 1080×1920 (9:16)</option>
+            <option value="capa_reel_grid">Capa de Reels na grade — 1080×1350 (4:5)</option>
+            <option value="capa_yt_thumb">Thumb YouTube — 1280×720 (16:9)</option>
+            <option value="capa_yt_short">Capa YouTube Shorts — 1080×1920 (9:16)</option>
+          </optgroup>
+          <optgroup label="Ícones / foto de perfil">
+            <option value="icone_insta">Perfil Instagram / Facebook — 1080×1080</option>
+            <option value="icone_wpp">Perfil WhatsApp — 640×640</option>
+            <option value="icone_li">Logo LinkedIn (empresa) — 400×400</option>
+            <option value="icone_yt">Foto do canal YouTube — 800×800</option>
+            <option value="icone_destaque">Capa de destaque dos Stories — 1080×1080</option>
+          </optgroup>
+          <optgroup label="Capas de redes">
+            <option value="capa_fb">Capa Facebook — 1640×856</option>
+            <option value="capa_li_empresa">Capa LinkedIn empresa — 1128×191</option>
+            <option value="capa_li_perfil">Capa LinkedIn perfil — 1584×396</option>
+            <option value="capa_yt">Banner YouTube — 2560×1440</option>
+            <option value="capa_x">Capa X / Twitter — 1500×500</option>
+          </optgroup>
           <optgroup label="Outros">
             <option value="pdf">PDF / Documento</option>
             <option value="impresso">Peça impressa / Outro</option>
@@ -2738,14 +2817,23 @@ textarea.form-control{resize:vertical;min-height:80px}
       </div>
       <div class="form-group">
         <label class="form-label">E-mail de quem vai aprovar</label>
-        <input class="form-control" id="ap_email" placeholder="pessoa@empresa.com.br">
+        <div class="mail-linha">
+          <input class="form-control" id="ap_email" list="dl_emails" data-multi="1"
+                 placeholder="pessoa@empresa.com.br — separe vários por vírgula">
+          <button type="button" class="mail-bt" onclick="mailGuardar('ap_email')" title="Salvar este e-mail na lista"><i class="fa-solid fa-bookmark"></i></button>
+        </div>
+        <div class="mail-chips" data-mail-chips="ap_email"></div>
       </div>
     </div>
 
     <div class="form-row">
       <div class="form-group">
         <label class="form-label">WhatsApp de quem vai aprovar</label>
-        <input class="form-control" id="ap_phone" placeholder="(51) 99999-9999">
+        <div class="mail-linha">
+          <input class="form-control" id="ap_phone" placeholder="(51) 99999-9999">
+          <button type="button" class="mail-bt" onclick="foneGuardar('ap_phone')" title="Salvar este número nos atalhos"><i class="fa-solid fa-bookmark"></i></button>
+        </div>
+        <div class="mail-chips" data-fone-chips="ap_phone"></div>
       </div>
     </div>
 
@@ -2804,13 +2892,21 @@ textarea.form-control{resize:vertical;min-height:80px}
       </div>
       <div class="form-group">
         <label class="form-label">E-mail do Responsável</label>
-        <input class="form-control" id="pa_email" type="email" placeholder="email@empresa.com">
+        <div class="mail-linha">
+          <input class="form-control" id="pa_email" list="dl_emails" placeholder="email@empresa.com.br">
+          <button type="button" class="mail-bt" onclick="mailGuardar('pa_email')" title="Salvar este e-mail na lista"><i class="fa-solid fa-bookmark"></i></button>
+        </div>
+        <div class="mail-chips" data-mail-chips="pa_email"></div>
       </div>
     </div>
     <div class="form-row">
       <div class="form-group">
         <label class="form-label">WhatsApp do Responsável</label>
-        <input class="form-control" id="pa_phone" placeholder="(51) 99999-9999">
+        <div class="mail-linha">
+          <input class="form-control" id="pa_phone" placeholder="(51) 99999-9999">
+          <button type="button" class="mail-bt" onclick="foneGuardar('pa_phone')" title="Salvar este número nos atalhos"><i class="fa-solid fa-bookmark"></i></button>
+        </div>
+        <div class="mail-chips" data-fone-chips="pa_phone"></div>
       </div>
     </div>
     <div class="form-row-3">
@@ -2903,13 +2999,21 @@ textarea.form-control{resize:vertical;min-height:80px}
         </div>
         <div class="form-group" style="margin-bottom:0">
           <label class="form-label">E-mail do Responsável *</label>
-          <input class="form-control" id="cb_email" type="email" placeholder="email@empresa.com.br">
+          <div class="mail-linha">
+            <input class="form-control" id="cb_email" list="dl_emails" placeholder="email@empresa.com.br">
+            <button type="button" class="mail-bt" onclick="mailGuardar('cb_email')" title="Salvar este e-mail na lista"><i class="fa-solid fa-bookmark"></i></button>
+          </div>
+          <div class="mail-chips" data-mail-chips="cb_email"></div>
         </div>
       </div>
       <div class="form-row" style="margin-top:12px">
         <div class="form-group" style="margin-bottom:0">
           <label class="form-label">WhatsApp do Responsável</label>
-          <input class="form-control" id="cb_phone" placeholder="(51) 99999-9999">
+          <div class="mail-linha">
+            <input class="form-control" id="cb_phone" placeholder="(51) 99999-9999">
+            <button type="button" class="mail-bt" onclick="foneGuardar('cb_phone')" title="Salvar este número nos atalhos"><i class="fa-solid fa-bookmark"></i></button>
+          </div>
+          <div class="mail-chips" data-fone-chips="cb_phone"></div>
         </div>
       </div>
     </div>
@@ -3078,6 +3182,183 @@ const TEAM = [
 ];
 
 // ============================================================
+// E-MAILS FREQUENTES
+// Lista fixa (sempre disponível) + lista salva pela equipe,
+// guardada em DB.settings.emailsSalvos e sincronizada no Firebase.
+// ============================================================
+const EMAILS_FIXOS = [
+  'marketing@impresul.com.br',
+  'marketing@clickimpresso.com.br',
+  ...TEAM.map(t => t.email)
+];
+
+const mailEsc  = s => String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const mailOk   = m => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(String(m||'').trim());
+const mailNorm = m => String(m||'').trim().toLowerCase();
+
+const mailSalvos = () => Array.isArray(DB.settings.emailsSalvos) ? DB.settings.emailsSalvos : [];
+const mailFixo   = m => EMAILS_FIXOS.some(e => mailNorm(e) === mailNorm(m));
+
+function mailLista(){
+  const vistos = new Set(), out = [];
+  [...EMAILS_FIXOS, ...mailSalvos()].forEach(m => {
+    const e = mailNorm(m);
+    if (e && !vistos.has(e)) { vistos.add(e); out.push(e); }
+  });
+  return out;
+}
+
+/** Guarda um e-mail na lista da equipe */
+async function mailGuardar(alvo){
+  const el = document.getElementById(alvo);
+  if(!el) return;
+  const brutos = String(el.value||'').split(/[;,]/).map(x=>x.trim()).filter(Boolean);
+  if(!brutos.length){ showToast('Escreva um e-mail no campo para salvar','error'); return; }
+  const invalidos = brutos.filter(x=>!mailOk(x));
+  if(invalidos.length){ showToast(`E-mail inválido: ${invalidos[0]}`,'error'); return; }
+
+  const jaTem = mailLista();
+  const novos = brutos.map(mailNorm).filter(x=>!jaTem.includes(x));
+  if(!novos.length){ showToast('Esse e-mail já está na lista','info'); return; }
+
+  DB.settings.emailsSalvos = [...mailSalvos(), ...novos];
+  await fbSaveSettings();
+  mailRender();
+  showToast(`✅ ${novos.join(', ')} salvo${novos.length>1?'s':''} na lista`,'success');
+}
+
+/** Guarda em silêncio os e-mails já usados num formulário */
+function mailGuardarAuto(valor){
+  const novos = String(valor||'').split(/[;,]/).map(mailNorm)
+    .filter(x => x && mailOk(x) && !mailLista().includes(x));
+  if(!novos.length) return;
+  DB.settings.emailsSalvos = [...mailSalvos(), ...novos];
+  fbSaveSettings();
+  mailRender();
+}
+
+/** Tira um e-mail da lista salva (os fixos não saem) */
+async function mailApagar(idx){
+  const m = mailLista()[idx];
+  if(!m) return;
+  if(mailFixo(m)){ showToast('Os e-mails padrão não podem ser removidos','info'); return; }
+  DB.settings.emailsSalvos = mailSalvos().filter(x => mailNorm(x) !== mailNorm(m));
+  await fbSaveSettings();
+  mailRender();
+  showToast('E-mail removido da lista','info');
+}
+
+/** Clique no atalho: preenche o campo (ou soma ao que já está lá) */
+function mailUsar(alvo, idx){
+  const m = mailLista()[idx], el = document.getElementById(alvo);
+  if(!m || !el) return;
+  if(el.dataset.multi === '1'){
+    const atuais = String(el.value||'').split(/[;,]/).map(x=>x.trim()).filter(Boolean);
+    if(atuais.some(x => mailNorm(x) === mailNorm(m))){
+      showToast('Esse e-mail já está entre os destinatários','info'); return;
+    }
+    atuais.push(m);
+    el.value = atuais.join(', ');
+  } else {
+    el.value = m;
+  }
+  el.dispatchEvent(new Event('input', {bubbles:true}));
+}
+
+/** Redesenha o datalist e os atalhos de todos os campos de e-mail */
+function mailRender(){
+  const lista = mailLista();
+  const dl = document.getElementById('dl_emails');
+  if(dl) dl.innerHTML = lista.map(m => `<option value="${mailEsc(m)}"></option>`).join('');
+
+  document.querySelectorAll('[data-mail-chips]').forEach(box => {
+    const alvo = box.getAttribute('data-mail-chips');
+    box.innerHTML = '<span class="mail-chips-rot">Usar</span>' + lista.map((m,k) => `
+      <span class="mail-chip">
+        <button type="button" class="usar" onclick="mailUsar('${alvo}',${k})" title="${mailEsc(m)}">${mailEsc(m)}</button>
+        ${mailFixo(m) ? '' : `<button type="button" class="x" onclick="mailApagar(${k})" title="Remover da lista"><i class="fa-solid fa-xmark"></i></button>`}
+      </span>`).join('');
+  });
+}
+
+// ============================================================
+// WHATSAPP FREQUENTE
+// Mesma lógica dos e-mails: contatos fixos + contatos salvos
+// (DB.settings.fonesSalvos). O atalho mostra só o nome.
+// ============================================================
+const FONES_FIXOS = [
+  {nome:'Laura',   fone:'(51) 99687-0796'},
+  {nome:'Andréia', fone:'(51) 99112-5564'}
+];
+
+const foneSo     = f => String(f||'').replace(/\D/g,'');
+const foneSalvos = () => Array.isArray(DB.settings.fonesSalvos) ? DB.settings.fonesSalvos : [];
+const foneFixo   = f => FONES_FIXOS.some(c => foneSo(c.fone) === foneSo(f));
+
+function foneFormatar(f){
+  const d = foneSo(f);
+  if(d.length === 11) return `(${d.slice(0,2)}) ${d.slice(2,7)}-${d.slice(7)}`;
+  if(d.length === 10) return `(${d.slice(0,2)}) ${d.slice(2,6)}-${d.slice(6)}`;
+  return String(f||'').trim();
+}
+
+function foneLista(){
+  const vistos = new Set(), out = [];
+  [...FONES_FIXOS, ...foneSalvos()].forEach(c => {
+    const d = foneSo(c && c.fone);
+    if(d && !vistos.has(d)){
+      vistos.add(d);
+      out.push({ nome: String((c&&c.nome)||'').trim() || foneFormatar(c.fone), fone: foneFormatar(c.fone) });
+    }
+  });
+  return out;
+}
+
+/** Guarda o número do campo, pedindo o nome de quem usa */
+async function foneGuardar(alvo){
+  const el = document.getElementById(alvo);
+  if(!el) return;
+  const bruto = String(el.value||'').trim();
+  if(foneSo(bruto).length < 10){ showToast('Escreva um número com DDD para salvar','error'); return; }
+  if(foneLista().some(c => foneSo(c.fone) === foneSo(bruto))){ showToast('Esse número já está na lista','info'); return; }
+  const nome = (window.prompt('Nome de quem usa esse número:','')||'').trim();
+  if(!nome){ showToast('Não salvei — o número precisa de um nome','info'); return; }
+  DB.settings.fonesSalvos = [...foneSalvos(), { nome, fone: foneFormatar(bruto) }];
+  await fbSaveSettings();
+  foneRender();
+  showToast(`✅ ${nome} salvo nos atalhos de WhatsApp`,'success');
+}
+
+async function foneApagar(idx){
+  const c = foneLista()[idx];
+  if(!c) return;
+  if(foneFixo(c.fone)){ showToast('Os contatos padrão não podem ser removidos','info'); return; }
+  DB.settings.fonesSalvos = foneSalvos().filter(x => foneSo(x.fone) !== foneSo(c.fone));
+  await fbSaveSettings();
+  foneRender();
+  showToast(`${c.nome} removido dos atalhos`,'info');
+}
+
+function foneUsar(alvo, idx){
+  const c = foneLista()[idx], el = document.getElementById(alvo);
+  if(!c || !el) return;
+  el.value = c.fone;
+  el.dispatchEvent(new Event('input', {bubbles:true}));
+}
+
+function foneRender(){
+  const lista = foneLista();
+  document.querySelectorAll('[data-fone-chips]').forEach(box => {
+    const alvo = box.getAttribute('data-fone-chips');
+    box.innerHTML = '<span class="mail-chips-rot">Usar</span>' + lista.map((c,k) => `
+      <span class="mail-chip">
+        <button type="button" class="usar" onclick="foneUsar('${alvo}',${k})" title="${mailEsc(c.nome)} — ${mailEsc(c.fone)}">${mailEsc(c.nome)}</button>
+        ${foneFixo(c.fone) ? '' : `<button type="button" class="x" onclick="foneApagar(${k})" title="Remover dos atalhos"><i class="fa-solid fa-xmark"></i></button>`}
+      </span>`).join('');
+  });
+}
+
+// ============================================================
 // FIREBASE HELPERS — leitura/escrita/exclusão por coleção
 // ============================================================
 const COL = name => fdb
@@ -3177,6 +3458,7 @@ function initFirebaseListeners() {
   fdb.collection('teams').doc(TEAM_ID).onSnapshot(snap => {
     if (snap.exists && snap.data().settings) {
       Object.assign(DB.settings, snap.data().settings);
+      mailRender(); foneRender();
     }
   });
 
@@ -4663,6 +4945,23 @@ const AP_FORMATOS={
   li_carrossel_16x9:{label:'LinkedIn carrossel PDF',ratio:'16/9',      dim:'1920 × 1080 px',  icon:'fa-brands fa-linkedin', largo:true, contain:true, pdf:true},
   li_video_16x9:   {label:'LinkedIn vídeo',         ratio:'16/9',      dim:'1920 × 1080 px',  icon:'fa-brands fa-linkedin', largo:true, contain:true},
   li_video_9x16:   {label:'LinkedIn vídeo vertical',ratio:'9/16',      dim:'1080 × 1920 px',  icon:'fa-brands fa-linkedin', largo:false},
+  // ---- Capas de Reels / vídeo ----
+  capa_reel:       {label:'Capa de Reels',           ratio:'9/16',     dim:'1080 × 1920 px', icon:'fa-solid fa-clapperboard', largo:false, nota:'Na grade do perfil só aparece o miolo 1080 × 1350 — não escreva perto das pontas'},
+  capa_reel_grid:  {label:'Capa de Reels (grade)',   ratio:'4/5',      dim:'1080 × 1350 px', icon:'fa-solid fa-table-cells',  largo:false, nota:'É o recorte que aparece na grade do perfil'},
+  capa_yt_thumb:   {label:'Thumb YouTube',           ratio:'16/9',     dim:'1280 × 720 px',  icon:'fa-brands fa-youtube',     largo:true,  contain:true, nota:'O selo de duração cobre o canto inferior direito'},
+  capa_yt_short:   {label:'Capa YouTube Shorts',     ratio:'9/16',     dim:'1080 × 1920 px', icon:'fa-brands fa-youtube',     largo:false},
+  // ---- Ícones / foto de perfil ----
+  icone_insta:     {label:'Perfil Instagram/Face',   ratio:'1/1',      dim:'1080 × 1080 px', icon:'fa-solid fa-circle-user',  largo:false, circulo:true, nota:'O corte é circular — deixe folga nas bordas'},
+  icone_wpp:       {label:'Perfil WhatsApp',         ratio:'1/1',      dim:'640 × 640 px',   icon:'fa-brands fa-whatsapp',    largo:false, circulo:true, nota:'O corte é circular'},
+  icone_li:        {label:'Logo LinkedIn',           ratio:'1/1',      dim:'400 × 400 px',   icon:'fa-brands fa-linkedin',    largo:false, nota:'O LinkedIn exibe em quadrado com cantos arredondados'},
+  icone_yt:        {label:'Foto do canal YouTube',   ratio:'1/1',      dim:'800 × 800 px',   icon:'fa-brands fa-youtube',     largo:false, circulo:true, nota:'O corte é circular'},
+  icone_destaque:  {label:'Destaque dos Stories',    ratio:'1/1',      dim:'1080 × 1080 px', icon:'fa-solid fa-circle-dot',   largo:false, circulo:true, nota:'Ícone bem centralizado — o corte é circular e pequeno'},
+  // ---- Capas de redes ----
+  capa_fb:         {label:'Capa Facebook',           ratio:'1640/856', dim:'1640 × 856 px',  icon:'fa-brands fa-facebook',    largo:true,  contain:true, nota:'No celular as laterais somem — centralize o essencial'},
+  capa_li_empresa: {label:'Capa LinkedIn empresa',   ratio:'1128/191', dim:'1128 × 191 px',  icon:'fa-brands fa-linkedin',    largo:true,  contain:true, nota:'Faixa baixa — a logo da página cobre o canto esquerdo'},
+  capa_li_perfil:  {label:'Capa LinkedIn perfil',    ratio:'1584/396', dim:'1584 × 396 px',  icon:'fa-brands fa-linkedin',    largo:true,  contain:true, nota:'A foto de perfil cobre o canto inferior esquerdo'},
+  capa_yt:         {label:'Banner YouTube',          ratio:'2560/1440',dim:'2560 × 1440 px', icon:'fa-brands fa-youtube',     largo:true,  contain:true, nota:'Área segura de 1546 × 423 px no centro — é só ela que aparece na TV e no celular'},
+  capa_x:          {label:'Capa X / Twitter',        ratio:'1500/500', dim:'1500 × 500 px',  icon:'fa-brands fa-x-twitter',   largo:true,  contain:true, nota:'A foto de perfil cobre o canto inferior esquerdo'},
   impresso:        {label:'Peça impressa', ratio:'4/5',       dim:'—',              icon:'fa-solid fa-print',          largo:false},
   // compatibilidade com registros antigos
   image:{label:'Imagem',ratio:'4/5', dim:'—',icon:'fa-solid fa-image',largo:false},
@@ -4843,7 +5142,7 @@ function renderApprovals(){
   grid.innerHTML=items.map((i,k)=>{
     const f=apFmt(i), slides=apSlides(i), st=AP_STATUS[i.status]||AP_STATUS.pending, emp=i.category||'geral';
     const rot = slides.length>1 ? `${f.label} · ${slides.length}` : f.label;
-    return `<div class="ec-card ${f.largo?'largo':''}" style="aspect-ratio:${f.ratio}" onclick="apAbrir('${i.id}')" title="${apEsc(i.title||'')}">
+    return `<div class="ec-card ${f.largo?'largo':''} ${f.circulo?'circulo':''}" style="aspect-ratio:${f.ratio}" onclick="apAbrir('${i.id}')" title="${apEsc(i.title||'')}">
       ${apMidiaCard(i)}
       <span class="ec-card-n">${String(k+1).padStart(2,'0')}</span>
       <span class="ec-card-badge">${apEsc(rot)}</span>
@@ -4879,7 +5178,7 @@ function apPintarFolha(){
   if(vids) det.push(vids===1?'1 vídeo':`${vids} vídeos`);
 
   document.getElementById('ecFolhaConteudo').innerHTML=`
-    <div class="ec-palco ${f.contain?'contain':''}" style="aspect-ratio:${f.ratio}">${apMidiaPalco(i)}</div>
+    <div class="ec-palco ${f.contain?'contain':''} ${f.circulo?'circulo':''}" style="aspect-ratio:${f.ratio}">${apMidiaPalco(i)}</div>
     <div class="ec-info">
       <div class="ec-info-meta">
         <span class="badge ${empCls}">${apEsc(AP_EMPRESAS[i.category]||'Geral')}</span>
@@ -4986,6 +5285,7 @@ function apCopiarResumo(){
 async function apEnviarResumo(){
   const to=document.getElementById('apResumoEmail').value.trim();
   if(!to){showToast('Informe o e-mail do destinatário','error');return;}
+  mailGuardarAuto(to);
   const txt=document.getElementById('apResumoTxt').value;
   const html=`<!DOCTYPE html><html><body style="font-family:Arial,sans-serif;background:#f4f6fb;padding:30px;color:#1a1a2e">
     <div style="max-width:620px;margin:0 auto;background:#fff;border-radius:12px;overflow:hidden">
@@ -5280,7 +5580,10 @@ function fileToBase64(file){
 // ---------- formulário ----------
 function apDims(){
   const f=AP_FORMATOS[document.getElementById('ap_type').value];
-  document.getElementById('ap_dims').textContent = f?`Tamanho sugerido: ${f.dim}`:'';
+  const el=document.getElementById('ap_dims');
+  if(!f){ el.textContent=''; return; }
+  el.innerHTML = `Tamanho sugerido: ${apEsc(f.dim)}` +
+    (f.nota ? `<span class="ap-nota"><i class="fa-solid fa-circle-info"></i> ${apEsc(f.nota)}</span>` : '');
 }
 function apNovo(){
   ['ap_id','ap_title','ap_desc','ap_url','ap_email','ap_phone','ap_video','ap_pdf','ap_assignee']
@@ -5344,7 +5647,7 @@ async function saveApproval(){
     url: document.getElementById('ap_url').value.trim(),
     video: '',                       // migrado para os slides
     pdfUrl: document.getElementById('ap_pdf').value.trim(),
-    approverEmail: document.getElementById('ap_email').value.trim(),
+    approverEmail: (()=>{ const v=document.getElementById('ap_email').value.trim(); mailGuardarAuto(v); return v; })(),
     approverPhone: document.getElementById('ap_phone').value.trim(),
     arquivos: apGaleria.map(s=>({t:s.t,src:s.src,poster:s.poster||''})),
     thumbnailUrl: capa||'',
@@ -5571,7 +5874,7 @@ function savePauta() {
   const isEdit=DB.pautas.some(p=>p.id===id);
   const days=[...document.querySelectorAll('.day-btn.active')].map(b=>Number(b.dataset.day));
   const checklist=document.getElementById('pa_checklist').value.split('\n').map(s=>s.trim()).filter(Boolean);
-  const pauta={id,name,desc:document.getElementById('pa_desc').value,assignee,email:document.getElementById('pa_email').value,phone:document.getElementById('pa_phone').value.trim(),category:document.getElementById('pa_category').value,priority:document.getElementById('pa_priority').value,frequency:document.getElementById('pa_frequency').value,days,time:document.getElementById('pa_time').value,deadlineTime:document.getElementById('pa_deadline_time').value,checklist,checklistDone:checklist.map(()=>false),observations:'',status:'pending',executions:[]};
+  const pauta={id,name,desc:document.getElementById('pa_desc').value,assignee,email:(()=>{const v=document.getElementById('pa_email').value.trim(); mailGuardarAuto(v); return v;})(),phone:document.getElementById('pa_phone').value.trim(),category:document.getElementById('pa_category').value,priority:document.getElementById('pa_priority').value,frequency:document.getElementById('pa_frequency').value,days,time:document.getElementById('pa_time').value,deadlineTime:document.getElementById('pa_deadline_time').value,checklist,checklistDone:checklist.map(()=>false),observations:'',status:'pending',executions:[]};
   firebaseCreate('pautas',pauta);
   const tarefaNova = pautaSincronizaTarefa(pauta);
   if(tarefaNova) addActivity(`Pauta virou tarefa: "${name}"`,'task');
@@ -6488,6 +6791,7 @@ function saveCobranca() {
   const name = document.getElementById('cb_name').value.trim();
   const responsible = document.getElementById('cb_responsible').value.trim();
   const email = document.getElementById('cb_email').value.trim();
+  mailGuardarAuto(email);
   if (!name || !responsible || !email) { showToast('Nome, responsável e e-mail são obrigatórios', 'error'); return; }
   const id = document.getElementById('cb_id').value || genId();
   const days = [...document.querySelectorAll('.cb-day-btn.active')].map(b => Number(b.dataset.day));
@@ -7144,7 +7448,7 @@ async function apGerarLink(id, silencioso){
   const doc={
     token, refId:i.id,
     titulo:i.title||'', empresa:AP_EMPRESAS[i.category]||'Geral',
-    tipo:f.label, dim:f.dim, ratio:f.ratio, contain:!!f.contain,
+    tipo:f.label, dim:f.dim, ratio:f.ratio, contain:!!f.contain, circulo:!!f.circulo, nota:f.nota||'',
     legenda:i.desc||'',
     slides:slides.map(s=>({t:s.t, src:s.src, poster:s.poster||''})),
     status:'pendente', comentarioCliente:'', decididoEm:null,
@@ -7275,6 +7579,7 @@ setTimeout(async () => {
   if (metaDateEl) metaDateEl.value = td;
 
   // 6. Initial render (even before Firebase data arrives)
+  mailRender(); foneRender();
   renderDashboard();
   renderNotifPanel();
   updateBadges();
@@ -8415,5 +8720,7 @@ function edExportCSV(){
 }
 
 </script>
+<datalist id="dl_emails"></datalist>
+
 </body>
 </html>
