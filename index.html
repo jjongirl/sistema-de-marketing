@@ -1438,6 +1438,23 @@ textarea.form-control{resize:vertical;min-height:80px}
   flex:1;background:none;border:0;color:var(--text-secondary);font-size:11px;
   font-family:monospace;min-width:0;
 }
+/* ---- vínculo tarefa <-> aprovação ---- */
+.vinc-box{
+  display:flex;gap:10px;align-items:center;background:var(--bg-card);
+  border:1px solid var(--border-subtle);border-radius:var(--radius-md);
+  padding:10px 12px;font-size:12px;
+}
+.vinc-box > i{font-size:15px;color:var(--accent-purple);flex:none}
+.vinc-txt{flex:1;min-width:0}
+.vinc-tit{font-weight:600;color:var(--text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vinc-sub{font-size:11px;color:var(--text-muted);margin-top:3px;display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.vinc-acoes{display:flex;gap:4px;flex:none}
+.vinc-linha{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.vinc-linha select{flex:1;min-width:200px}
+.vinc-dica{font-size:11px;color:var(--text-muted);margin-top:6px;line-height:1.5}
+.task-ap{cursor:pointer}
+.task-ap:hover{filter:brightness(1.15)}
+.ec-item-tarefa{font-size:10.5px;color:var(--accent-purple);display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
 </style>
 </head>
 <body>
@@ -2530,6 +2547,14 @@ textarea.form-control{resize:vertical;min-height:80px}
       </div>
     </div>
     <div class="form-group">
+      <label class="form-label">Aprovação vinculada</label>
+      <div id="t_apArea"></div>
+      <input type="hidden" id="t_approvalId">
+      <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:12px;color:var(--text-secondary);margin-top:8px">
+        <input type="checkbox" id="t_semAprovacao" onchange="taskApPintar()" style="accent-color:var(--accent-blue)"> Esta tarefa não precisa de aprovação
+      </label>
+    </div>
+    <div class="form-group">
       <label class="form-label">Cor</label>
       <div class="color-row" id="taskColorPicker">
         <div class="color-opt selected" style="background:#009FE3" data-color="#009FE3" onclick="selectColor(this)"></div>
@@ -2552,6 +2577,23 @@ textarea.form-control{resize:vertical;min-height:80px}
       <button class="btn btn-ghost" onclick="closeModal('taskModal')">Cancelar</button>
       <button class="btn btn-secondary" onclick="taskParaPauta()" title="Cria uma rotina na Pauta Operacional com os dados desta tarefa"><i class="fa-solid fa-rotate"></i>Virar Pauta Operacional</button>
       <button class="btn btn-primary" onclick="saveTask()"><i class="fa-solid fa-check"></i>Salvar Tarefa</button>
+    </div>
+  </div>
+</div>
+
+<!-- TAREFA FINALIZADA -> APROVACAO -->
+<div id="taskApPromptModal" class="modal-overlay">
+  <div class="modal" style="max-width:460px">
+    <div class="modal-header">
+      <div class="modal-title"><i class="fa-solid fa-stamp" style="color:var(--accent-purple);margin-right:6px"></i>Enviar para aprovação?</div>
+      <button class="modal-close" onclick="closeModal('taskApPromptModal')"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <p id="taskApPromptTxt" style="font-size:13px;color:var(--text-secondary);line-height:1.6;margin:0 0 6px"></p>
+    <p style="font-size:11.5px;color:var(--text-muted);line-height:1.5;margin:0 0 16px">A peça fica ligada a esta tarefa: aprovou, a tarefa vai para Concluído; pediram ajuste ou reprovaram, ela volta para Em Progresso.</p>
+    <div class="modal-footer" style="flex-wrap:wrap">
+      <button class="btn btn-ghost" onclick="taskApNaoPrecisa()" title="Não pergunta mais para esta tarefa">Não precisa de aprovação</button>
+      <button class="btn btn-secondary" onclick="closeModal('taskApPromptModal')">Agora não</button>
+      <button class="btn btn-primary" onclick="taskApPromptSim()"><i class="fa-solid fa-paper-plane"></i>Enviar para aprovação</button>
     </div>
   </div>
 </div>
@@ -2850,6 +2892,12 @@ textarea.form-control{resize:vertical;min-height:80px}
         <label class="form-label">Responsável pela criação</label>
         <input class="form-control" id="ap_assignee" placeholder="Quem criou...">
       </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Tarefa vinculada</label>
+      <select class="form-control" id="ap_taskId"><option value="">Nenhuma</option></select>
+      <div class="vinc-dica">Aprovou → a tarefa vai para <b>Concluído</b>. Pediram ajuste ou reprovaram → ela volta para <b>Em Progresso</b>.</div>
     </div>
 
     <div class="form-group">
@@ -3430,12 +3478,41 @@ async function fbDelete(colName, id) {
   lsSave();
 }
 
+// Preferências de tela de cada pessoa (filtro Click/Impresul e tema).
+// Ficam SÓ no navegador de quem escolheu — nunca vão para o documento
+// compartilhado. Antes iam, e o filtro de uma pessoa passava a valer
+// escondido para a outra (a aba mostrava "Todos", mas a lista vinha filtrada).
+const SETTINGS_LOCAIS = ['category','theme'];
+const settingsCompartilhados = obj => {
+  const out = {};
+  Object.keys(obj||{}).forEach(k => { if(!SETTINGS_LOCAIS.includes(k)) out[k] = obj[k]; });
+  return out;
+};
+
 /** Salva settings (doc único) */
 async function fbSaveSettings() {
   if (fdb) {
-    try { await fdb.collection('teams').doc(TEAM_ID).set({ settings: DB.settings }, { merge: true }); return; } catch(e) {}
+    try {
+      const del = firebase.firestore.FieldValue.delete();
+      const dados = settingsCompartilhados(DB.settings);
+      SETTINGS_LOCAIS.forEach(k => { dados[k] = del; });   // limpa o que ficou salvo lá por engano
+      await fdb.collection('teams').doc(TEAM_ID).set({ settings: dados }, { merge: true });
+      lsSave();
+      return;
+    } catch(e) { console.warn('fbSaveSettings', e); }
   }
   lsSave();
+}
+
+/** Remove do documento compartilhado o filtro/tema gravados por versões antigas */
+async function fbLimparSettingsLocais(){
+  if(!fdb) return;
+  try{
+    const del = firebase.firestore.FieldValue.delete();
+    const up = {};
+    SETTINGS_LOCAIS.forEach(k => { up['settings.'+k] = del; });
+    await fdb.collection('teams').doc(TEAM_ID).update(up);
+  }catch(e){ /* documento ainda não existe ou sem permissão — sem problema */ }
 }
 
 // Compat: funções antigas que o código chama
@@ -3478,35 +3555,36 @@ function initFirebaseListeners() {
     'edDescartes'
   ];
 
+  // Lê a coleção inteira e ordena aqui no navegador.
+  // Antes a consulta usava orderBy('__createdAt') — e o Firestore
+  // simplesmente DEIXA DE FORA qualquer documento sem esse campo
+  // (itens gravados por caminhos antigos). Resultado: um item que
+  // aparecia no cache de uma pessoa não aparecia para a outra.
+  const porData = (a,b) => (b.__createdAt||0) - (a.__createdAt||0);
   collections.forEach(colName => {
-    const unsub = COL(colName)
-      .orderBy('__createdAt', 'desc')
-      .onSnapshot(snapshot => {
-        DB[colName] = snapshot.docs.map(d => d.data());
-        auditGuardar(colName, DB[colName]);
-        // Re-render página atual ao receber mudanças de outro usuário
-        renderPage(currentPage);
-        updateBadges();
-        if (currentPage === 'dashboard') renderActivity();
-        renderNotifPanel();
-        lsSave();
-      }, err => {
-        // Se a coleção não tiver índice para orderBy, tenta sem
-        COL(colName).onSnapshot(snap => {
-          DB[colName] = snap.docs.map(d => d.data());
-          auditGuardar(colName, DB[colName]);
-          renderPage(currentPage);
-          updateBadges();
-          lsSave();
-        });
-      });
+    const unsub = COL(colName).onSnapshot(snapshot => {
+      DB[colName] = snapshot.docs
+        .map(d => { const x = d.data(); if(x && !x.id) x.id = d.id; return x; })
+        .sort(porData);
+      auditGuardar(colName, DB[colName]);
+      // Re-render página atual ao receber mudanças de outro usuário
+      renderPage(currentPage);
+      updateBadges();
+      if (currentPage === 'dashboard') renderActivity();
+      renderNotifPanel();
+      lsSave();
+    }, err => {
+      console.error('[Firebase] não consegui ler "'+colName+'":', err.message);
+      showToast('⚠️ Não consegui ler "'+colName+'" do Firebase ('+err.message+'). Você pode estar vendo dados antigos deste navegador.','error');
+    });
     _unsubscribers.push(unsub);
   });
 
   // Settings doc
   fdb.collection('teams').doc(TEAM_ID).onSnapshot(snap => {
     if (snap.exists && snap.data().settings) {
-      Object.assign(DB.settings, snap.data().settings);
+      // filtro e tema são de cada pessoa: o que vier do banco não sobrescreve
+      Object.assign(DB.settings, settingsCompartilhados(snap.data().settings));
       mailRender(); foneRender();
     }
   });
@@ -3543,7 +3621,8 @@ async function firebaseCreate(colName, item) {
     await fbSet(colName, item.id, itemWithMeta);
   } else {
     if (!DB[colName]) DB[colName] = [];
-    DB[colName].unshift(itemWithMeta);
+    const k = DB[colName].findIndex(x => x.id === item.id);
+    if (k >= 0) DB[colName][k] = itemWithMeta; else DB[colName].unshift(itemWithMeta);
     lsSave();
   }
 }
@@ -3706,13 +3785,24 @@ function toggleTheme() {
 }
 
 function setCategory(c) {
-  DB.settings.category = c;
-  document.querySelectorAll('.cat-tab').forEach(t=>t.classList.remove('active'));
-  event.target.classList.add('active');
+  DB.settings.category = ['all','click','impresul'].includes(c) ? c : 'all';
+  catPintar();
   save(); renderPage(currentPage);
 }
 
-const filterByCategory = arr => DB.settings.category==='all'?arr:arr.filter(i=>i.category===DB.settings.category||i.category==='geral');
+/** Deixa a aba Todos/Click/Impresul sempre igual ao filtro que está valendo */
+function catPintar(){
+  const c = DB.settings.category || 'all';
+  document.querySelectorAll('.cat-tab').forEach(t=>{
+    t.classList.toggle('active', (t.getAttribute('onclick')||'').includes("'"+c+"'"));
+  });
+  if(typeof edPintarMarca === 'function') edPintarMarca();
+}
+
+const filterByCategory = arr => {
+  const c = DB.settings.category || 'all';
+  return c==='all' ? arr : arr.filter(i=>i.category===c||i.category==='geral');
+};
 
 // ============================================================
 // DASHBOARD
@@ -3862,6 +3952,7 @@ function miniCalNext(){miniCalDate=new Date(miniCalDate.getFullYear(),miniCalDat
 // TASKS
 // ============================================================
 let taskView = 'kanban'; let taskFilter = 'all'; let taskEditId = null;
+let taskDePendenciaId = null;   // pendência que vira tarefa ao salvar
 
 const STATUS_COLS = [
   {id:'pending',label:'Pendente',color:'var(--accent-orange)'},
@@ -3966,6 +4057,7 @@ function taskCardHTML(t) {
     <div class="task-card-meta">
       ${priorityBadge(t.priority)}
       ${catBadge(t.category)}
+      ${taskApBadge(t)}
       ${t.tags?t.tags.slice(0,2).map(tag=>`<span class="badge badge-gray">${tag}</span>`).join(''):''}
     </div>
     <div class="task-card-footer">
@@ -4005,6 +4097,7 @@ function renderTaskList(tasks) {
               <div style="display:flex;align-items:center;gap:8px">
                 <div style="width:10px;height:10px;border-radius:2px;background:${t.color||'var(--accent-blue)'}"></div>
                 <span style="font-size:13px;font-weight:500">${t.title}</span>
+                ${taskApBadge(t)}
               </div>
               ${t.desc?`<div style="font-size:11px;color:var(--text-muted);margin-top:2px;padding-left:18px">${t.desc.slice(0,60)}${t.desc.length>60?'...':''}</div>`:''}
             </td>
@@ -4043,8 +4136,10 @@ function dropTask(e,status) {
   const id=e.dataTransfer.getData('taskId');
   const t=DB.tasks.find(t=>t.id===id);
   if(t&&t.status!==status){
+    const anterior={...t};
     t.status=status;
     firebaseCreate('tasks', t);
+    taskFinalizada(anterior, t);
     addActivity(`Tarefa "${t.title}" movida para ${STATUS_COLS.find(c=>c.id===status)?.label||status}`,'task');
     if (!fdb) renderTasks();
     showToast(`Status atualizado: ${STATUS_COLS.find(c=>c.id===status)?.label}`,'success');
@@ -4074,26 +4169,41 @@ function editTask(id) {
   document.getElementById('t_recurrence').value=t.recurrence||'';
   document.getElementById('t_addCal').checked=t.addCal||false;
   document.querySelectorAll('.color-opt').forEach(o=>{o.classList.remove('selected');if(o.dataset.color===t.color)o.classList.add('selected');});
+  document.getElementById('t_approvalId').value=taskApId(t);
+  document.getElementById('t_semAprovacao').checked=!!t.semAprovacao;
   openModal('taskModal');
+  // openModal recria a lista de projetos — o projeto da tarefa entra depois
+  document.getElementById('t_project').value=t.project||'';
 }
 
-function saveTask() {
+function saveTask(opts) {
+  opts = opts || {};
   const title=document.getElementById('t_title').value.trim();
-  if(!title){showToast('Título é obrigatório','error');return;}
+  if(!title){showToast('Título é obrigatório','error');return null;}
   const color=document.querySelector('.color-opt.selected')?.dataset.color||'#009FE3';
   const tags=document.getElementById('t_tags').value.split(',').map(s=>s.trim()).filter(Boolean);
   const proj=document.getElementById('t_project').value;
   const id=document.getElementById('t_id').value||genId();
+  const anterior=DB.tasks.find(x=>x.id===id) || null;
 
-  const task={id,title,desc:document.getElementById('t_desc').value,date:document.getElementById('t_date').value,time:document.getElementById('t_time').value,priority:document.getElementById('t_priority').value,status:document.getElementById('t_status').value,category:document.getElementById('t_category').value,assignee:document.getElementById('t_assignee').value,color,tags,recurrence:document.getElementById('t_recurrence').value,addCal:document.getElementById('t_addCal').checked,project:proj};
+  // Parte do que vem do formulário; o resto da tarefa (origem editorial,
+  // pauta, data de criação, autor...) é preservado. Antes era descartado.
+  const task={...(anterior||{}), id,title,desc:document.getElementById('t_desc').value,date:document.getElementById('t_date').value,time:document.getElementById('t_time').value,priority:document.getElementById('t_priority').value,status:document.getElementById('t_status').value,category:document.getElementById('t_category').value,assignee:document.getElementById('t_assignee').value,color,tags,recurrence:document.getElementById('t_recurrence').value,addCal:document.getElementById('t_addCal').checked,project:proj,
+    approvalId:document.getElementById('t_approvalId').value||'',
+    semAprovacao:document.getElementById('t_semAprovacao').checked};
+  if(task.approvalId) task.semAprovacao=false;
 
-  const isEdit = !!taskEditId;
+  const isEdit = !!anterior;
   firebaseCreate('tasks', task);
+  vincSalvarDaTarefa(task, anterior);
+  if(taskDePendenciaId){ firebaseDelete('pending', taskDePendenciaId); taskDePendenciaId=null; }
   addActivity(`${isEdit?'Tarefa editada':'Nova tarefa criada'}: "${title}"`,'task');
   closeModal('taskModal');
   if (!fdb) { renderPage(currentPage); }
-  showToast(isEdit?'Tarefa atualizada!':'Tarefa criada!','success');
+  if(!opts.silencioso) showToast(isEdit?'Tarefa atualizada!':'Tarefa criada!','success');
   resetTaskModal();
+  if(!opts.semPergunta) taskFinalizada(anterior, task);
+  return task;
 }
 
 // ------------------------------------------------------------
@@ -4175,6 +4285,9 @@ function taskParaPauta() {
 
 function deleteTask(id) {
   if(!confirm('Excluir esta tarefa?')) return;
+  const t=DB.tasks.find(x=>x.id===id);
+  const ap=t && vincAprovacaoDaTarefa(t);
+  if(ap) firebaseUpdate('approvals', ap.id, {taskId:''});
   firebaseDelete('tasks', id);
   if (!fdb) renderTasks();
   showToast('Tarefa excluída','info');
@@ -4190,7 +4303,11 @@ function resetTaskModal() {
   document.getElementById('t_category').value='click';
   document.getElementById('t_recurrence').value='';
   document.getElementById('t_addCal').checked=false;
+  document.getElementById('t_approvalId').value='';
+  document.getElementById('t_semAprovacao').checked=false;
+  taskDePendenciaId=null;
   document.querySelectorAll('.color-opt').forEach((o,i)=>{o.classList.toggle('selected',i===0);});
+  taskApPintar();
 }
 
 function selectColor(el) {
@@ -4521,7 +4638,7 @@ function updateProjProgress(id) {
   const boxes=document.querySelectorAll(`#projDetailContent input[type=checkbox]`);
   const done=[...boxes].filter(b=>b.checked).length;
   p.progress=boxes.length?Math.round(done/boxes.length*100):0;
-  save();
+  firebaseCreate('projects', p);
 }
 
 function populateProjSelects() {
@@ -4676,9 +4793,10 @@ function suggestTime(id) {
   if(!free.length){showToast('Nenhum horário livre hoje!','warning');return;}
   const sug=free[0];
   if(confirm(`Sugestão de horário livre: ${sug} hoje.\nDeseja criar uma tarefa para este horário?`)){
-    DB.tasks.push({id:genId(),title:p.desc.slice(0,60),desc:p.desc,date:td,time:sug,priority:p.priority,status:'pending',category:p.category,assignee:p.assignee,color:'#009FE3',tags:[],recurrence:'',addCal:true,project:''});
-    DB.pending=DB.pending.filter(pp=>pp.id!==id);
-    save();renderPending();renderTasks();
+    // antes gravava só no navegador de quem clicou — a colega nunca via
+    firebaseCreate('tasks',{id:genId(),title:p.desc.slice(0,60),desc:p.desc,date:td,time:sug,priority:p.priority,status:'pending',category:p.category,assignee:p.assignee,color:'#009FE3',tags:[],recurrence:'',addCal:true,project:''});
+    firebaseDelete('pending', id);
+    if(!fdb){ renderPending(); renderTasks(); }
     showToast(`Tarefa criada para ${sug}!`,'success');
   }
 }
@@ -4690,8 +4808,9 @@ function pendingToTask(id) {
   document.getElementById('t_priority').value=p.priority;
   document.getElementById('t_category').value=p.category;
   document.getElementById('t_assignee').value=p.assignee||'';
-  DB.pending=DB.pending.filter(pp=>pp.id!==id);
-  save();renderPending();navigate('tarefas');openModal('taskModal');
+  // a pendência só sai (para todo mundo) quando a tarefa for salva
+  taskDePendenciaId=id;
+  navigate('tarefas');openModal('taskModal');
 }
 
 function savePending() {
@@ -5174,6 +5293,7 @@ function renderApprovals(){
         <span class="ec-item-txt">
           <span class="ec-item-pilar">${apEsc(i.title||'Sem título')}</span>
           <span class="ec-item-formato">${apEsc([f.label,...det,AP_EMPRESAS[i.category]||'Geral'].join(' · '))}</span>
+          ${(()=>{const tv=vincTarefaDaAprovacao(i); return tv?`<span class="ec-item-tarefa"><i class="fa-solid fa-link"></i> ${apEsc(tv.title||'Tarefa')}</span>`:'';})()}
         </span>
         <span class="ec-item-status ${st.cls}"></span>
       </button>`;
@@ -5256,6 +5376,7 @@ function apPintarFolha(){
         <button onclick="apGerarLink('${i.id}')" title="Copiar link"><i class="fa-solid fa-copy"></i></button>
         <button onclick="apRevogarLink('${i.id}')" title="Desativar link" style="color:var(--accent-red)"><i class="fa-solid fa-ban"></i></button>
       </div>`:''}
+      ${vincFolhaHTML(i)}
       ${apAutoriaHTML(i)}
       <div class="ec-links">
         ${i.url?`<a href="${apEsc(i.url)}" target="_blank" rel="noopener"><i class="fa-solid fa-up-right-from-square"></i>Abrir material</a>`:''}
@@ -5285,6 +5406,7 @@ function apDecidir(id,status){
   i.comments=i.comments||[];
   i.comments.push({author:authNome(),text:txt||'Material aprovado.',date:today(),type:status});
   firebaseCreate('approvals',i);
+  vincSyncTarefa(i);
   showToast({approved:'Material aprovado!',revision:'Ajuste solicitado!',rejected:'Material reprovado',pending:'Voltou para pendente'}[status],
             status==='approved'?'success':'info');
   addActivity(`"${i.title}" — ${AP_STATUS[status].label}`,'approval');
@@ -5297,6 +5419,9 @@ function requestRevision(id){apAtual=id;apDecidir(id,'revision');}
 
 function deleteApproval(id){
   if(!confirm('Tem certeza que deseja excluir este material da aprovação?')) return;
+  const ap=DB.approvals.find(x=>x.id===id);
+  const tv=ap && vincTarefaDaAprovacao(ap);
+  if(tv) firebaseUpdate('tasks', tv.id, {approvalId:''});
   firebaseDelete('approvals',id);
   closeModal('approvalDetailModal');
   apAtual=null;
@@ -5495,6 +5620,7 @@ async function apAjusteFeito(id){
   i.comments.push({author:'Marketing',text:`Ajuste feito e reenviado para ${to}.${texto?` Alterações: ${texto}`:''}`,date:today(),type:'adjusted'});
   i.sentAt=new Date().toISOString();
   firebaseCreate('approvals',i);
+  vincSyncTarefa(i);
   addActivity(`"${i.title}" — ajuste feito, aprovador avisado`,'approval');
   renderApprovals();
   if(apAtual===id) apPintarFolha();
@@ -5641,6 +5767,7 @@ function apNovo(){
   document.getElementById('ap_category').value='click';
   document.getElementById('apModalTitle').textContent='Enviar Material para Aprovação';
   apGaleria=[]; apCapaAlvo=-1; apDesenharGaleria(); apDims();
+  vincPintarSelTarefa('', null, '');
   openModal('approvalModal');
 }
 function apEditar(id){
@@ -5664,6 +5791,8 @@ function apEditar(id){
   closeModal('approvalDetailModal');
   openModal('approvalModal');
   const p=document.getElementById('ap_project'); if(p) p.value=i.project||'';
+  const tv=vincTarefaDaAprovacao(i);
+  vincPintarSelTarefa(tv?tv.id:'', null, i.id);
 }
 
 async function saveApproval(){
@@ -5687,7 +5816,9 @@ async function saveApproval(){
   const capa=apGaleria.length ? (apGaleria[0].t==='vid'?apGaleria[0].poster:apGaleria[0].src) : '';
 
   const item={
+    ...(antigo||{}),                 // preserva link do cliente, data de envio, autoria...
     id, title,
+    taskId: document.getElementById('ap_taskId').value||'',
     type: document.getElementById('ap_type').value,
     project: document.getElementById('ap_project').value,
     assignee: document.getElementById('ap_assignee').value,
@@ -5706,6 +5837,7 @@ async function saveApproval(){
   };
 
   firebaseCreate('approvals',item);
+  vincSalvarDaAprovacao(item, antigo);
   addActivity(`Material "${title}" ${antigo?'atualizado':'enviado para aprovação'}`,'approval');
   closeModal('approvalModal');
   renderApprovals();
@@ -6108,7 +6240,7 @@ function renderNotifPanel() {
   const unread=notifs.filter(n=>!n.read).length;
   document.getElementById('notifDot').style.display=unread?'block':'none';
 }
-function readNotif(id) {const n=DB.notifications.find(n=>n.id===id);if(n)n.read=true;save();renderNotifPanel();}
+function readNotif(id) {const n=DB.notifications.find(n=>n.id===id);if(n){n.read=true;firebaseCreate('notifications',n);}renderNotifPanel();}
 async function clearNotifs() {
   // Se estiver conectado ao Firebase, deleta cada notificação do banco de dados
   if (fdb) {
@@ -6128,12 +6260,18 @@ async function clearNotifs() {
 // ============================================================
 function openModal(id) {
   populateProjSelects();
+  if(id==='taskModal' && typeof taskApPintar==='function') taskApPintar();
   document.getElementById(id).classList.add('open');
 }
-function closeModal(id) {document.getElementById(id).classList.remove('open');}
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+  // Fechar a tarefa sem salvar limpa o formulário. Antes o ID da última
+  // tarefa aberta ficava guardado e "Nova tarefa" sobrescrevia ela.
+  if(id==='taskModal' && typeof resetTaskModal==='function') resetTaskModal();
+}
 
 document.querySelectorAll('.modal-overlay').forEach(overlay=>{
-  overlay.addEventListener('click',e=>{if(e.target===overlay) overlay.classList.remove('open');});
+  overlay.addEventListener('click',e=>{if(e.target===overlay) closeModal(overlay.id);});
 });
 
 // ============================================================
@@ -6635,12 +6773,12 @@ function toggleCbCheck(id, idx) {
   const c = (DB.cobrancas || []).find(c => c.id === id); if (!c) return;
   if (!c.checklistDone) c.checklistDone = new Array((c.checklist || []).length).fill(false);
   c.checklistDone[idx] = !c.checklistDone[idx];
-  save(); renderCobrancaContent();
+  firebaseCreate('cobrancas', c); renderCobrancaContent();
 }
 
 function setCobrancaStatus(id, status) {
   const c = (DB.cobrancas || []).find(c => c.id === id); if (!c) return;
-  c.status = status; save(); renderCobrancaContent();
+  c.status = status; firebaseCreate('cobrancas', c); renderCobrancaContent();
 }
 
 function openCobrancaDone(id) {
@@ -6921,14 +7059,15 @@ function checkCobrancasOverdue() {
   const currentTime = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
   const td = today();
   (DB.cobrancas || []).forEach(c => {
-    if (c.status !== 'done' && c.deadlineDate && c.deadlineDate <= td && c.deadlineTime && c.deadlineTime <= currentTime) {
-      if (c.status !== 'overdue') {
-        c.status = 'overdue';
-        DB.notifications.unshift({ id: genId(), text: `⚠️ Cobrança atrasada: "${c.name}" — ${c.responsible}`, type: 'alert', read: false, time: new Date().toISOString() });
-      }
+    const venceu = c.deadlineDate && (c.deadlineDate < td || (c.deadlineDate === td && (!c.deadlineTime || c.deadlineTime <= currentTime)));
+    if (c.status !== 'done' && c.status !== 'overdue' && venceu) {
+      c.status = 'overdue';
+      firebaseUpdate('cobrancas', c.id, { status: 'overdue' });
+      // id fixo: se dois computadores detectarem ao mesmo tempo, grava uma notificação só
+      firebaseCreate('notifications', { id: 'cb-atraso-' + c.id, text: `⚠️ Cobrança atrasada: "${c.name}" — ${c.responsible}`, type: 'alert', read: false, time: new Date().toISOString() });
     }
   });
-  save(); updateBadges(); renderNotifPanel();
+  updateBadges(); renderNotifPanel();
 }
 
 // ============================================================
@@ -7115,7 +7254,7 @@ function openProjectDetail(id) {
 function adjustProgress(id, delta) {
   const p = DB.projects.find(p => p.id === id); if (!p) return;
   p.progress = Math.min(100, Math.max(0, p.progress + delta));
-  save(); openProjectDetail(id);
+  firebaseCreate('projects', p); openProjectDetail(id);
   if (currentPage === 'projetos') renderProjects();
 }
 
@@ -7125,7 +7264,7 @@ function toggleProjCheck(id, idx) {
   p.checklistState[idx] = !p.checklistState[idx];
   const done = p.checklistState.filter(Boolean).length;
   if ((p.checklist||[]).length) p.progress = Math.round(done / p.checklist.length * 100);
-  save(); openProjectDetail(id);
+  firebaseCreate('projects', p); openProjectDetail(id);
   if (currentPage === 'projetos') renderProjects();
 }
 
@@ -7136,7 +7275,7 @@ function addCheckItem(id) {
   if (!p.checklist) p.checklist = [];
   if (!p.checklistState) p.checklistState = [];
   p.checklist.push(text); p.checklistState.push(false);
-  inp.value = ''; save(); openProjectDetail(id);
+  inp.value = ''; firebaseCreate('projects', p); openProjectDetail(id);
 }
 
 function addDemand(id) {
@@ -7145,13 +7284,13 @@ function addDemand(id) {
   const p = DB.projects.find(p => p.id === id); if (!p) return;
   if (!p.demands) p.demands = [];
   p.demands.push({text, done: false});
-  inp.value = ''; save(); openProjectDetail(id);
+  inp.value = ''; firebaseCreate('projects', p); openProjectDetail(id);
 }
 
 function toggleDemand(id, idx) {
   const p = DB.projects.find(p => p.id === id); if (!p || !p.demands) return;
   p.demands[idx].done = !p.demands[idx].done;
-  save(); openProjectDetail(id);
+  firebaseCreate('projects', p); openProjectDetail(id);
 }
 
 function demandToTask(id, idx) {
@@ -7371,7 +7510,8 @@ const AUDIT_CAMPOS={
   favorite:'favorito', approverEmail:'e-mail do aprovador', email:'e-mail',
   approverPhone:'WhatsApp do aprovador', phone:'WhatsApp',
   frequency:'frequência', observations:'observações', project:'projeto',
-  url:'link', pdfUrl:'PDF', publicToken:'link do cliente', days:'dias'
+  url:'link', pdfUrl:'PDF', publicToken:'link do cliente', days:'dias',
+  approvalId:'aprovação vinculada', taskId:'tarefa vinculada', semAprovacao:'sem aprovação'
 };
 
 const AUDIT_PREV={};
@@ -7556,6 +7696,7 @@ function apEscutarPublicas(){
       });
       AUDIT_ATOR='Cliente (link público)';
       firebaseCreate('approvals',i);
+      vincSyncTarefa(i);
       AUDIT_ATOR=null;
       addActivity('"'+i.title+'" — '+AP_STATUS[novo].label+' pelo cliente','approval');
       showToast('Cliente respondeu: '+i.title+' — '+AP_STATUS[novo].label,
@@ -7575,11 +7716,245 @@ function apAutoriaHTML(i){
 }
 
 // ============================================================
+// VÍNCULO TAREFA <-> APROVAÇÃO
+// tarefa.approvalId  <->  aprovação.taskId  (um para um)
+//  · tarefa vai para Em Revisão/Concluído sem aprovação → pergunta se envia
+//  · aprovou → tarefa Concluído · ajuste/reprovou → Em Progresso
+//  · ajuste feito (volta a pendente) → tarefa Em Revisão
+// ============================================================
+const TASK_STATUS_LABEL = {pending:'Pendente', in_progress:'Em Progresso', review:'Em Revisão', done:'Concluído'};
+const TASK_AP_CURTO = {pending:'Em aprovação', approved:'Aprovado', revision:'Ajuste pedido', rejected:'Reprovado'};
+
+/* acha o par pelos dois lados (se um dos lados não chegou a gravar, o outro basta) */
+function vincAprovacaoDaTarefa(t){
+  if(!t) return null;
+  return (t.approvalId && DB.approvals.find(a=>a.id===t.approvalId))
+      || DB.approvals.find(a=>a.taskId && a.taskId===t.id) || null;
+}
+function vincTarefaDaAprovacao(ap){
+  if(!ap) return null;
+  return (ap.taskId && DB.tasks.find(t=>t.id===ap.taskId))
+      || DB.tasks.find(t=>t.approvalId && t.approvalId===ap.id) || null;
+}
+const taskApId = t => { const a = vincAprovacaoDaTarefa(t); return a ? a.id : ''; };
+
+/* grava campos num documento; se ainda não chegou do Firebase, usa o objeto que temos */
+function vincGravar(col, id, campos, objeto){
+  if((DB[col]||[]).some(x=>x.id===id)) return firebaseUpdate(col, id, campos);
+  if(objeto) return firebaseCreate(col, {...objeto, ...campos});
+}
+
+/* ---------- selo no card / lista de tarefas ---------- */
+function taskApBadge(t){
+  const ap = vincAprovacaoDaTarefa(t);
+  if(!ap) return '';
+  const st = AP_STATUS[ap.status] || AP_STATUS.pending;
+  return `<span class="badge ${st.badge} task-ap" onclick="event.stopPropagation();abrirAprovacao('${ap.id}')" title="Aprovação: ${apEsc(ap.title||'')} — ${apEsc(st.label)} (clique para abrir)"><i class="fa-solid fa-stamp"></i>${TASK_AP_CURTO[ap.status]||st.label}</span>`;
+}
+
+function abrirAprovacao(id){
+  if(!DB.approvals.some(a=>a.id===id)){ showToast('Essa aprovação não existe mais','warning'); return; }
+  ['taskModal','taskApPromptModal'].forEach(m=>{ const el=document.getElementById(m); if(el && el.classList.contains('open')) closeModal(m); });
+  navigate('aprovacoes');
+  apAbrir(id);
+}
+function abrirTarefa(id){
+  if(!DB.tasks.some(t=>t.id===id)){ showToast('Essa tarefa não existe mais','warning'); return; }
+  closeModal('approvalDetailModal');
+  navigate('tarefas');
+  editTask(id);
+}
+
+/* ---------- bloco "Aprovação vinculada" no modal da tarefa ---------- */
+function taskApPintar(){
+  const area = document.getElementById('t_apArea'); if(!area) return;
+  const tid  = document.getElementById('t_id').value;
+  const hid  = document.getElementById('t_approvalId');
+  const sem  = document.getElementById('t_semAprovacao');
+  const ap   = hid.value && DB.approvals.find(a=>a.id===hid.value);
+  if(hid.value && !ap) hid.value = '';
+  sem.closest('label').style.display = ap ? 'none' : 'flex';
+
+  if(ap){
+    const st = AP_STATUS[ap.status] || AP_STATUS.pending;
+    area.innerHTML = `<div class="vinc-box">
+      <i class="fa-solid fa-stamp"></i>
+      <div class="vinc-txt">
+        <div class="vinc-tit">${apEsc(ap.title||'Sem título')}</div>
+        <div class="vinc-sub"><span class="badge ${st.badge}">${apEsc(st.label)}</span>${apEsc(apFmt(ap).label)} · ${apEsc(AP_EMPRESAS[ap.category]||'Geral')}</div>
+      </div>
+      <div class="vinc-acoes">
+        <button type="button" class="btn btn-xs btn-secondary" onclick="abrirAprovacao('${ap.id}')"><i class="fa-solid fa-up-right-from-square"></i>Abrir</button>
+        <button type="button" class="btn btn-xs btn-ghost" onclick="taskApDesvincular()" title="Desfaz o vínculo (a aprovação continua existindo)"><i class="fa-solid fa-link-slash"></i></button>
+      </div>
+    </div>`;
+    return;
+  }
+  if(sem.checked){
+    area.innerHTML = `<div class="vinc-dica" style="margin-top:0">Esta tarefa não vai para aprovação.</div>`;
+    return;
+  }
+  const livres = DB.approvals
+    .filter(a => { const dono = vincTarefaDaAprovacao(a); return !dono || dono.id === tid; })
+    .slice().sort((a,b)=>(b.__createdAt||0)-(a.__createdAt||0));
+  area.innerHTML = `<div class="vinc-linha">
+      <select class="form-control" onchange="document.getElementById('t_approvalId').value=this.value;taskApPintar()">
+        <option value="">Ligar a uma aprovação que já existe…</option>
+        ${livres.map(a=>`<option value="${a.id}">${apEsc(a.title||'Sem título')} · ${apEsc((AP_STATUS[a.status]||AP_STATUS.pending).label)} · ${apEsc(AP_EMPRESAS[a.category]||'Geral')}</option>`).join('')}
+      </select>
+      <button type="button" class="btn btn-secondary btn-sm" onclick="taskEnviarAprovacao()"><i class="fa-solid fa-paper-plane"></i>Enviar para aprovação</button>
+    </div>`;
+}
+function taskApDesvincular(){
+  document.getElementById('t_approvalId').value = '';
+  taskApPintar();
+  showToast('Vínculo removido — salve a tarefa para confirmar','info');
+}
+
+/* botão do modal: salva a tarefa e abre o envio da peça já preenchido */
+function taskEnviarAprovacao(){
+  const t = saveTask({semPergunta:true, silencioso:true});
+  if(t) apNovoDaTarefa(t);
+}
+
+/* ---------- pergunta quando a tarefa é finalizada ---------- */
+let taskApPromptTask = null;
+function taskFinalizada(anterior, t){
+  const fim = s => s==='review' || s==='done';
+  if(!t || !fim(t.status)) return;
+  if(anterior && fim(anterior.status)) return;          // já estava finalizada
+  if(t.semAprovacao || vincAprovacaoDaTarefa(t) || t.approvalId) return;
+  taskApPromptTask = {...t};
+  document.getElementById('taskApPromptTxt').innerHTML =
+    `A tarefa <b>${apEsc(t.title)}</b> foi para <b>${TASK_STATUS_LABEL[t.status]}</b>. Quer mandar a peça para aprovação agora?`;
+  openModal('taskApPromptModal');
+}
+function taskApPromptSim(){
+  const t = taskApPromptTask; taskApPromptTask = null;
+  closeModal('taskApPromptModal');
+  if(t) apNovoDaTarefa(t);
+}
+function taskApNaoPrecisa(){
+  const t = taskApPromptTask; taskApPromptTask = null;
+  closeModal('taskApPromptModal');
+  if(t) vincGravar('tasks', t.id, {semAprovacao:true}, t);
+  showToast('Ok — não pergunto mais para essa tarefa','info');
+}
+
+/* abre "Enviar material" com os dados da tarefa */
+function apFormatoDaTarefa(t){
+  const tx = ((t.tags||[]).join(' ')+' '+(t.title||'')).toLowerCase();
+  if(/reel/.test(tx)) return 'reel';
+  if(/stor(y|ies)/.test(tx)) return 'story';
+  if(/carrossel pdf/.test(tx) && /linkedin/.test(tx)) return 'li_carrossel_1x1';
+  if(/carrossel/.test(tx)) return 'carrossel';
+  if(/linkedin/.test(tx)) return 'li_quadrado';
+  if(/banner/.test(tx)) return 'banner_1500x350';
+  if(/pdf/.test(tx)) return 'pdf';
+  return 'feed';
+}
+function apNovoDaTarefa(t){
+  navigate('aprovacoes');
+  apNovo();
+  document.getElementById('ap_title').value    = t.title||'';
+  document.getElementById('ap_desc').value     = t.desc||'';
+  document.getElementById('ap_assignee').value = t.assignee||'';
+  document.getElementById('ap_category').value = ['click','impresul','geral'].includes(t.category) ? t.category : 'click';
+  document.getElementById('ap_type').value     = apFormatoDaTarefa(t);
+  apDims();
+  const pj = document.getElementById('ap_project'); if(pj) pj.value = t.project||'';
+  vincPintarSelTarefa(t.id, t, '');
+  showToast('Anexe a arte e salve — a aprovação fica ligada à tarefa','info');
+}
+
+/* ---------- select "Tarefa vinculada" no modal da aprovação ---------- */
+function vincPintarSelTarefa(valor, extra, apId){
+  const sel = document.getElementById('ap_taskId'); if(!sel) return;
+  let tarefas = DB.tasks.filter(t => { const a = vincAprovacaoDaTarefa(t); return !a || a.id === apId; });
+  if(extra && !tarefas.some(t=>t.id===extra.id)) tarefas = [extra, ...tarefas];
+  const ord = (a,b) => (a.date||'9999').localeCompare(b.date||'9999') || (a.title||'').localeCompare(b.title||'');
+  const abertas = tarefas.filter(t=>t.status!=='done').sort(ord);
+  const feitas  = tarefas.filter(t=>t.status==='done').sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+  const op = t => `<option value="${t.id}">${apEsc(t.title||'Sem título')}${t.assignee?' · '+apEsc(t.assignee):''}${t.date?' · '+fmtDate(t.date):''}</option>`;
+  sel.innerHTML = '<option value="">Nenhuma</option>' +
+    (abertas.length ? `<optgroup label="Em aberto">${abertas.map(op).join('')}</optgroup>` : '') +
+    (feitas.length  ? `<optgroup label="Concluídas">${feitas.map(op).join('')}</optgroup>` : '');
+  sel.value = valor || '';
+}
+
+/* ---------- gravação dos dois lados ---------- */
+function vincSalvarDaTarefa(task, anterior){
+  const velho = anterior && anterior.approvalId;
+  if(velho && velho !== task.approvalId && DB.approvals.some(a=>a.id===velho))
+    firebaseUpdate('approvals', velho, {taskId:''});
+  if(!task.approvalId) return;
+  const ap = DB.approvals.find(a=>a.id===task.approvalId); if(!ap) return;
+  if(ap.taskId && ap.taskId !== task.id && DB.tasks.some(t=>t.id===ap.taskId))
+    firebaseUpdate('tasks', ap.taskId, {approvalId:''});
+  if(ap.taskId !== task.id) firebaseUpdate('approvals', ap.id, {taskId:task.id});
+}
+function vincSalvarDaAprovacao(ap, antigo){
+  const velha = antigo && antigo.taskId;
+  if(velha && velha !== ap.taskId && DB.tasks.some(t=>t.id===velha))
+    firebaseUpdate('tasks', velha, {approvalId:''});
+  if(!ap.taskId) return;
+  const t = DB.tasks.find(x=>x.id===ap.taskId); if(!t) return;
+  if(t.approvalId && t.approvalId !== ap.id && DB.approvals.some(a=>a.id===t.approvalId))
+    firebaseUpdate('approvals', t.approvalId, {taskId:''});
+  const campos = {approvalId:ap.id, semAprovacao:false};
+  // peça enviada: tarefa que ainda estava a fazer passa para Em Revisão
+  if(t.status==='pending' || t.status==='in_progress') campos.status = 'review';
+  firebaseUpdate('tasks', t.id, campos);
+  if(campos.status) addActivity(`Tarefa "${t.title}" → Em Revisão (enviada para aprovação)`,'task');
+}
+
+/* status da aprovação manda no status da tarefa */
+function vincSyncTarefa(ap){
+  const t = vincTarefaDaAprovacao(ap); if(!t) return;
+  let novo = null;
+  if(ap.status==='approved') novo = 'done';
+  else if(ap.status==='revision' || ap.status==='rejected') novo = 'in_progress';
+  else if(ap.status==='pending' && (t.status==='pending' || t.status==='in_progress')) novo = 'review';
+  const campos = {};
+  if(t.approvalId !== ap.id) campos.approvalId = ap.id;
+  if(novo && t.status !== novo) campos.status = novo;
+  if(!Object.keys(campos).length) return;
+  firebaseUpdate('tasks', t.id, campos);
+  if(campos.status){
+    const motivo = {approved:'aprovada', revision:'pediram ajuste', rejected:'reprovada', pending:'reenviada para aprovação'}[ap.status];
+    addActivity(`Tarefa "${t.title}" → ${TASK_STATUS_LABEL[novo]} (peça ${motivo})`,'task');
+    showToast(`Tarefa "${t.title}" foi para ${TASK_STATUS_LABEL[novo]}`,'info');
+  }
+}
+
+/* ---------- bloco "Tarefa vinculada" na folha da aprovação ---------- */
+function vincFolhaHTML(ap){
+  const t = vincTarefaDaAprovacao(ap);
+  if(!t) return `<div class="ec-info-rot" style="margin-top:14px">Tarefa vinculada</div>
+    <div class="vinc-dica" style="margin:0 0 10px">Nenhuma. <a href="#" onclick="event.preventDefault();apEditar('${ap.id}')" style="color:var(--accent-blue)">Ligar a uma tarefa</a></div>`;
+  const cor = {pending:'badge-orange', in_progress:'badge-blue', review:'badge-purple', done:'badge-green'}[t.status] || 'badge-gray';
+  const sub = [t.assignee, t.date ? fmtDate(t.date)+(t.time?' '+t.time:'') : ''].filter(Boolean).map(apEsc).join(' · ');
+  return `<div class="ec-info-rot" style="margin-top:14px">Tarefa vinculada</div>
+    <div class="vinc-box" style="margin-bottom:10px">
+      <i class="fa-solid fa-list-check"></i>
+      <div class="vinc-txt">
+        <div class="vinc-tit">${apEsc(t.title||'Sem título')}</div>
+        <div class="vinc-sub"><span class="badge ${cor}">${TASK_STATUS_LABEL[t.status]||apEsc(t.status)}</span>${sub}</div>
+      </div>
+      <div class="vinc-acoes"><button type="button" class="btn btn-xs btn-secondary" onclick="abrirTarefa('${t.id}')"><i class="fa-solid fa-up-right-from-square"></i>Abrir tarefa</button></div>
+    </div>`;
+}
+
+// ============================================================
 // INIT
 // ============================================================
 async function init() {
   // 1. Load from localStorage first (immediate render)
   load();
+
+  // 1b. O filtro de empresa é de cada navegador: a aba precisa mostrar o que vale
+  if(!['all','click','impresul'].includes(DB.settings.category)) DB.settings.category = 'all';
+  catPintar();
 
   // 2. Apply theme
   const theme = DB.settings.theme || 'dark';
@@ -7594,6 +7969,7 @@ async function init() {
   if (fdb) {
     showToast('🔄 Conectando ao Firebase...', 'info');
     initFirebaseListeners();
+    fbLimparSettingsLocais();
     // Seed data into Firebase only if it's empty
    // Remova ou comente este bloco inteiro dentro da função init()
 /*
@@ -8247,6 +8623,14 @@ function edResp(p){
   // para o Victor subir depois (a trilha própria dele é o canal Patrocinado)
   return 'Mariana';
 }
+// chip "Marca" do editorial <-> filtro de empresa do topo
+const ED_MARCA_CAT = {'':'all', 'Click Impresso':'click', 'Impresul':'impresul'};
+function edPintarMarca(){
+  const c = DB.settings.category || 'all';
+  document.querySelectorAll('#page-editorial .ed-chips[data-g="marca"] .filter-chip').forEach(b=>{
+    b.classList.toggle('active', (ED_MARCA_CAT[b.dataset.v]||'all') === c);
+  });
+}
 // as abas Click / Impresul da sidebar mandam na marca
 function edMarcasAtivas(){
   const c = DB.settings.category;
@@ -8575,8 +8959,10 @@ async function renderEditorial(){
     }
   }
   boot.style.display = 'none'; app.style.display = 'block';
+  ED.F.marca = '';
   edMontarPilares();
   edLigarChips();
+  edPintarMarca();
   edDesenhar();
 }
 
@@ -8595,6 +8981,14 @@ function edLigarChips(){
     g.dataset.ligado = '1';
     g.addEventListener('click', e=>{
       const b = e.target.closest('.filter-chip'); if(!b) return;
+      // "Marca" e as abas Click/Impresul do topo são o MESMO filtro.
+      // Antes eram dois, e dava para combinar Click no topo + Impresul
+      // aqui e ficar com a grade vazia.
+      if(g.dataset.g === 'marca'){
+        ED.F.marca = '';
+        setCategory(ED_MARCA_CAT[b.dataset.v] || 'all');
+        return;
+      }
       g.querySelectorAll('.filter-chip').forEach(c=>c.classList.remove('active'));
       b.classList.add('active');
       ED.F[g.dataset.g] = b.dataset.v;
