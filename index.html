@@ -825,6 +825,11 @@ textarea.form-control{resize:vertical;min-height:80px}
 .ec-palco img,.ec-palco video{width:100%;height:100%;object-fit:cover}
 .ec-palco.contain img,.ec-palco.contain video{object-fit:contain}
 .ec-palco iframe{width:100%;height:100%;border:0;background:#fff}
+/* peça impressa / PDF: moldura segue a proporção real do arquivo, sem cortar */
+.ec-folha.livre{width:min(600px,100%)}
+.ec-palco.livre{aspect-ratio:auto;display:flex;align-items:center;justify-content:center;min-height:240px}
+.ec-palco.livre img,.ec-palco.livre video{width:100%;height:auto;max-height:72vh;object-fit:contain;display:block}
+.ec-palco.livre iframe{height:72vh}
 .ec-seta{
   position:absolute;top:50%;transform:translateY(-50%);z-index:4;width:32px;height:32px;border-radius:50%;
   background:rgba(255,255,255,.9);color:#0D1117;display:grid;place-items:center;font-size:15px;box-shadow:0 2px 8px rgba(0,0,0,.2);
@@ -5123,7 +5128,7 @@ const AP_FORMATOS={
   video_monitor:   {label:'Vídeo monitor', ratio:'16/9',      dim:'1920 × 1080 px', icon:'fa-solid fa-tv',             largo:true,  contain:true},
   banner_1500x350: {label:'Banner site',   ratio:'1500/350',  dim:'1500 × 350 px',  icon:'fa-solid fa-window-maximize',largo:true,  contain:true},
   banner_1500x1800:{label:'Banner site',   ratio:'1500/1800', dim:'1500 × 1800 px', icon:'fa-solid fa-rectangle-ad',   largo:false},
-  pdf:             {label:'PDF',           ratio:'1/1.414',   dim:'A4 / livre',     icon:'fa-solid fa-file-pdf',       largo:false, pdf:true},
+  pdf:             {label:'PDF',           ratio:'1/1.414',   dim:'A4 / livre',     icon:'fa-solid fa-file-pdf',       largo:false, pdf:true, livre:true},
   // ---- LinkedIn ----
   li_paisagem:     {label:'LinkedIn paisagem',      ratio:'1200/627',  dim:'1200 × 627 px',   icon:'fa-brands fa-linkedin', largo:true, contain:true},
   li_quadrado:     {label:'LinkedIn quadrado',      ratio:'1/1',       dim:'1080 × 1080 px',  icon:'fa-brands fa-linkedin', largo:false},
@@ -5149,9 +5154,9 @@ const AP_FORMATOS={
   capa_li_perfil:  {label:'Capa LinkedIn perfil',    ratio:'1584/396', dim:'1584 × 396 px',  icon:'fa-brands fa-linkedin',    largo:true,  contain:true, nota:'A foto de perfil cobre o canto inferior esquerdo'},
   capa_yt:         {label:'Banner YouTube',          ratio:'2560/1440',dim:'2560 × 1440 px', icon:'fa-brands fa-youtube',     largo:true,  contain:true, nota:'Área segura de 1546 × 423 px no centro — é só ela que aparece na TV e no celular'},
   capa_x:          {label:'Capa X / Twitter',        ratio:'1500/500', dim:'1500 × 500 px',  icon:'fa-brands fa-x-twitter',   largo:true,  contain:true, nota:'A foto de perfil cobre o canto inferior esquerdo'},
-  impresso:        {label:'Peça impressa', ratio:'4/5',       dim:'—',              icon:'fa-solid fa-print',          largo:false},
+  impresso:        {label:'Peça impressa', ratio:'4/5',       dim:'—',              icon:'fa-solid fa-print',          largo:false, livre:true},
   // compatibilidade com registros antigos
-  image:{label:'Imagem',ratio:'4/5', dim:'—',icon:'fa-solid fa-image',largo:false},
+  image:{label:'Imagem',ratio:'4/5', dim:'—',icon:'fa-solid fa-image',largo:false, livre:true},
   video:{label:'Vídeo', ratio:'9/16',dim:'—',icon:'fa-solid fa-film', largo:false},
   post: {label:'Post',  ratio:'4/5', dim:'—',icon:'fa-brands fa-instagram',largo:false}
 };
@@ -5358,6 +5363,7 @@ function apPintarFolha(){
   const i=DB.approvals.find(x=>x.id===apAtual); if(!i) return;
   const f=apFmt(i), slides=apSlides(i), st=AP_STATUS[i.status]||AP_STATUS.pending;
   document.getElementById('ecFolha').classList.toggle('wide', !!f.largo);
+  document.getElementById('ecFolha').classList.toggle('livre', !!f.livre);
 
   const vids=slides.filter(s=>s.t==='vid').length;
   const empCls = i.category==='click' ? 'badge-blue' : i.category==='impresul' ? 'badge-purple' : 'badge-gray';
@@ -5366,7 +5372,7 @@ function apPintarFolha(){
   if(vids) det.push(vids===1?'1 vídeo':`${vids} vídeos`);
 
   document.getElementById('ecFolhaConteudo').innerHTML=`
-    <div class="ec-palco ${f.contain?'contain':''} ${f.circulo?'circulo':''}" style="aspect-ratio:${f.ratio}">${apMidiaPalco(i)}</div>
+    <div class="ec-palco ${f.contain?'contain':''} ${f.circulo?'circulo':''} ${f.livre?'livre':''}" ${f.livre?'':`style="aspect-ratio:${f.ratio}"`}>${apMidiaPalco(i)}</div>
     <div class="ec-info">
       <div class="ec-info-meta">
         <span class="badge ${empCls}">${apEsc(AP_EMPRESAS[i.category]||'Geral')}</span>
@@ -7658,7 +7664,7 @@ async function apGerarLink(id, silencioso){
   const doc={
     token, refId:i.id,
     titulo:i.title||'', empresa:AP_EMPRESAS[i.category]||'Geral',
-    tipo:f.label, dim:f.dim, ratio:f.ratio, contain:!!f.contain, circulo:!!f.circulo, nota:f.nota||'',
+    tipo:f.label, dim:f.dim, ratio:f.ratio, livre:!!f.livre, contain:!!f.contain, circulo:!!f.circulo, nota:f.nota||'',
     legenda:i.desc||'',
     slides:slides.map(s=>({t:s.t, src:s.src, poster:s.poster||''})),
     status:'pendente', comentarioCliente:'', decididoEm:null,
