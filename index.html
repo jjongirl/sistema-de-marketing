@@ -5878,6 +5878,9 @@ document.addEventListener('keydown',ev=>{
   const m=document.getElementById('approvalDetailModal');
   if(!m||!m.classList.contains('open')) return;
   if(ev.key==='Escape') closeModal('approvalDetailModal');
+  // digitando num campo? as setas movem o cursor do texto, não o carrossel
+  const t=ev.target;
+  if(t && (t.tagName==='INPUT'||t.tagName==='TEXTAREA'||t.tagName==='SELECT'||t.isContentEditable)) return;
   if(ev.key==='ArrowLeft')  apSlide(-1);
   if(ev.key==='ArrowRight') apSlide(1);
 });
