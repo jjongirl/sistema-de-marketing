@@ -345,6 +345,8 @@ html[data-estilo="aurora"][data-theme="dark"] body{
   background-attachment:fixed;
 }
 html[data-estilo="aurora"] .topbar{background:transparent}
+/* fundo personalizado vale por cima do degradê do Aurora */
+html[data-fundo-custom] body{background:var(--bg-base) !important}
 html[data-estilo="aurora"] .sidebar,
 html[data-estilo="aurora"] .card,
 html[data-estilo="aurora"] .stat-card,

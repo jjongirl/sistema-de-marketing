@@ -33,7 +33,7 @@
   };
 
   var CAMPOS = [
-    { id: 'accent', nome: 'Cor de destaque', dica: 'Botões, links, item ativo' },
+    { id: 'accent', nome: 'Cor de destaque', dica: 'Botões, cards em destaque, calendário' },
     { id: 'fundo',  nome: 'Fundo',           dica: 'Atrás de tudo' },
     { id: 'cards',  nome: 'Cards',           dica: 'Caixas de conteúdo' },
     { id: 'menu',   nome: 'Menu lateral',    dica: 'Barra da esquerda' },
@@ -42,7 +42,7 @@
 
   var PROPS_CUSTOM = ['--accent-blue', '--text-accent', '--on-accent', '--bg-base', '--bg-surface', '--bg-elevated',
     '--bg-card', '--sb-bg', '--sb-solid', '--sb-active-fg', '--text-primary', '--text-secondary', '--text-muted',
-    '--radius-md', '--radius-lg', '--radius-xl'];
+    '--radius-md', '--radius-lg', '--radius-xl', '--feat1-bg', '--feat1-fg', '--feat2-bg', '--dot'];
 
   function ler() {
     try { var s = JSON.parse(localStorage.getItem(CHAVE)); if (s && typeof s === 'object') return s; } catch (e) {}
@@ -81,10 +81,23 @@
     PROPS_CUSTOM.forEach(function (p) { root.style.removeProperty(p); });
 
     if (c.accent) {
+      var claro = lum(c.accent) > 0.45;
       root.style.setProperty('--accent-blue', c.accent);
       root.style.setProperty('--text-accent', c.accent);
-      root.style.setProperty('--on-accent', lum(c.accent) > 0.45 ? '#111111' : '#ffffff');
-    }
+      root.style.setProperty('--on-accent', claro ? '#111111' : '#ffffff');
+      // tudo o que no estilo tem cor própria de destaque passa a seguir a cor escolhida:
+      // 1º card de números de cada aba, cartão do Meu Perfil, logo do login...
+      root.style.setProperty('--feat1-bg', 'linear-gradient(160deg, ' + c.accent + ' 0%, color-mix(in srgb, ' + c.accent + ' ' + (claro ? 86 : 62) + '%, #000) 100%)');
+      root.style.setProperty('--feat1-fg', claro ? '#111111' : '#ffffff');
+      // ...o 2º card (destaque suave), a bolinha de evento do calendário
+      root.style.setProperty('--feat2-bg', m === 'light'
+        ? 'linear-gradient(160deg, var(--bg-card) 0%, color-mix(in srgb, ' + c.accent + ' 18%, var(--bg-card)) 100%)'
+        : 'linear-gradient(160deg, color-mix(in srgb, ' + c.accent + ' 18%, var(--bg-card)) 0%, color-mix(in srgb, ' + c.accent + ' 34%, var(--bg-card)) 100%)');
+      root.style.setProperty('--dot', c.accent);
+      root.style.setProperty('--sb-active-fg', 'var(--accent-blue)');
+      root.setAttribute('data-accent-custom', '');
+    } else root.removeAttribute('data-accent-custom');
+    if (c.fundo) root.setAttribute('data-fundo-custom', ''); else root.removeAttribute('data-fundo-custom');
     if (c.fundo) {
       root.style.setProperty('--bg-base', c.fundo);
       root.style.setProperty('--bg-surface', 'color-mix(in srgb, ' + c.fundo + ' 65%, ' + (c.cards || 'var(--bg-card)') + ')');
@@ -94,7 +107,7 @@
     if (c.texto) {
       root.style.setProperty('--text-primary', c.texto);
       root.style.setProperty('--text-secondary', 'color-mix(in srgb, ' + c.texto + ' 70%, transparent)');
-      root.style.setProperty('--text-muted', 'color-mix(in srgb, ' + c.texto + ' 45%, transparent)');
+      root.style.setProperty('--text-muted', 'color-mix(in srgb, ' + c.texto + ' 62%, transparent)');
     }
 
     // menu lateral: cor + contraste automático do texto
