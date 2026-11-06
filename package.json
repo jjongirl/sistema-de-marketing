@@ -4,6 +4,7 @@
   "description": "Central Operacional de Marketing — Grupo Impresul",
   "private": true,
   "dependencies": {
+    "firebase-admin": "^12.7.0",
     "nodemailer": "^6.9.8"
   },
   "engines": {
