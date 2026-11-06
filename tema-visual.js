@@ -224,7 +224,7 @@
       '<div class="tv-sec">Cores</div><div class="tv-estilos">' + estilosHtml + '</div>' +
       '<div class="tv-sec">Modo</div><div class="tv-modo"><button data-modo="light">☀ Claro</button><button data-modo="dark">☾ Escuro</button></div>' +
       '<div class="tv-sec">Personalizar cores <span style="text-transform:none;letter-spacing:0;font-weight:500" id="tvModoNome"></span></div>' + coresHtml +
-      '<div class="tv-range"><label>Cantos arredondados <small id="tvCantosVal" style="color:#999;font-weight:500"></small></label><input type="range" min="0" max="32" step="1" id="tvCantos"></div>' +
+      '<div class="tv-range"><label>Cantos arredondados <small id="tvCantosVal" style="color:#6b6b6b;font-weight:500"></small></label><input type="range" min="0" max="32" step="1" id="tvCantos"></div>' +
       '<div class="tv-acoes"><button data-reset-cores>Limpar minhas cores</button><button data-reset-tudo>Voltar ao original</button></div>' +
       '<div class="tv-nota">Dica: as cores personalizadas valem para o modo (claro ou escuro) que estiver ativo.</div>';
 
@@ -355,6 +355,13 @@
         if (PROPS_RAIO.indexOf(p) !== -1) nv = converterRaio(v);
         else if (!ehMarca && /^(background|color|border|box-shadow|outline|fill|stroke|text-decoration)/.test(p)) nv = converterCor(v);
         if (nv && nv !== v) decl += p + ':' + nv + ';';
+      }
+      // fundo na cor de destaque + letra branca fixa → letra que contrasta com o destaque
+      // (ex.: verde-limão do Noite grafite precisa de letra escura)
+      var fundo = (r.style.getPropertyValue('background') || '') + ' ' + (r.style.getPropertyValue('background-color') || '');
+      var letra = String(r.style.getPropertyValue('color') || '').replace(/\s/g, '').toLowerCase();
+      if (!ehMarca && /accent-blue|#009fe3|rgba?\(0,\s*159,\s*227/i.test(fundo) && /^(#fff|#ffffff|white|rgb\(255,255,255\))$/.test(letra)) {
+        decl += 'color:var(--on-accent,#fff);';
       }
       if (decl) out += prefixar(r.selectorText) + '{' + decl + '}';
     }

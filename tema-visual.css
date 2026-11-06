@@ -528,16 +528,27 @@ html[data-estrutura="compacto"] .sidebar:not(:hover) .sidebar-bottom .user-avata
    3d. LEGIBILIDADE — texto sempre com contraste sobre a cor
        de destaque (vale para todos os estilos)
 ============================================================ */
-html[data-estilo] .ec-btn-nova,
-html[data-estilo] .cal-day.today,
-html[data-estilo] .cal-cell.today-cell .cal-cell-day,
-html[data-estilo] .proj-step.active .proj-step-dot,
-html[data-estilo] .ed-add:hover,
-html[data-estilo] .pf-chips .pf-chip.on,
-html[data-estilo] .btn-primary,
-html[data-estilo] .login-btn{color:var(--on-accent,#fff) !important}
-html[data-estilo] .ec-acao-full:hover,
-html[data-estilo] .ec-acao-full.destaque{border-color:var(--accent-blue);color:var(--accent-blue)}
+html .ec-btn-nova,
+html .cal-day.today,
+html .cal-cell.today-cell .cal-cell-day,
+html .proj-step.active .proj-step-dot,
+html .ed-add:hover,
+html .pf-chips .pf-chip.on,
+html .btn-primary,
+html .login-btn{color:var(--on-accent,#fff) !important}
+/* elementos que o sistema pinta direto no HTML/JS com fundo de destaque e letra branca
+   (botões de dia da semana, selos, contadores...) */
+html .day-btn.active,
+html .cb-day-btn.active,
+html [style*="background:var(--accent-blue)"][style*="color:#fff"],
+html [style*="background:var(--accent-blue)"][style*="color: #fff"],
+html [style*="background:var(--accent-blue)"][style*="color: rgb(255, 255, 255)"],
+html [style*="background: var(--accent-blue)"][style*="color:#fff"],
+html [style*="background: var(--accent-blue)"][style*="color: #fff"],
+html [style*="background: var(--accent-blue)"][style*="color: rgb(255, 255, 255)"],
+html [style*="background-color: var(--accent-blue)"][style*="color: rgb(255, 255, 255)"]{color:var(--on-accent,#fff) !important}
+html .ec-acao-full:hover,
+html .ec-acao-full.destaque{border-color:var(--accent-blue);color:var(--accent-blue)}
 /* No modo claro, verde / amarelo / laranja / turquesa vivos somem no fundo
    claro quando usados como TEXTO. Aqui escurecemos esses tons (continuam
    reconhecíveis como "verde", "amarelo"...) e acertamos os poucos lugares
@@ -553,9 +564,33 @@ html[data-theme="light"]{--accent-red:#C81E1E}
 html[data-theme="light"] .badge-magenta,
 html[data-theme="light"] .ed-card.imp .ed-cdate b{color:#B0005F}
 /* botões verdes com letra branca: verde mais fundo para ler bem */
-html[data-estilo] .btn-success{background:#15803D}
-html[data-estilo] .btn-success:hover{background:#166534}
-html[data-estilo] .btn[style*="#25D366"]{background:#128C7E !important;border-color:#128C7E !important}
+html .btn-success{background:#15803D}
+html .btn-success:hover{background:#166534}
+/* WhatsApp: botão cheio ganha verde mais fundo; botão de contorno ganha letra legível */
+html .btn[style*="background:#25D366"]{background:#128C7E !important;border-color:#128C7E !important;color:#fff !important}
+html[data-theme="light"] .btn[style*="color:#25D366"]:not([style*="background:#25D366"]){color:#0E7A4E !important;border-color:#0E7A4E !important}
+html[data-theme="dark"] .btn[style*="color:#25D366"]:not([style*="background:#25D366"]){color:#4ADE80 !important;border-color:#4ADE80 !important}
+
+/* visual Original: textos de apoio e o ciano do destaque com mais contraste */
+html:not([data-estilo])[data-theme="dark"]{--text-muted:#7D879C;--accent-blue:#0284C7;--text-accent:#38BDF8}
+/* selos roxo / magenta no escuro: tom mais claro para ler bem */
+html[data-theme="dark"] .badge-purple{color:#C4A2FF}
+html[data-theme="dark"] .badge-magenta{color:#FF5CAD}
+html:not([data-estilo])[data-theme="light"]{--text-muted:#6B7280;--accent-blue:#0077B6;--text-accent:#0077B6}
+
+/* menu lateral colorido: rótulos (PRINCIPAL, FILTRO GLOBAL...) um pouco mais fortes */
+html[data-sb="dark"] .sidebar{--text-muted:rgba(255,255,255,.66)}
+
+/* card de destaque (1º número): textos pequenos mais fortes sobre a cor */
+html[data-layout="ref"] .stat-grid > .stat-card:first-child{
+  --text-muted:color-mix(in srgb,var(--feat1-fg) 84%,transparent);
+  --text-secondary:color-mix(in srgb,var(--feat1-fg) 92%,transparent);
+}
+html[data-layout="ref"] .stat-grid > .stat-card:first-child .stat-label,
+html[data-layout="ref"] .stat-grid > .stat-card:first-child .stat-sub{text-shadow:0 1px 2px rgba(0,0,0,.18)}
+
+/* iniciais em círculos coloridos */
+[style*="border-radius:50%"][style*="linear-gradient"]{text-shadow:0 1px 2px rgba(0,0,0,.4)}
 
 /* textos de apoio (datas, legendas, subtítulos) com contraste suficiente */
 html[data-estilo="institucional"][data-theme="light"]{--text-muted:#646B88}
@@ -584,27 +619,27 @@ html[data-theme="light"] .ec-acao.aj[aria-pressed="true"]{background:#FACC15;col
 html[data-theme="light"] .badge-yellow{background:rgba(234,179,8,.16)}
 
 /* tons fixos pensados para fundo escuro → no modo claro ficam escuros */
-html[data-estilo][data-theme="light"] .badge-yellow,
-html[data-estilo][data-theme="light"] .ed-badge-pa,
-html[data-estilo][data-theme="light"] .ed-resp-victor,
-html[data-estilo][data-theme="light"] .ed-diag .dica{color:#8a6d00}
-html[data-estilo][data-theme="light"] .ed-badge-li,
-html[data-estilo][data-theme="light"] .ed-resp-laura{color:#0a5aa8}
-html[data-estilo][data-theme="light"] .ed-resp-felix,
-html[data-estilo][data-theme="light"] .ed-add.feito,
-html[data-estilo][data-theme="light"] .ed-diag .ok,
-html[data-estilo][data-theme="light"] .ed-prazo.ok,
-html[data-estilo][data-theme="light"] .ed-venda{color:#15803d}
-html[data-estilo][data-theme="light"] .ed-resp-mariana{color:#7e22ce}
-html[data-estilo][data-theme="light"] .ed-badge-st,
-html[data-estilo][data-theme="light"] .ed-stk{color:#be0a6a}
-html[data-estilo][data-theme="light"] .ed-badge-trend,
-html[data-estilo][data-theme="light"] .ed-ref .ed-fv{color:#c2410c}
-html[data-estilo][data-theme="light"] .ed-conf,
-html[data-estilo][data-theme="light"] .ed-prazo,
-html[data-estilo][data-theme="light"] .ed-prio-Alta,
-html[data-estilo][data-theme="light"] .ed-diag .ruim,
-html[data-estilo][data-theme="light"] .ed-desc:hover{color:#b91c1c}
+html[data-theme="light"] .badge-yellow,
+html[data-theme="light"] .ed-badge-pa,
+html[data-theme="light"] .ed-resp-victor,
+html[data-theme="light"] .ed-diag .dica{color:#8a6d00}
+html[data-theme="light"] .ed-badge-li,
+html[data-theme="light"] .ed-resp-laura{color:#0a5aa8}
+html[data-theme="light"] .ed-resp-felix,
+html[data-theme="light"] .ed-add.feito,
+html[data-theme="light"] .ed-diag .ok,
+html[data-theme="light"] .ed-prazo.ok,
+html[data-theme="light"] .ed-venda{color:#15803d}
+html[data-theme="light"] .ed-resp-mariana{color:#7e22ce}
+html[data-theme="light"] .ed-badge-st,
+html[data-theme="light"] .ed-stk{color:#be0a6a}
+html[data-theme="light"] .ed-badge-trend,
+html[data-theme="light"] .ed-ref .ed-fv{color:#c2410c}
+html[data-theme="light"] .ed-conf,
+html[data-theme="light"] .ed-prazo,
+html[data-theme="light"] .ed-prio-Alta,
+html[data-theme="light"] .ed-diag .ruim,
+html[data-theme="light"] .ed-desc:hover{color:#b91c1c}
 
 /* ============================================================
    3e. ABA APROVAÇÃO — mesmo jeito das outras abas
@@ -674,7 +709,7 @@ html[data-estilo] #page-aprovacoes .ec-rodape{border-top:0;padding:4px 2px 10px}
 .tv-estrutura:hover{border-color:#bbb}
 .tv-estrutura.on{border-color:#14181f;box-shadow:0 0 0 2px #14181f inset}
 .tv-estrutura b{font-size:12px;display:block;margin-top:6px}
-.tv-estrutura span{font-size:10.5px;color:#888}
+.tv-estrutura span{font-size:10.5px;color:#666}
 /* desenhinho do layout */
 .tv-lay{position:relative;height:42px;border-radius:6px;background:#EEF0F4;overflow:hidden}
 .tv-lay i{position:absolute;display:block;border-radius:3px}
@@ -706,8 +741,8 @@ html[data-estilo] #page-aprovacoes .ec-rodape{border-top:0;padding:4px 2px 10px}
 @keyframes tvIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 .tv-painel h4{font-size:15px;font-weight:800;margin:0 0 2px;display:flex;justify-content:space-between;align-items:center}
 .tv-painel h4 button{background:none;border:0;font-size:16px;color:#888;cursor:pointer}
-.tv-painel .tv-sub{font-size:11.5px;color:#777;margin-bottom:14px}
-.tv-painel .tv-sec{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#999;margin:16px 0 8px}
+.tv-painel .tv-sub{font-size:11.5px;color:#666;margin-bottom:14px}
+.tv-painel .tv-sec{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#6b6b6b;margin:16px 0 8px}
 .tv-estilos{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .tv-estilo{
   border:1.5px solid #E6E6E6;border-radius:12px;padding:0;cursor:pointer;overflow:hidden;
@@ -717,7 +752,7 @@ html[data-estilo] #page-aprovacoes .ec-rodape{border-top:0;padding:4px 2px 10px}
 .tv-estilo.on{border-color:#14181f;box-shadow:0 0 0 2px #14181f inset}
 .tv-estilo .tv-txt{padding:7px 10px 9px}
 .tv-estilo b{font-size:12px;display:block}
-.tv-estilo span{font-size:10.5px;color:#888}
+.tv-estilo span{font-size:10.5px;color:#666}
 /* miniatura: menu + fundo + card destaque */
 .tv-mini{display:flex;height:46px;gap:0}
 .tv-mini .m{width:26%}
@@ -726,9 +761,9 @@ html[data-estilo] #page-aprovacoes .ec-rodape{border-top:0;padding:4px 2px 10px}
 .tv-cor{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid #F0F0F0}
 .tv-cor:last-child{border-bottom:0}
 .tv-cor label{flex:1;font-size:12.5px;font-weight:600}
-.tv-cor label small{display:block;font-size:10.5px;color:#999;font-weight:400}
+.tv-cor label small{display:block;font-size:10.5px;color:#6b6b6b;font-weight:400}
 .tv-cor input[type=color]{width:38px;height:28px;border:1px solid #ddd;border-radius:8px;padding:2px;background:#fff;cursor:pointer}
-.tv-cor .tv-limpar{background:none;border:0;color:#bbb;cursor:pointer;font-size:12px;width:18px}
+.tv-cor .tv-limpar{background:none;border:0;color:#777;cursor:pointer;font-size:12px;width:18px}
 .tv-cor .tv-limpar:hover{color:#e11}
 .tv-cor .tv-limpar[hidden]{visibility:hidden;display:inline}
 .tv-modo{display:flex;background:#F1F1F1;border-radius:10px;padding:3px}
