@@ -57,9 +57,12 @@
     var segunda = diaSemana(hojeIso) === 1;
     var add = function (grupo, it) { r[grupo].push(it); };
 
-    // TAREFAS
+    // TAREFAS (a tarefa criada automaticamente para uma pauta fica de fora: a pauta já aparece)
+    var idsPautas = {};
+    (dados.pautas || []).forEach(function (p) { idsPautas[p.id] = true; });
     (dados.tasks || []).forEach(function (t) {
       if (t.status === 'done' || !ehDela(t.assignee, nomes) || !t.date) return;
+      if (t.pautaId && idsPautas[t.pautaId]) return;
       var it = { tipo: 'tarefa', id: t.id, icone: '📝', titulo: t.title, data: t.date, hora: t.time || '', detalhe: t.priority === 'urgent' ? 'urgente' : t.priority === 'high' ? 'prioridade alta' : '' };
       if (t.date < hojeIso) { it.detalhe = 'venceu em ' + dataBr(t.date); add('atrasadas', it); }
       else if (t.date === hojeIso) add('hoje', it);
@@ -85,8 +88,13 @@
     });
 
     // PAUTAS / ROTINAS DO DIA
+    // (concluída = marcada como feita, ou a tarefa ligada a ela já foi concluída)
+    var tarefaDaPauta = {};
+    (dados.tasks || []).forEach(function (t) { if (t.pautaId) tarefaDaPauta[t.pautaId] = t; });
     (dados.pautas || []).forEach(function (p) {
       if (!ehDela(p.assignee, nomes) || !pautaHoje(p, hojeIso)) return;
+      var tp = tarefaDaPauta[p.id];
+      if (p.status === 'done' || p.status === 'not_done' || (tp && tp.status === 'done')) return;
       add('hoje', { tipo: 'pauta', id: p.id, icone: '🔁', titulo: p.name, data: hojeIso, hora: p.time || '', detalhe: 'rotina' });
     });
 

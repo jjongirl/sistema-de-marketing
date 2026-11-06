@@ -91,11 +91,28 @@
       itens.push({ tipo: 'tarefa', id: t.id, titulo: t.title, feito: feito, atrasado: atrasado,
         quando: t.date, extra: (t.time ? t.time : ''), st: ST_TAREFA[t.status] || [t.status || '—', 'cinza'], prio: PRIO[t.priority] });
     });
+    // Pautas: o sistema guarda o status da última execução e não volta para "pendente"
+    // sozinho. Então a pauta conta como concluída se estiver marcada como feita OU se a
+    // tarefa ligada a ela (tarefa.pautaId) já estiver concluída.
+    var tarefaDaPauta = {};
+    lista('tasks').forEach(function (t) { if (t.pautaId) tarefaDaPauta[t.pautaId] = t; });
+    var ST_PAUTA = { pending: ['Pendente', 'laranja'], in_progress: ['Em andamento', 'azul'], done: ['Feita', 'verde'], overdue: ['Atrasada', 'vermelho'], not_done: ['Não realizada', 'cinza'] };
+    var pautasMinhas = {};
     lista('pautas').forEach(function (p) {
       if (!eMeu(p.assignee, me)) return;
-      itens.push({ tipo: 'pauta', id: p.id, titulo: p.name, feito: false, atrasado: p.status === 'overdue',
-        quando: '', extra: FREQ[p.frequency] || p.frequency || 'Rotina', st: ST_ROT[p.status] || ['Rotina', 'azul'], prio: PRIO[p.priority] });
+      pautasMinhas[p.id] = true;
+      var t = tarefaDaPauta[p.id];
+      var feito = p.status === 'done' || p.status === 'not_done' || (t && t.status === 'done');
+      var st = feito && p.status !== 'not_done' ? ST_PAUTA.done : (ST_PAUTA[p.status] || ['Rotina', 'azul']);
+      itens.push({ tipo: 'pauta', id: p.id, titulo: p.name, feito: feito, atrasado: !feito && p.status === 'overdue',
+        quando: '', extra: FREQ[p.frequency] || p.frequency || 'Rotina', st: st, prio: PRIO[p.priority] });
     });
+    // a tarefa criada automaticamente para a pauta não aparece duas vezes
+    for (var k = itens.length - 1; k >= 0; k--) {
+      if (itens[k].tipo !== 'tarefa') continue;
+      var tk = lista('tasks').find(function (t) { return t.id === itens[k].id; });
+      if (tk && tk.pautaId && pautasMinhas[tk.pautaId]) itens.splice(k, 1);
+    }
     lista('pending').forEach(function (p) {
       if (!eMeu(p.assignee, me)) return;
       itens.push({ tipo: 'pendencia', id: p.id, titulo: p.desc, feito: false, atrasado: false,
