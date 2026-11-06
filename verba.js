@@ -17,7 +17,6 @@
     click:    { nome: 'Click', longo: 'Click Impresso', titulo: 'Relatório de despesas MKT Click' },
     impresul: { nome: 'Impresul', longo: 'Impresul', titulo: 'Relatório de despesas MKT Impresul' }
   };
-  var CATS = ['Impressos', 'Comunicação visual', 'Brindes', 'Impulsionamento / anúncios', 'Eventos', 'Freelancer / serviços', 'Fotografia / vídeo', 'Material de escritório', 'Outros'];
   var MES = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
   var LS_IMPRIMIR = 'impresulVerbaImprimir';
 
@@ -66,8 +65,7 @@
     return lista().filter(function (v) {
       if (empresa && empresa !== 'todas' && v.empresa !== empresa) return false;
       if (!v.data || v.data < p.de || v.data > p.ate) return false;
-      if (ui.cat && v.categoria !== ui.cat) return false;
-      if (b && norm([v.loja, v.descricao, v.os, v.categoria, v.obs].join(' ')).indexOf(b) === -1) return false;
+      if (b && norm([v.loja, v.descricao, v.os, v.obs].join(' ')).indexOf(b) === -1) return false;
       return true;
     }).sort(function (a, b) { return (a.data + (a.__createdAt || 0)).localeCompare(b.data + (b.__createdAt || 0)); });
   }
@@ -141,10 +139,9 @@
       '<div class="stat-grid" id="vbStats"></div>' +
       '<div class="card vb-card">' +
         '<div class="card-header"><div class="card-title"><i class="fa-solid fa-receipt"></i><span id="vbTitulo">Lançamentos</span></div>' +
-          '<div class="vb-filtros"><div class="search-bar" style="width:220px"><i class="fa-solid fa-magnifying-glass"></i><input type="text" placeholder="Buscar loja, descrição, OS..." oninput="VB.buscar(this.value)"></div>' +
-          '<select class="form-control" id="vbCatFiltro" onchange="VB.categoria(this.value)" style="width:auto"></select></div></div>' +
+          '<div class="vb-filtros"><div class="search-bar" style="width:220px"><i class="fa-solid fa-magnifying-glass"></i><input type="text" placeholder="Buscar loja, descrição, OS..." oninput="VB.buscar(this.value)"></div></div></div>' +
         '<div class="vb-tabela-wrap"><table class="vb-tabela"><thead><tr>' +
-          '<th style="width:118px">Data</th><th style="width:200px">Loja <button class="vb-lojas-btn" onclick="VB.lojas()" title="Cadastrar as lojas da Click e da Impresul"><i class="fa-solid fa-pen"></i> lojas</button></th><th>Descrição</th><th style="width:130px">Boletim/OS</th><th style="width:160px">Categoria</th><th class="dir" style="width:120px">Valor</th><th style="width:70px"></th>' +
+          '<th style="width:118px">Data</th><th style="width:200px">Loja <button class="vb-lojas-btn" onclick="VB.lojas()" title="Cadastrar as lojas da Click e da Impresul"><i class="fa-solid fa-pen"></i> lojas</button></th><th>Descrição</th><th style="width:150px">Boletim/OS</th><th class="dir" style="width:120px">Valor</th><th style="width:70px"></th>' +
         '</tr>' +
         '<tr class="vb-novo">' +
           '<td><input type="date" class="form-control" id="vbN_data"></td>' +
@@ -152,11 +149,10 @@
             '<button type="button" class="vb-loja-mais" onclick="VB.novaLoja(\'vbN_loja\')" title="Adicionar uma loja nova à lista"><i class="fa-solid fa-plus"></i></button></div></td>' +
           '<td><input class="form-control" id="vbN_desc" placeholder="O que foi comprado / feito"></td>' +
           '<td><input class="form-control" id="vbN_os" placeholder="Nº"></td>' +
-          '<td><select class="form-control" id="vbN_cat">' + CATS.map(function (c) { return '<option>' + c + '</option>'; }).join('') + '</select></td>' +
           '<td><input class="form-control dir" id="vbN_valor" inputmode="decimal" placeholder="0,00"></td>' +
           '<td><button class="btn btn-primary btn-sm" onclick="VB.adicionar()" title="Adicionar (Enter)"><i class="fa-solid fa-plus"></i></button></td>' +
         '</tr></thead><tbody id="vbLinhas"></tbody>' +
-        '<tfoot><tr><td colspan="5" class="dir vb-total-rot">Total do período</td><td class="dir vb-total" id="vbTotal"></td><td></td></tr></tfoot></table></div>' +
+        '<tfoot><tr><td colspan="4" class="dir vb-total-rot">Total do período</td><td class="dir vb-total" id="vbTotal"></td><td></td></tr></tfoot></table></div>' +
         '<datalist id="vbLojas"></datalist>' +
         '<label class="vb-auto"><input type="checkbox" id="vbAutoPrint" onchange="VB.autoPrint(this.checked)"> Abrir o relatório para imprimir sempre que eu adicionar uma despesa</label>' +
       '</div>' +
@@ -181,8 +177,7 @@
           '<button type="button" class="vb-loja-mais" onclick="VB.novaLoja(\'vb_loja\', document.getElementById(\'vb_empresa\').value)" title="Adicionar uma loja nova à lista"><i class="fa-solid fa-plus"></i></button></div></div>' +
           '<div class="form-group"><label class="form-label">Boletim / OS</label><input class="form-control" id="vb_os"></div></div>' +
         '<div class="form-group"><label class="form-label">Descrição</label><input class="form-control" id="vb_desc"></div>' +
-        '<div class="vb-form-2"><div class="form-group"><label class="form-label">Categoria</label><select class="form-control" id="vb_cat">' + CATS.map(function (c) { return '<option>' + c + '</option>'; }).join('') + '</select></div>' +
-          '<div class="form-group"><label class="form-label">Valor (R$)</label><input class="form-control" id="vb_valor" inputmode="decimal"></div></div>' +
+        '<div class="form-group"><label class="form-label">Valor (R$)</label><input class="form-control" id="vb_valor" inputmode="decimal"></div>' +
         '<div class="form-group"><label class="form-label">Campanha / projeto <span class="vb-opc">(opcional)</span></label><select class="form-control" id="vb_proj"></select></div>' +
         '<div class="form-group"><label class="form-label">Observações</label><textarea class="form-control" id="vb_obs" rows="2"></textarea></div>' +
         '<div class="modal-footer"><button class="btn btn-ghost vb-excluir" onclick="VB.excluir()"><i class="fa-solid fa-trash"></i>Excluir</button>' +
@@ -246,9 +241,6 @@
     document.getElementById('vbCustom').style.display = ui.mes === 'custom' ? '' : 'none';
     if (ui.mes === 'custom') { document.getElementById('vbDe').value = p.de; document.getElementById('vbAte').value = p.ate; }
 
-    // filtro categoria
-    var cf = document.getElementById('vbCatFiltro');
-    cf.innerHTML = '<option value="">Todas as categorias</option>' + CATS.map(function (c) { return '<option' + (ui.cat === c ? ' selected' : '') + '>' + c + '</option>'; }).join('');
 
     // lojas
     document.getElementById('vbLojas').innerHTML = lojasDe('click').concat(lojasDe('impresul')).map(function (l) { return '<option value="' + esc(l) + '">'; }).join('');
@@ -270,9 +262,9 @@
     var mesUnico = ui.mes !== 'custom';
 
     // números
-    var porCat = {};
-    itens.forEach(function (v) { var c = v.categoria || 'Outros'; porCat[c] = (porCat[c] || 0) + (Number(v.valor) || 0); });
-    var maior = Object.keys(porCat).sort(function (a, b) { return porCat[b] - porCat[a]; })[0];
+    var porLoja = {};
+    itens.forEach(function (v) { var c = (v.loja || 'SEM LOJA').toUpperCase(); porLoja[c] = (porLoja[c] || 0) + (Number(v.valor) || 0); });
+    var maior = Object.keys(porLoja).sort(function (a, b) { return porLoja[b] - porLoja[a]; })[0];
     var pct = lim ? Math.min(100, Math.round(total / lim * 100)) : 0;
     document.getElementById('vbStats').innerHTML =
       '<div class="stat-card blue"><div class="stat-label"><i class="fa-solid fa-wallet"></i>Gasto no período</div><div class="stat-value">' + brl(total) + '</div><div class="stat-sub">' + itens.length + ' lançamento(s)</div></div>' +
@@ -280,7 +272,7 @@
         '<div class="stat-value">' + (lim ? brl(lim - total) : '—') + '</div>' +
         '<div class="stat-sub">' + (lim ? (mesUnico ? pct + '% de ' + brl(lim) + ' usados' : 'limite é mensal') : '<button class="vb-link" onclick="VB.limite()">definir limite</button>') + '</div>' +
         (lim && mesUnico ? '<div class="vb-uso"><i style="width:' + pct + '%" class="' + (total > lim ? 'estourou' : pct > 80 ? 'alerta' : '') + '"></i></div>' : '') + '</div>' +
-      '<div class="stat-card orange"><div class="stat-label"><i class="fa-solid fa-tags"></i>Maior categoria</div><div class="stat-value vb-menor">' + esc(maior || '—') + '</div><div class="stat-sub">' + (maior ? brl(porCat[maior]) : 'sem despesas') + '</div></div>' +
+      '<div class="stat-card orange"><div class="stat-label"><i class="fa-solid fa-store"></i>Loja com mais gasto</div><div class="stat-value vb-menor">' + esc(maior || '—') + '</div><div class="stat-sub">' + (maior ? brl(porLoja[maior]) : 'sem despesas') + '</div></div>' +
       '<div class="stat-card magenta"><div class="stat-label"><i class="fa-solid fa-calendar"></i>Período</div><div class="stat-value vb-menor">' + dataBr(p.de, true) + '<br>' + dataBr(p.ate, true) + '</div>' +
         '<div class="stat-sub"><button class="vb-link" onclick="VB.limite()"><i class="fa-solid fa-sliders"></i> limites mensais</button></div></div>';
 
@@ -293,27 +285,26 @@
         '<td class="vb-loja">' + esc(v.loja || '') + '</td>' +
         '<td>' + esc(v.descricao || '') + (v.obs ? ' <i class="fa-regular fa-note-sticky vb-nota" title="' + esc(v.obs) + '"></i>' : '') + '</td>' +
         '<td>' + esc(v.os || '') + '</td>' +
-        '<td><span class="vb-cat">' + esc(v.categoria || 'Outros') + '</span></td>' +
         '<td class="dir vb-valor">' + brl(v.valor) + '</td>' +
         '<td class="dir"><button class="btn btn-xs btn-ghost" onclick="event.stopPropagation();VB.editar(\'' + v.id + '\')" title="Editar"><i class="fa-solid fa-pen"></i></button></td></tr>';
-    }).join('') : '<tr class="vb-vazio"><td colspan="7"><i class="fa-solid fa-receipt"></i> Nenhuma despesa neste período' + (emp === 'todas' ? '' : '. Use a linha de cima para lançar a primeira.') + '</td></tr>';
+    }).join('') : '<tr class="vb-vazio"><td colspan="6"><i class="fa-solid fa-receipt"></i> Nenhuma despesa neste período' + (emp === 'todas' ? '' : '. Use a linha de cima para lançar a primeira.') + '</td></tr>';
     document.getElementById('vbTotal').textContent = brl(total);
 
-    // resumo por categoria + por mês (ano)
+    // resumo por loja + por mês (ano)
     var ano = p.de.slice(0, 4);
     var porMes = new Array(12).fill(0);
     lista().forEach(function (v) {
       if ((emp === 'todas' || v.empresa === emp) && v.data && v.data.slice(0, 4) === ano) porMes[+v.data.slice(5, 7) - 1] += Number(v.valor) || 0;
     });
     var maxMes = Math.max.apply(null, porMes.concat([1]));
-    var cats = Object.keys(porCat).sort(function (a, b) { return porCat[b] - porCat[a]; });
+    var lojasOrd = Object.keys(porLoja).sort(function (a, b) { return porLoja[b] - porLoja[a]; });
     document.getElementById('vbResumo').innerHTML =
       '<div class="card-header"><div class="card-title"><i class="fa-solid fa-chart-column"></i>Resumo</div></div>' +
       '<div class="vb-resumo">' +
-        '<div><div class="vb-sub">Por categoria no período</div>' +
-          (cats.length ? cats.map(function (c) {
-            var pc = total ? Math.round(porCat[c] / total * 100) : 0;
-            return '<div class="vb-rc"><span>' + esc(c) + '</span><div class="vb-rc-barra"><i style="width:' + pc + '%"></i></div><b>' + brl(porCat[c]) + '</b><em>' + pc + '%</em></div>';
+        '<div><div class="vb-sub">Por loja no período</div>' +
+          (lojasOrd.length ? lojasOrd.map(function (c) {
+            var pc = total ? Math.round(porLoja[c] / total * 100) : 0;
+            return '<div class="vb-rc"><span>' + esc(c) + '</span><div class="vb-rc-barra"><i style="width:' + pc + '%"></i></div><b>' + brl(porLoja[c]) + '</b><em>' + pc + '%</em></div>';
           }).join('') : '<p class="vb-vazio-txt">Sem despesas no período.</p>') + '</div>' +
         '<div><div class="vb-sub">Mês a mês em ' + ano + '</div><div class="vb-meses">' +
           porMes.map(function (v, i) {
@@ -333,7 +324,7 @@
     if (!valor) { showToast('Coloque o valor', 'error'); document.getElementById('vbN_valor').focus(); return; }
     var item = {
       id: genId(), empresa: ui.empresa === 'todas' ? 'click' : ui.empresa, data: data,
-      loja: g('loja').toUpperCase(), descricao: desc.toUpperCase(), os: g('os'), categoria: g('cat'), valor: valor, projeto: '', obs: ''
+      loja: g('loja').toUpperCase(), descricao: desc.toUpperCase(), os: g('os'), valor: valor, projeto: '', obs: ''
     };
     firebaseCreate('verba', item);
     ['desc', 'os', 'valor'].forEach(function (k) { document.getElementById('vbN_' + k).value = ''; });
@@ -354,7 +345,7 @@
     document.getElementById('vb_proj').innerHTML = '<option value="">Nenhuma</option>' + projs.map(function (p) { return '<option value="' + esc(p.id) + '">' + esc(p.name) + '</option>'; }).join('');
     s('id', v.id); s('data', v.data); s('empresa', v.empresa || 'click'); s('os', v.os); s('desc', v.descricao);
     document.getElementById('vb_loja').innerHTML = opcoesLoja(v.empresa || 'click', v.loja);
-    s('cat', v.categoria || 'Outros'); s('valor', (Number(v.valor) || 0).toFixed(2).replace('.', ',')); s('proj', v.projeto || ''); s('obs', v.obs);
+    s('valor', (Number(v.valor) || 0).toFixed(2).replace('.', ',')); s('proj', v.projeto || ''); s('obs', v.obs);
     openModal('verbaModal');
   }
 
@@ -365,7 +356,7 @@
     if (!g('data') || !g('desc') || !valor) { showToast('Data, descrição e valor são obrigatórios', 'error'); return; }
     firebaseCreate('verba', Object.assign({}, antigo, {
       data: g('data'), empresa: g('empresa'), loja: g('loja').toUpperCase(), os: g('os'), descricao: g('desc').toUpperCase(),
-      categoria: g('cat'), valor: valor, projeto: g('proj'), obs: g('obs')
+      valor: valor, projeto: g('proj'), obs: g('obs')
     }));
     closeModal('verbaModal');
     showToast('Despesa atualizada', 'success');
@@ -459,8 +450,8 @@
   function csv() {
     var emp = ui.empresa, itens = doPeriodo(emp), p = periodo();
     var q = function (s) { s = String(s == null ? '' : s); return /[;"\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; };
-    var linhas = [['Data', 'Empresa', 'Loja', 'Descrição', 'Boletim/OS', 'Categoria', 'Valor'].join(';')].concat(itens.map(function (v) {
-      return [dataBr(v.data, true), (EMP[v.empresa] || {}).longo || '', v.loja, v.descricao, v.os, v.categoria, (Number(v.valor) || 0).toFixed(2).replace('.', ',')].map(q).join(';');
+    var linhas = [['Data', 'Empresa', 'Loja', 'Descrição', 'Boletim/OS', 'Valor'].join(';')].concat(itens.map(function (v) {
+      return [dataBr(v.data, true), (EMP[v.empresa] || {}).longo || '', v.loja, v.descricao, v.os, (Number(v.valor) || 0).toFixed(2).replace('.', ',')].map(q).join(';');
     }));
     var blob = new Blob(['﻿' + linhas.join('\r\n')], { type: 'text/csv;charset=utf-8' });
     var a = document.createElement('a');
@@ -496,7 +487,7 @@
   function confirmarImport() {
     var emp = document.getElementById('vbI_emp').value;
     importadas.forEach(function (v, i) {
-      firebaseCreate('verba', Object.assign({ id: genId() + i, empresa: emp, categoria: 'Comunicação visual', projeto: '', obs: 'importado da planilha' }, v));
+      firebaseCreate('verba', Object.assign({ id: genId() + i, empresa: emp, projeto: '', obs: 'importado da planilha' }, v));
     });
     showToast(importadas.length + ' despesa(s) importadas', 'success');
     closeModal('verbaImportModal');
@@ -553,7 +544,6 @@
     mes: function (m) { ui.mes = m; if (m === 'custom' && !ui.de) { var p = new Date(); ui.de = p.getFullYear() + '-01-01'; ui.ate = hojeIso(); } render(); },
     custom: function () { ui.de = document.getElementById('vbDe').value; ui.ate = document.getElementById('vbAte').value; render(); },
     buscar: function (t) { ui.busca = t; clearTimeout(ui._t); ui._t = setTimeout(render, 150); },
-    categoria: function (c) { ui.cat = c; render(); },
     autoPrint: function (on) { try { localStorage.setItem(LS_IMPRIMIR, on ? '1' : '0'); } catch (e) {} },
     _periodo: periodo, _relatorio: htmlRelatorio
   };

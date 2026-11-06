@@ -515,7 +515,7 @@
       if (!g('data') || !g('desc').trim() || !valor) { showToast('Data, descrição e valor são obrigatórios', 'error'); return; }
       firebaseCreate('verba', {
         id: genId(), empresa: p.category === 'impresul' ? 'impresul' : 'click', data: g('data'), loja: g('loja').trim().toUpperCase(),
-        descricao: g('desc').trim().toUpperCase(), os: g('os').trim(), categoria: 'Outros', valor: valor, projeto: p.id, obs: ''
+        descricao: g('desc').trim().toUpperCase(), os: g('os').trim(), valor: valor, projeto: p.id, obs: ''
       });
       showToast('Gasto de ' + brl(valor) + ' lançado', 'success');
       depois(render);
