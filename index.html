@@ -3488,7 +3488,14 @@ const COL = name => fdb
 /** Salva/atualiza um documento */
 async function fbSet(colName, id, data) {
   if (fdb) {
-    try { await COL(colName).doc(id).set(data); return; } catch(e) { console.error('fbSet', e); }
+    try { await COL(colName).doc(id).set(data); return true; } catch(e) {
+      console.error('fbSet', e);
+      const msg = /exceeds the maximum|too large|1048487|longer than/i.test(e.message||'')
+        ? 'o arquivo passou do limite de 1 MB do banco'
+        : (e.code==='permission-denied' ? 'sem permissão — faça login de novo' : (e.message||'erro desconhecido'));
+      showToast('⚠️ Não foi salvo: '+msg,'error');
+      return false;
+    }
   }
   // fallback localStorage
   lsSave();
@@ -3642,7 +3649,7 @@ async function firebaseCreate(colName, item) {
     __updatedBy: authNome()
   };
   if (fdb) {
-    await fbSet(colName, item.id, itemWithMeta);
+    return await fbSet(colName, item.id, itemWithMeta);
   } else {
     if (!DB[colName]) DB[colName] = [];
     const k = DB[colName].findIndex(x => x.id === item.id);
@@ -5171,7 +5178,9 @@ const AP_EMPRESAS={click:'Click Impresso', impresul:'Impresul', geral:'Geral / G
 const apEsc = s => String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const apFmt = i => AP_FORMATOS[i.type] || AP_FORMATOS.feed;
 const apKB  = b => b>1024*1024 ? (b/1024/1024).toFixed(2)+' MB' : Math.round(b/1024)+' KB';
-const apB64 = s => (typeof s==='string' && s.startsWith('data:')) ? Math.ceil((s.length-(s.indexOf(',')+1))*0.75) : 0;
+// Peso REAL no banco: o Firestore guarda o texto base64 inteiro (≈33% maior que a imagem).
+// Antes contava os bytes decodificados (×0,75) e deixava passar materiais acima de 1 MB.
+const apB64 = s => (typeof s==='string' && s.startsWith('data:')) ? s.length : 0;
 const apPeso = arr => arr.reduce((t,s)=>t+apB64(s.src)+apB64(s.poster),0);
 const apMp4  = u => /\.(mp4|webm|ogg|mov)(\?|$)/i.test(u||'');
 
@@ -5820,6 +5829,34 @@ function apEditar(id){
   vincPintarSelTarefa(tv?tv.id:'', null, i.id);
 }
 
+// Recomprime as imagens da galeria até caber no limite do documento (1 MB do Firestore)
+function apRecomprimir(src, max, q){
+  return new Promise(res=>{
+    const img=new Image();
+    img.onload=()=>{
+      let w=img.width,h=img.height;
+      if(w>h){ if(w>max){h*=max/w;w=max;} } else { if(h>max){w*=max/h;h=max;} }
+      const c=document.createElement('canvas');
+      c.width=Math.round(w); c.height=Math.round(h);
+      c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+      res(c.toDataURL('image/jpeg',q));
+    };
+    img.onerror=()=>res(src);
+    img.src=src;
+  });
+}
+async function apCaberNoLimite(){
+  const passos=[[860,0.55],[860,0.48],[760,0.48],[680,0.45],[600,0.42],[520,0.40]];
+  for(const [max,q] of passos){
+    if(apPeso(apGaleria)<=AP_LIMITE_BYTES) return true;
+    for(const s of apGaleria){
+      if(s.t!=='vid' && apB64(s.src)) s.src=await apRecomprimir(s.src,max,q);
+      if(s.poster && apB64(s.poster)) s.poster=await apRecomprimir(s.poster,max,q);
+    }
+  }
+  return apPeso(apGaleria)<=AP_LIMITE_BYTES;
+}
+
 async function saveApproval(){
   const title=document.getElementById('ap_title').value.trim();
   if(!title){showToast('Título é obrigatório','error');return;}
@@ -5831,10 +5868,14 @@ async function saveApproval(){
     else showToast('Galeria cheia: o link do vídeo não foi adicionado','warning');
   }
 
-  const peso=apPeso(apGaleria);
-  if(peso>AP_LIMITE_BYTES){
-    showToast(`Os slides somam ${apKB(peso)} — acima do limite. Remova alguns.`,'error');
-    return;
+  if(apPeso(apGaleria)>AP_LIMITE_BYTES){
+    showToast('Comprimindo as imagens para caber no banco…','info');
+    const coube=await apCaberNoLimite();
+    apDesenharGaleria();
+    if(!coube){
+      showToast(`Mesmo comprimidos, os slides somam ${apKB(apPeso(apGaleria))} — acima do limite. Remova alguns.`,'error');
+      return;
+    }
   }
   const id=document.getElementById('ap_id').value||genId();
   const antigo=DB.approvals.find(x=>x.id===id);
@@ -5855,13 +5896,19 @@ async function saveApproval(){
     approverEmail: (()=>{ const v=document.getElementById('ap_email').value.trim(); mailGuardarAuto(v); return v; })(),
     approverPhone: document.getElementById('ap_phone').value.trim(),
     arquivos: apGaleria.map(s=>({t:s.t,src:s.src,poster:s.poster||''})),
-    thumbnailUrl: capa||'',
+    thumbnailUrl: '',                // a capa já está em arquivos[0]; duplicar estourava o limite de 1 MB
     status: antigo?antigo.status:'pending',
     comments: antigo?(antigo.comments||[]):[],
     created: antigo?antigo.created:today()
   };
 
-  firebaseCreate('approvals',item);
+  const tamanho=JSON.stringify(item).length;
+  if(tamanho>1000000){
+    showToast(`O material ficou com ${apKB(tamanho)} — o limite do banco é 1 MB. Remova alguns slides.`,'error');
+    return;
+  }
+  const ok=await firebaseCreate('approvals',item);
+  if(ok===false) return;   // fbSet já mostrou o erro; mantém o modal aberto
   vincSalvarDaAprovacao(item, antigo);
   addActivity(`Material "${title}" ${antigo?'atualizado':'enviado para aprovação'}`,'approval');
   closeModal('approvalModal');
