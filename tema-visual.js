@@ -20,6 +20,9 @@
     aurora:        { nome: 'Aurora',             desc: 'Vidro e degradê',       ref: true, menu: 'dark', mini: ['#2A2257', 'linear-gradient(135deg,#E3D9FF,#FFDDEB,#D3F1FF)', 'linear-gradient(140deg,#6D4AFF,#E8569A)', 'rgba(255,255,255,.75)'] },
     grafite:       { nome: 'Noite grafite',      desc: 'Escuro + verde-limão',  ref: true, menu: 'dark', mini: ['#0D0E11', '#16171C', '#C8F53A', '#2A2C33'] },
     bento:         { nome: 'Bento suave',        desc: 'Pastéis e cantos redondos', ref: true, menu: 'dark', mini: ['#231F1C', '#F3EEE8', '#DCD2FF', '#CDEBD8'] },
+    onda:          { nome: 'Roxo e menta',       desc: 'Combina com o layout Onda', ref: true, menu: 'dark', mini: ['linear-gradient(#7B3BFF,#5B2BE0)', '#F6F5FB', 'linear-gradient(180deg,#5B4BFF,#33287F)', 'linear-gradient(160deg,#fff,#ECE8FF)'] },
+    marinho:       { nome: 'Marinho e coral',    desc: 'Combina com o Encaixado', ref: true, menu: 'dark', mini: ['#14296E', '#EEF1F8', 'linear-gradient(160deg,#F2545B,#C9353D)', 'linear-gradient(160deg,#fff,#FFE3DA)'] },
+    preto:         { nome: 'Preto e branco',     desc: 'Combina com o layout Vidro', ref: true, menu: { light: 'light', dark: 'dark' }, mini: ['#FFFFFF', 'linear-gradient(135deg,#eee,#9c9c9c)', '#111111', '#FFFFFF'] },
     papel:         { nome: 'Papel minimalista',  desc: 'Limpo e editorial',     ref: false, menu: null, mini: ['#FAFAF8', '#FAFAF8', '#FFFFFF', '#E2531C'] },
     original:      { nome: 'Original',           desc: 'Visual de antes',       ref: false, menu: null, mini: ['#161B22', '#0D1117', '#161B22', '#009FE3'] }
   };
@@ -29,8 +32,19 @@
     lateral:   { nome: 'Menu lateral',  desc: 'Barra fixa à esquerda' },
     flutuante: { nome: 'Menu flutuante', desc: 'Barra solta, com respiro' },
     compacto:  { nome: 'Só ícones',     desc: 'Abre ao passar o mouse' },
-    topo:      { nome: 'Menu no topo',  desc: 'Tela inteira p/ conteúdo' }
+    topo:      { nome: 'Menu no topo',  desc: 'Tela inteira p/ conteúdo' },
+    onda:      { nome: 'Onda',          desc: 'Ícones numa faixa curva' },
+    encaixe:   { nome: 'Encaixado',     desc: 'Item ativo encaixa no fundo' },
+    vidro:     { nome: 'Vidro',         desc: 'Menu solto + cards foscos' }
   };
+  var COM_ICONES = { compacto: 1, onda: 1 };       // menu só de ícones (abre ao passar o mouse)
+  var MENU_SOLTO = { flutuante: 1, encaixe: 1, vidro: 1 }; // menu com respiro em volta
+  var SEM_SCROLL_PADRAO = { encaixe: 1, onda: 1 };          // barra de rolagem do menu escondida por padrão
+
+  // ---------- imagem de fundo (fica só neste navegador) ----------
+  var CHAVE_IMG = 'impresulVisualImg';
+  var imgFundo = null;
+  try { imgFundo = localStorage.getItem(CHAVE_IMG); } catch (e) {}
 
   var CAMPOS = [
     { id: 'accent', nome: 'Cor de destaque', dica: 'Botões, cards em destaque, calendário' },
@@ -135,7 +149,70 @@
     if (!ESTRUTURAS[estado.estrutura]) estado.estrutura = 'lateral';
     if (estado.estrutura === 'lateral') root.removeAttribute('data-estrutura');
     else root.setAttribute('data-estrutura', estado.estrutura);
+    if (COM_ICONES[estado.estrutura]) root.setAttribute('data-icones', ''); else root.removeAttribute('data-icones');
+    if (MENU_SOLTO[estado.estrutura]) root.setAttribute('data-solto', ''); else root.removeAttribute('data-solto');
+    // barra de rolagem do menu: escolha da pessoa; se não escolheu, some no Encaixado e no Onda
+    var mostrarScroll = estado.scrollMenu !== undefined ? !!estado.scrollMenu : !SEM_SCROLL_PADRAO[estado.estrutura];
+    if (mostrarScroll) root.removeAttribute('data-sem-scroll'); else root.setAttribute('data-sem-scroll', '');
+    aplicarImagem();
     if (typeof ajustarSaudacao === 'function') ajustarSaudacao();
+  }
+
+  // Véu automático: a claridade da imagem (medida ao escolher) decide o mínimo de véu.
+  // Modo claro → a parte MAIS ESCURA da imagem precisa ficar clara (letra escura legível).
+  // Modo escuro → a parte MAIS CLARA precisa ficar escura (letra clara legível).
+  // O controle "Véu" só acrescenta por cima desse mínimo; nunca deixa abaixo.
+  var ALVO_CLARO = 0.86, ALVO_ESCURO = 0.16;
+  function veuMinimo(m, st) {
+    if (!st) return m === 'light' ? 0.6 : 0.6;
+    if (m === 'light') return st.p10 >= ALVO_CLARO ? 0 : (ALVO_CLARO - st.p10) / (1 - st.p10);
+    return st.p90 <= ALVO_ESCURO ? 0 : 1 - ALVO_ESCURO / st.p90;
+  }
+  function aplicarImagem() {
+    var f = estado.fundoImg;
+    if (!imgFundo || !f) { root.removeAttribute('data-fundo-img'); return; }
+    root.setAttribute('data-fundo-img', '');
+    var camada = document.getElementById('tvFundoImg');
+    if (!camada && document.body) {
+      camada = document.createElement('div');
+      camada.id = 'tvFundoImg';
+      camada.innerHTML = '<div class="img"></div><div class="veu"></div>';
+      document.body.insertBefore(camada, document.body.firstChild);
+    }
+    if (!camada) return;
+    var im = camada.querySelector('.img');
+    if (im.__src !== imgFundo) { im.style.backgroundImage = 'url("' + imgFundo + '")'; im.__src = imgFundo; }
+    var m = modo();
+    var minimo = veuMinimo(m, f.stats);
+    var extra = Math.max(0, Math.min(100, Number(f.veu) || 0)) / 100;
+    var a = Math.min(1, minimo + (1 - minimo) * extra);
+    camada.style.setProperty('--tv-blur', (Number(f.blur) || 0) + 'px');
+    camada.style.setProperty('--tv-veu', m === 'light' ? 'rgba(255,255,255,' + a.toFixed(3) + ')' : 'rgba(0,0,0,' + a.toFixed(3) + ')');
+  }
+
+  // lê a imagem, reduz (para caber no navegador) e mede a claridade
+  function carregarImagem(arquivo, pronto) {
+    var leitor = new FileReader();
+    leitor.onload = function () {
+      var img = new Image();
+      img.onload = function () {
+        var max = 1920, w = img.width, h = img.height;
+        if (w > max) { h = Math.round(h * max / w); w = max; }
+        var cv = document.createElement('canvas'); cv.width = w; cv.height = h;
+        cv.getContext('2d').drawImage(img, 0, 0, w, h);
+        var url = cv.toDataURL('image/jpeg', 0.8);
+        if (url.length > 2600000) url = cv.toDataURL('image/jpeg', 0.6);
+        // claridade: imagem pequena (já "desfocada") → percentis 10% e 90%
+        var p = document.createElement('canvas'); p.width = 40; p.height = 40;
+        var px = p.getContext('2d'); px.drawImage(img, 0, 0, 40, 40);
+        var d = px.getImageData(0, 0, 40, 40).data, vals = [];
+        for (var i = 0; i < d.length; i += 4) vals.push((0.2126 * d[i] + 0.7152 * d[i + 1] + 0.0722 * d[i + 2]) / 255);
+        vals.sort(function (x, y) { return x - y; });
+        pronto(url, { p10: vals[Math.floor(vals.length * 0.04)], p90: vals[Math.floor(vals.length * 0.96)] });
+      };
+      img.src = leitor.result;
+    };
+    leitor.readAsDataURL(arquivo);
   }
 
   // aplica já (antes da página desenhar) e de novo se o modo claro/escuro mudar
@@ -234,9 +311,18 @@
         return '<button class="tv-estrutura" data-estrutura="' + k + '"><div class="tv-lay tv-lay-' + k + '"><i class="m"></i><i class="a"></i><i class="b"></i><i class="c"></i></div>' +
           '<b>' + ESTRUTURAS[k].nome + '</b><span>' + ESTRUTURAS[k].desc + '</span></button>';
       }).join('') + '</div>' +
+      '<label class="tv-check"><input type="checkbox" id="tvScrollMenu"> Mostrar barra de rolagem no menu<small>Sem ela, o menu continua rolando com a rodinha do mouse</small></label>' +
       '<div class="tv-sec">Cores</div><div class="tv-estilos">' + estilosHtml + '</div>' +
       '<div class="tv-sec">Modo</div><div class="tv-modo"><button data-modo="light">☀ Claro</button><button data-modo="dark">☾ Escuro</button></div>' +
       '<div class="tv-sec">Personalizar cores <span style="text-transform:none;letter-spacing:0;font-weight:500" id="tvModoNome"></span></div>' + coresHtml +
+      '<div class="tv-sec">Imagem de fundo</div>' +
+      '<div class="tv-img"><label class="tv-img-btn"><i class="fa-solid fa-image"></i> <span id="tvImgTxt">Escolher imagem</span><input type="file" accept="image/*" id="tvImgArq" hidden></label>' +
+      '<button data-img-remover>Remover</button></div>' +
+      '<div id="tvImgCtrl">' +
+      '<div class="tv-range"><label>Desfoque <small id="tvImgBlurVal" style="color:#6b6b6b;font-weight:500"></small></label><input type="range" min="0" max="40" step="1" id="tvImgBlur"></div>' +
+      '<div class="tv-range"><label>Véu extra <small id="tvImgVeuVal" style="color:#6b6b6b;font-weight:500"></small></label><input type="range" min="0" max="90" step="1" id="tvImgVeu"></div>' +
+      '<div class="tv-nota" style="margin-top:2px">O texto fica sempre legível: o sistema mede a imagem e põe sozinho o véu mínimo (claro no modo claro, escuro no modo escuro). O "véu extra" só aumenta.</div>' +
+      '</div>' +
       '<div class="tv-range"><label>Cantos arredondados <small id="tvCantosVal" style="color:#6b6b6b;font-weight:500"></small></label><input type="range" min="0" max="32" step="1" id="tvCantos"></div>' +
       '<div class="tv-acoes"><button data-reset-cores>Limpar minhas cores</button><button data-reset-tudo>Voltar ao original</button></div>' +
       '<div class="tv-nota">Dica: as cores personalizadas valem para o modo (claro ou escuro) que estiver ativo.</div>';
@@ -252,7 +338,9 @@
       if (t.dataset.modo && t.dataset.modo !== modo() && typeof window.toggleTheme === 'function') window.toggleTheme();
       if (t.dataset.limpar) { delete estado.custom[modo()][t.dataset.limpar]; salvar(); aplicar(); redesenhar(); sincronizarPainel(); }
       if (t.hasAttribute('data-reset-cores')) { estado.custom[modo()] = {}; salvar(); aplicar(); redesenhar(); sincronizarPainel(); }
+      if (t.hasAttribute('data-img-remover')) removerImagem();
       if (t.hasAttribute('data-reset-tudo')) {
+        removerImagem();
         estado = { estilo: 'original', custom: { dark: {}, light: {} } };
         salvar(); aplicar(); redesenhar(); sincronizarPainel();
       }
@@ -260,17 +348,54 @@
     painel.addEventListener('input', function (ev) {
       var t = ev.target;
       if (t.dataset.cor) { estado.custom[modo()][t.dataset.cor] = t.value; salvar(); aplicar(); marcarLimpar(); }
+      if (t.id === 'tvScrollMenu') { estado.scrollMenu = t.checked; salvar(); aplicar(); }
+      if ((t.id === 'tvImgBlur' || t.id === 'tvImgVeu') && estado.fundoImg) {
+        estado.fundoImg[t.id === 'tvImgBlur' ? 'blur' : 'veu'] = Number(t.value);
+        salvar(); aplicarImagem(); textosImagem();
+      }
       if (t.id === 'tvCantos') {
         estado.cantos = t.value; salvar(); aplicar();
         painel.querySelector('#tvCantosVal').textContent = t.value === '0' ? '· retos' : '· ' + t.value + 'px';
       }
     });
-    painel.addEventListener('change', function (ev) { if (ev.target.dataset.cor) redesenhar(); });
+    painel.addEventListener('change', function (ev) {
+      if (ev.target.dataset.cor) redesenhar();
+      if (ev.target.id === 'tvImgArq' && ev.target.files[0]) {
+        var arq = ev.target.files[0];
+        ev.target.value = '';
+        painel.querySelector('#tvImgTxt').textContent = 'Carregando…';
+        carregarImagem(arq, function (url, stats) {
+          try { localStorage.setItem(CHAVE_IMG, url); }
+          catch (e) {
+            painel.querySelector('#tvImgTxt').textContent = 'Escolher imagem';
+            alert('Essa imagem é grande demais para guardar no navegador. Tente uma menor (até uns 2 MB).');
+            return;
+          }
+          imgFundo = url;
+          var antes = estado.fundoImg || {};
+          estado.fundoImg = { blur: antes.blur !== undefined ? antes.blur : 12, veu: antes.veu || 0, stats: stats };
+          salvar(); aplicar(); sincronizarPainel();
+        });
+      }
+    });
 
     document.addEventListener('mousedown', function (ev) {
       if (painel.classList.contains('aberto') && !painel.contains(ev.target) && !ev.target.closest('.tv-btn')) fechar();
     });
     document.addEventListener('keydown', function (ev) { if (ev.key === 'Escape') fechar(); });
+  }
+
+  function removerImagem() {
+    try { localStorage.removeItem(CHAVE_IMG); } catch (e) {}
+    imgFundo = null;
+    delete estado.fundoImg;
+    salvar(); aplicarImagem(); sincronizarPainel();
+  }
+  function textosImagem() {
+    if (!painel) return;
+    var f = estado.fundoImg || {};
+    painel.querySelector('#tvImgBlurVal').textContent = '· ' + (f.blur || 0) + 'px';
+    painel.querySelector('#tvImgVeuVal').textContent = '· +' + (f.veu || 0) + '%';
   }
 
   function marcarLimpar() {
@@ -292,6 +417,16 @@
       painel.querySelector('#tvCantos').value = r;
       painel.querySelector('#tvCantosVal').textContent = temCantos ? (r === 0 ? '· retos' : '· ' + r + 'px') : '';
       painel.querySelectorAll('.tv-estrutura').forEach(function (b) { b.classList.toggle('on', b.dataset.estrutura === estado.estrutura); });
+      painel.querySelector('#tvScrollMenu').checked = !root.hasAttribute('data-sem-scroll');
+      var temImg = !!(imgFundo && estado.fundoImg);
+      painel.querySelector('#tvImgCtrl').style.display = temImg ? '' : 'none';
+      painel.querySelector('[data-img-remover]').style.display = temImg ? '' : 'none';
+      painel.querySelector('#tvImgTxt').textContent = temImg ? 'Trocar imagem' : 'Escolher imagem';
+      if (temImg) {
+        painel.querySelector('#tvImgBlur').value = estado.fundoImg.blur || 0;
+        painel.querySelector('#tvImgVeu').value = estado.fundoImg.veu || 0;
+        textosImagem();
+      }
       marcarLimpar();
     });
   }
@@ -428,7 +563,7 @@
   }
   registrarGraficos();
 
-  function iniciar() { converterCssDoSistema(); registrarGraficos(); montarPainel(); montarBotao(); sincronizarPainel(); vigiarSaudacao(); }
+  function iniciar() { aplicarImagem(); converterCssDoSistema(); registrarGraficos(); montarPainel(); montarBotao(); sincronizarPainel(); vigiarSaudacao(); }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', iniciar);
   else iniciar();
 })();

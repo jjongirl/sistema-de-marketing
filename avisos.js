@@ -204,7 +204,10 @@
     btn.disabled = true; txt.textContent = 'Enviando...';
     usr.getIdToken().then(function (tk) {
       return fetch('/api/avisos-diarios?teste=1', { method: 'POST', headers: { Authorization: 'Bearer ' + tk } });
-    }).then(function (r) { return r.json().catch(function () { return { ok: false, erro: 'resposta inválida (' + r.status + ')' }; }); })
+    }).then(function (r) {
+      if (r.status === 404) return { ok: false, erro: 'o envio de avisos ainda não está publicado no site. Falta enviar o arquivo api/avisos-diarios.js (dentro da pasta "api") para o GitHub.' };
+      return r.json().catch(function () { return { ok: false, erro: 'resposta inválida (' + r.status + ')' }; });
+    })
       .then(function (d) {
         btn.disabled = false;
         txt.textContent = d.ok ? 'Enviado para ' + (d.para || 'o seu e-mail') + '. Confira a caixa de entrada (e o spam).' : 'Não foi: ' + (d.erro || 'erro desconhecido');

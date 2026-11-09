@@ -449,42 +449,42 @@ html[data-estilo="papel"] .stat-card:hover{transform:none}
 @media (min-width:769px){
 
   /* ---------- Menu flutuante ---------- */
-  html[data-estrutura="flutuante"] .sidebar{
+  html[data-solto] .sidebar{
     top:14px;left:14px;bottom:14px;border-radius:var(--radius-xl);overflow:hidden;
     border:0;box-shadow:0 20px 50px -18px color-mix(in srgb,var(--sb-solid,#000) 75%,transparent);
   }
-  html[data-estrutura="flutuante"] .main-content{margin-left:calc(var(--sidebar-w) + 14px)}
-  html[data-estrutura="flutuante"] .topbar{margin:14px 14px 0;border-radius:var(--radius-lg);top:14px}
-  html[data-estrutura="flutuante"] .tv-painel{left:calc(var(--sidebar-w) + 28px)}
+  html[data-solto] .main-content{margin-left:calc(var(--sidebar-w) + 14px)}
+  html[data-solto] .topbar{margin:14px 14px 0;border-radius:var(--radius-lg);top:14px}
+  html[data-solto] .tv-painel{left:calc(var(--sidebar-w) + 28px)}
 
   /* ---------- Só ícones (abre ao passar o mouse) ---------- */
-  html[data-estrutura="compacto"]{--sidebar-w:76px}
-  html[data-estrutura="compacto"] .sidebar{
+  html[data-icones]{--sidebar-w:76px}
+  html[data-icones] .sidebar{
     width:76px;min-width:76px;overflow:hidden;
     transition:width .22s ease,min-width .22s ease,box-shadow .22s ease;
   }
-  html[data-estrutura="compacto"] .sidebar:hover{width:250px;min-width:250px;box-shadow:12px 0 40px -12px rgba(0,0,0,.45)}
+  html[data-icones] .sidebar:hover{width:250px;min-width:250px;box-shadow:12px 0 40px -12px rgba(0,0,0,.45)}
   /* fechado */
-  html[data-estrutura="compacto"] .sidebar:not(:hover) .logo-text,
-  html[data-estrutura="compacto"] .sidebar:not(:hover) .category-filter,
-  html[data-estrutura="compacto"] .sidebar:not(:hover) .user-info,
-  html[data-estrutura="compacto"] .sidebar:not(:hover) .nav-item i ~ i{display:none}
-  html[data-estrutura="compacto"] .sidebar:not(:hover) .sidebar-logo{justify-content:center;padding-left:0;padding-right:0}
-  html[data-estrutura="compacto"] .sidebar:not(:hover) .sidebar-nav{padding:10px 12px}
-  html[data-estrutura="compacto"] .sidebar:not(:hover) .nav-section-label{
+  html[data-icones] .sidebar:not(:hover) .logo-text,
+  html[data-icones] .sidebar:not(:hover) .category-filter,
+  html[data-icones] .sidebar:not(:hover) .user-info,
+  html[data-icones] .sidebar:not(:hover) .nav-item i ~ i{display:none}
+  html[data-icones] .sidebar:not(:hover) .sidebar-logo{justify-content:center;padding-left:0;padding-right:0}
+  html[data-icones] .sidebar:not(:hover) .sidebar-nav{padding:10px 12px}
+  html[data-icones] .sidebar:not(:hover) .nav-section-label{
     font-size:0;padding:0;height:1px;margin:12px 8px;background:var(--border-default);
   }
-  html[data-estrutura="compacto"] .sidebar:not(:hover) .nav-item{
+  html[data-icones] .sidebar:not(:hover) .nav-item{
     font-size:0;justify-content:center;padding:12px 0;gap:0;
   }
-  html[data-estrutura="compacto"] .sidebar:not(:hover) .nav-item > i:first-child{font-size:16px;width:auto}
-  html[data-estrutura="compacto"] .sidebar:not(:hover) .nav-badge{
+  html[data-icones] .sidebar:not(:hover) .nav-item > i:first-child{font-size:16px;width:auto}
+  html[data-icones] .sidebar:not(:hover) .nav-badge{
     position:absolute;top:3px;right:4px;font-size:9px;min-width:16px;padding:1px 4px;margin:0;
   }
-  html[data-estrutura="compacto"] .sidebar:not(:hover) .sidebar-bottom{flex-direction:column;gap:6px;padding:12px 0}
-  html[data-estrutura="compacto"] .sidebar .nav-item{white-space:nowrap}
-  html[data-estrutura="compacto"] .sidebar-nav{overflow-x:hidden}
-  html[data-estrutura="compacto"] .tv-painel{left:calc(76px + 12px)}
+  html[data-icones] .sidebar:not(:hover) .sidebar-bottom{flex-direction:column;gap:6px;padding:12px 0}
+  html[data-icones] .sidebar .nav-item{white-space:nowrap}
+  html[data-icones] .sidebar-nav{overflow-x:hidden}
+  html[data-icones] .tv-painel{left:calc(76px + 12px)}
 
   /* ---------- Menu no topo ---------- */
   html[data-estrutura="topo"]{--sidebar-w:0px;--menu-h:64px}
@@ -513,7 +513,195 @@ html[data-estilo="papel"] .stat-card:hover{transform:none}
   html[data-estrutura="topo"] .topbar{top:var(--menu-h)}
   html[data-estrutura="topo"] .tv-painel{left:auto;right:14px;top:calc(var(--menu-h) + 10px);bottom:auto;max-height:calc(100vh - var(--menu-h) - 24px)}
   html[data-estrutura="topo"] .page-content{max-width:1440px;margin:0 auto;width:100%}
+
+  /* ---------- Onda: só ícones numa faixa com curvas em cima e embaixo ---------- */
+  html[data-estrutura="onda"] .sidebar{
+    border-right:0;box-shadow:none;padding:64px 0;
+    -webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cpath d='M0 0 C0 55 100 40 100 100 H0Z'/%3E%3C/svg%3E"),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cpath d='M0 0 H100 C100 60 0 45 0 100Z'/%3E%3C/svg%3E"),linear-gradient(#000,#000);
+    mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cpath d='M0 0 C0 55 100 40 100 100 H0Z'/%3E%3C/svg%3E"),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cpath d='M0 0 H100 C100 60 0 45 0 100Z'/%3E%3C/svg%3E"),linear-gradient(#000,#000);
+    -webkit-mask-position:top,bottom,center;mask-position:top,bottom,center;
+    -webkit-mask-size:100% 70px,100% 70px,100% calc(100% - 139px);mask-size:100% 70px,100% 70px,100% calc(100% - 139px);
+    -webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;
+  }
+  html[data-estrutura="onda"] .sidebar:hover{box-shadow:none}
+  html[data-estrutura="onda"] .sidebar .sidebar-logo{padding-top:4px}
+  html[data-estrutura="onda"] .sidebar .nav-item.active > i:first-child{color:var(--onda-ativo,currentColor)}
+  html[data-estrutura="onda"] .sidebar:not(:hover) .nav-item.active{box-shadow:inset 0 0 0 1.5px var(--onda-ativo,currentColor)}
+  html[data-estrutura="onda"] .main-content{margin-left:calc(var(--sidebar-w) + 6px)}
+  /* 2º card com "abas empilhadas" atrás */
+  html[data-estrutura="onda"] .stat-grid{padding-top:14px}
+  html[data-estrutura="onda"] .stat-grid > .stat-card:nth-child(2){
+    overflow:visible;
+    box-shadow:0 -7px 0 -1px var(--accent-blue),0 -14px 0 -3px color-mix(in srgb,var(--accent-blue) 55%,#000),var(--shadow-md);
+  }
+
+  /* ---------- Encaixado: item ativo "encaixa" no fundo da página ---------- */
+  html[data-estrutura="encaixe"] .sidebar-nav{padding-right:0}
+  html[data-estrutura="encaixe"] .sidebar .nav-item{border-radius:var(--radius-md) 0 0 var(--radius-md)}
+  html[data-estrutura="encaixe"] .sidebar .nav-item.active{
+    background:var(--tv-pagina-bg);color:var(--tv-pagina-fg);font-weight:700;overflow:visible;
+  }
+  html[data-fundo-img][data-estrutura="encaixe"] .sidebar .nav-item.active{background:var(--tv-pagina-card)}
+  html[data-estrutura="encaixe"] .sidebar .nav-item.active > i{color:var(--accent-blue)}
+  html[data-estrutura="encaixe"] .sidebar .nav-item.active .nav-badge{background:var(--accent-blue);color:var(--on-accent,#fff)}
+  html[data-estrutura="encaixe"] .sidebar .nav-item.active::before,
+  html[data-estrutura="encaixe"] .sidebar .nav-item.active::after{
+    content:'' !important;display:block !important;position:absolute;left:auto;right:0;width:16px;height:16px;
+    background:transparent !important;border-radius:0;pointer-events:none;
+  }
+  html[data-estrutura="encaixe"] .sidebar .nav-item.active::before{top:-16px;bottom:auto;border-bottom-right-radius:12px;box-shadow:5px 5px 0 5px var(--tv-pagina-bg)}
+  html[data-estrutura="encaixe"] .sidebar .nav-item.active::after{bottom:-16px;top:auto;border-top-right-radius:12px;box-shadow:5px -5px 0 5px var(--tv-pagina-bg)}
+  html[data-fundo-img][data-estrutura="encaixe"] .sidebar .nav-item.active::before{box-shadow:5px 5px 0 5px var(--tv-pagina-card)}
+  html[data-fundo-img][data-estrutura="encaixe"] .sidebar .nav-item.active::after{box-shadow:5px -5px 0 5px var(--tv-pagina-card)}
+  html[data-estrutura="encaixe"] .stat-card .stat-icon,
+  html[data-estrutura="encaixe"] .stat-card > i:first-child{border-radius:var(--radius-md)}
+
+  /* ---------- Vidro: menu solto + cards de vidro fosco ---------- */
+  html[data-estrutura="vidro"] .topbar{background:transparent;backdrop-filter:none;border-bottom-color:transparent}
+  html[data-estrutura="vidro"] .btn,
+  html[data-estrutura="vidro"] .icon-btn{border-radius:var(--pill)}
 }
+
+/* Vidro: cards translúcidos (vale também no celular) */
+html[data-estrutura="vidro"] .card,
+html[data-estrutura="vidro"] .stat-card:not(:first-child),
+html[data-estrutura="vidro"] .kanban-col,
+html[data-estrutura="vidro"] .search-bar,
+html[data-estrutura="vidro"] .icon-btn{
+  background:color-mix(in srgb,var(--bg-card) 72%,transparent);
+  backdrop-filter:blur(18px) saturate(1.3);-webkit-backdrop-filter:blur(18px) saturate(1.3);
+  border-color:color-mix(in srgb,var(--bg-card) 60%,transparent);
+}
+html[data-estrutura="vidro"][data-layout="ref"] .stat-grid > .stat-card:nth-child(2){background:color-mix(in srgb,var(--bg-card) 72%,transparent)}
+
+/* Encaixado: fundo liso (sem degradê) para o item ativo ter exatamente a cor da página */
+@media (min-width:769px){html[data-estrutura="encaixe"] body{background:var(--bg-base) !important}}
+
+/* menu sem barra de rolagem (continua rolando com a rodinha / touchpad) */
+html[data-sem-scroll] .sidebar-nav{scrollbar-width:none;-ms-overflow-style:none}
+html[data-sem-scroll] .sidebar-nav::-webkit-scrollbar{display:none;width:0}
+
+/* cores "da página" guardadas antes do menu trocar as variáveis dele */
+html{--tv-pagina-bg:var(--bg-base);--tv-pagina-fg:var(--text-primary);--tv-pagina-card:var(--bg-card)}
+
+/* ============================================================
+   3b2. IMAGEM DE FUNDO (qualquer layout)
+   O véu é calculado pela claridade da imagem: no modo claro a
+   imagem fica clara o bastante para letra escura; no escuro,
+   escura o bastante para letra clara. Sempre legível.
+============================================================ */
+html[data-fundo-img][data-fundo-img],
+html[data-fundo-img][data-fundo-img] body{background:transparent !important}
+#tvFundoImg{position:fixed;inset:0;z-index:-1;overflow:hidden;pointer-events:none;display:none}
+html[data-fundo-img] #tvFundoImg{display:block}
+#tvFundoImg .img{position:absolute;inset:calc(var(--tv-blur,0px) * -2.5);background-size:cover;background-position:center;filter:blur(var(--tv-blur,0px))}
+#tvFundoImg .veu{position:absolute;inset:0;background:var(--tv-veu,transparent)}
+html[data-fundo-img] .topbar{background:color-mix(in srgb,var(--bg-base) 55%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+html[data-fundo-img][data-estrutura="vidro"] .topbar{background:transparent;backdrop-filter:none}
+/* texto que fica direto em cima da imagem ganha um "halo" suave */
+html[data-fundo-img] .section-title,
+html[data-fundo-img] .section-subtitle,
+html[data-fundo-img] .topbar-title,
+html[data-fundo-img] .topbar-clock{text-shadow:0 0 18px var(--tv-halo),0 0 4px var(--tv-halo)}
+html[data-fundo-img][data-theme="light"]{--tv-halo:rgba(255,255,255,.9)}
+html[data-fundo-img][data-theme="dark"]{--tv-halo:rgba(0,0,0,.85)}
+
+/* ============================================================
+   3b3. NOVOS MODELOS DE COR
+============================================================ */
+/* ---------- Roxo e menta (combina com o layout Onda) ---------- */
+html[data-estilo="onda"]{
+  --font-title:'Outfit',sans-serif;
+  --sb-bg:linear-gradient(180deg,#7B3BFF 0%,#5B2BE0 100%); --sb-solid:#6A33F0;
+  --feat1-bg:linear-gradient(180deg,#5B4BFF 0%,#33287F 100%);
+  --dot:#2EC4A0; --onda-ativo:#7CF5D2;
+}
+html[data-estilo="onda"][data-theme="light"]{
+  --bg-base:#F6F5FB; --bg-surface:#FFFFFF; --bg-elevated:#F1EFF9; --bg-card:#FFFFFF; --bg-hover:#ECE8FB;
+  --bg-modal:rgba(246,245,251,.9);
+  --border-subtle:rgba(91,75,255,.08); --border-default:rgba(91,75,255,.14); --border-strong:rgba(91,75,255,.25);
+  --text-primary:#231D4F; --text-secondary:#555178; --text-muted:#706C93;
+  --accent-blue:#5B4BFF; --text-accent:#5B4BFF;
+  --shadow-sm:0 1px 2px rgba(108,59,245,.06); --shadow-md:0 10px 26px -12px rgba(108,59,245,.3); --shadow-lg:0 20px 50px -16px rgba(108,59,245,.35);
+  --feat2-bg:linear-gradient(160deg,#ffffff 0%,#ECE8FF 100%);
+  --card-edge:transparent;
+}
+html[data-estilo="onda"][data-theme="dark"]{
+  --bg-base:#100E1F; --bg-surface:#17142B; --bg-elevated:#221E3E; --bg-card:#1B1833; --bg-hover:#2A2550;
+  --bg-modal:rgba(16,14,31,.9);
+  --text-primary:#F1EFFF; --text-secondary:#B3AED6; --text-muted:#8C86B5;
+  --accent-blue:#9C8BFF; --text-accent:#9C8BFF; --on-accent:#100E1F;
+  --sb-bg:linear-gradient(180deg,#4B22B8 0%,#2E1580 100%); --sb-solid:#3A1B9A;
+  --feat1-bg:linear-gradient(180deg,#6B5BFF 0%,#33287F 100%);
+  --feat2-bg:linear-gradient(160deg,#221E3E,#2F2A5C);
+}
+
+/* ---------- Marinho e coral (combina com o layout Encaixado) ---------- */
+html[data-estilo="marinho"]{
+  --font-title:'Plus Jakarta Sans',sans-serif;
+  --sb-bg:#14296E; --sb-solid:#14296E;
+  --feat1-bg:linear-gradient(160deg,#F2545B 0%,#C9353D 100%);
+  --dot:#F2545B;
+}
+html[data-estilo="marinho"][data-theme="light"]{
+  --bg-base:#EEF1F8; --bg-surface:#FFFFFF; --bg-elevated:#F4F6FB; --bg-card:#FFFFFF; --bg-hover:#E6EBF6;
+  --bg-modal:rgba(238,241,248,.9);
+  --border-subtle:rgba(20,41,110,.07); --border-default:rgba(20,41,110,.12); --border-strong:rgba(20,41,110,.22);
+  --text-primary:#14296E; --text-secondary:#4E5A80; --text-muted:#6A7396;
+  --accent-blue:#14296E; --text-accent:#C9353D;
+  --shadow-sm:0 1px 2px rgba(20,41,110,.06); --shadow-md:0 10px 28px -14px rgba(20,41,110,.28); --shadow-lg:0 20px 50px -16px rgba(20,41,110,.35);
+  --feat2-bg:linear-gradient(160deg,#ffffff 0%,#FFE3DA 100%);
+  --card-edge:transparent;
+}
+html[data-estilo="marinho"][data-theme="dark"]{
+  --bg-base:#0A1330; --bg-surface:#0F1A3F; --bg-elevated:#16245A; --bg-card:#111D47; --bg-hover:#1C2C6A;
+  --bg-modal:rgba(10,19,48,.9);
+  --text-primary:#EEF2FF; --text-secondary:#A8B3D9; --text-muted:#8590BC;
+  --accent-blue:#FF7A80; --text-accent:#FF7A80; --on-accent:#0A1330;
+  --sb-bg:#0F1F57; --sb-solid:#0F1F57;
+  --feat2-bg:linear-gradient(160deg,#16245A,#22327A);
+}
+
+/* ---------- Preto e branco (combina com o layout Vidro) ---------- */
+html[data-estilo="preto"]{
+  --font-title:'Plus Jakarta Sans',sans-serif;
+  --feat1-bg:#111111; --feat1-fg:#ffffff; --dot:#111111;
+}
+html[data-estilo="preto"][data-theme="light"]{
+  --bg-base:#D6D6D6; --bg-surface:#F4F4F4; --bg-elevated:#F0F0F0; --bg-card:#FFFFFF; --bg-hover:#E8E8E8;
+  --bg-modal:rgba(214,214,214,.85);
+  --border-subtle:rgba(0,0,0,.06); --border-default:rgba(0,0,0,.12); --border-strong:rgba(0,0,0,.24);
+  --text-primary:#111111; --text-secondary:#3F3F3F; --text-muted:#555555;
+  --accent-blue:#111111; --text-accent:#111111; --on-accent:#ffffff;
+  --sb-bg:#FFFFFF; --sb-solid:#FFFFFF;
+  --shadow-sm:0 1px 2px rgba(0,0,0,.05); --shadow-md:0 10px 30px -14px rgba(0,0,0,.25); --shadow-lg:0 20px 50px -16px rgba(0,0,0,.35);
+  --feat2-bg:#FFFFFF; --head:#111111;
+  --card-edge:rgba(255,255,255,.6);
+}
+html[data-estilo="preto"][data-theme="dark"]{
+  --bg-base:#0F0F10; --bg-surface:#161618; --bg-elevated:#232326; --bg-card:#1C1C1F; --bg-hover:#2A2A2E;
+  --bg-modal:rgba(10,10,10,.9);
+  --border-subtle:rgba(255,255,255,.07); --border-default:rgba(255,255,255,.12);
+  --text-primary:#F2F2F2; --text-secondary:#B4B4B8; --text-muted:#8E8E94;
+  --accent-blue:#FFFFFF; --text-accent:#FFFFFF; --on-accent:#111111;
+  --sb-bg:#18181A; --sb-solid:#18181A;
+  --feat1-bg:#F2F2F2; --feat1-fg:#111111; --feat2-bg:#26262A; --dot:#FFFFFF;
+  --card-edge:rgba(255,255,255,.06);
+}
+html[data-estilo="preto"][data-theme="light"] body{
+  background:
+    radial-gradient(700px 500px at 18% 25%,#F5F5F5 0%,transparent 65%),
+    radial-gradient(600px 500px at 80% 15%,#C2C2C2 0%,transparent 65%),
+    radial-gradient(800px 600px at 60% 90%,#E6E6E6 0%,transparent 65%),
+    #D6D6D6;
+  background-attachment:fixed;
+}
+/* item ativo do menu = pílula na cor de destaque (preta, ou a que você escolher) */
+/* (no Encaixado não: lá o item ativo tem a cor da página, para "encaixar") */
+html[data-estilo="preto"]:not([data-estrutura="encaixe"]) .sidebar .nav-item.active{background:var(--accent-blue);color:var(--on-accent,#fff)}
+html[data-estilo="preto"]:not([data-estrutura="encaixe"]) .sidebar .nav-item.active i{color:inherit}
+html[data-estilo="preto"]:not([data-estrutura="encaixe"]) .sidebar .nav-item.active .nav-badge{background:var(--on-accent,#fff);color:var(--accent-blue)}
+html[data-estilo="preto"] .btn{border-radius:var(--pill)}
 
 /* ============================================================
    3c. RODAPÉ DO MENU — só foto + botões (nome, e-mail e o
@@ -524,7 +712,7 @@ html[data-estilo="papel"] .stat-card:hover{transform:none}
 .sidebar-bottom{justify-content:flex-start;gap:6px}
 .sidebar-bottom .user-avatar{cursor:pointer;margin-right:auto;transition:box-shadow var(--trans)}
 .sidebar-bottom .user-avatar:hover{box-shadow:0 0 0 2px var(--text-primary)}
-html[data-estrutura="compacto"] .sidebar:not(:hover) .sidebar-bottom .user-avatar{margin-right:0}
+html[data-icones] .sidebar:not(:hover) .sidebar-bottom .user-avatar{margin-right:0}
 
 /* ============================================================
    3d. LEGIBILIDADE — texto sempre com contraste sobre a cor
@@ -725,6 +913,20 @@ html[data-estilo] #page-aprovacoes .ec-rodape{border-top:0;padding:4px 2px 10px}
 .tv-lay-compacto .a{left:15%;top:6px;width:38%;height:12px}.tv-lay-compacto .b{left:57%;top:6px;width:37%;height:12px}.tv-lay-compacto .c{left:15%;top:22px;width:79%;height:14px}
 .tv-lay-topo .m{left:0;right:0;top:0;height:9px;border-radius:0}
 .tv-lay-topo .a{left:6%;top:14px;width:42%;height:10px}.tv-lay-topo .b{left:52%;top:14px;width:42%;height:10px}.tv-lay-topo .c{left:6%;top:27px;width:88%;height:10px}
+.tv-lay-onda .m{left:0;top:6px;bottom:6px;width:10%;border-radius:0 8px 8px 0;background:linear-gradient(#7B3BFF,#5B2BE0)}
+.tv-lay-onda .a{left:16%;top:6px;width:36%;height:12px}.tv-lay-onda .b{left:56%;top:6px;width:38%;height:12px}.tv-lay-onda .c{left:16%;top:22px;width:22%;height:16px;background:linear-gradient(#5B4BFF,#33287F)}
+.tv-lay-encaixe .m{left:4px;top:4px;bottom:4px;width:22%;background:#14296E}
+.tv-lay-encaixe .a{left:12%;top:12px;width:16%;height:7px;border-radius:3px 0 0 3px;background:#EEF0F4;box-shadow:none}.tv-lay-encaixe .b{left:32%;top:6px;width:62%;height:12px}.tv-lay-encaixe .c{left:32%;top:22px;width:62%;height:14px}
+.tv-lay-vidro{background:linear-gradient(135deg,#f2f2f2,#8e8e8e)}
+.tv-lay-vidro .m{left:4px;top:4px;bottom:4px;width:20%;background:#fff}
+.tv-lay-vidro .a{left:30%;top:6px;width:30%;height:14px;background:#111}.tv-lay-vidro .b{left:64%;top:6px;width:30%;height:14px;background:rgba(255,255,255,.55)}.tv-lay-vidro .c{left:30%;top:24px;width:64%;height:12px;background:rgba(255,255,255,.55)}
+.tv-check{display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px;margin-top:10px;font-size:12.5px;font-weight:600;cursor:pointer}
+.tv-check input{accent-color:#14181f;width:15px;height:15px;margin:0}
+.tv-check small{flex-basis:100%;padding-left:23px;font-size:10.5px;color:#6b6b6b;font-weight:400}
+.tv-img{display:flex;gap:8px}
+.tv-img .tv-img-btn,.tv-img button{flex:1;border:1px solid #E0E0E0;background:#fff;border-radius:10px;padding:9px;font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;color:#14181f;text-align:center}
+.tv-img .tv-img-btn{background:#14181f;color:#fff;border-color:#14181f}
+.tv-img button{flex:0 0 auto;padding:9px 14px}
 .tv-btn{
   width:28px;height:28px;border-radius:8px;flex-shrink:0;
   background:var(--bg-elevated);border:1px solid var(--border-subtle);
