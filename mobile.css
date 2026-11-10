@@ -1,0 +1,110 @@
+/* ============================================================
+   AJUSTES PARA CELULAR (iPhone / Android)
+   Carregado por último no index.html para valer sobre o resto.
+============================================================ */
+
+/* Respeita a área do relógio/entalhe quando instalado na tela de início */
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+
+@media (max-width:768px){
+
+  /* --- Nada pode ser mais largo que a tela --- */
+  html,body{max-width:100%;overflow-x:hidden}
+  @supports (overflow:clip){html,body{overflow-x:clip}}
+  .app-layout{width:100%;max-width:100vw}
+  .main-content{min-width:0;width:100%;max-width:100vw;margin-left:0 !important}
+  .page-content{padding:16px 14px calc(16px + env(safe-area-inset-bottom))}
+
+  /* Blocos de layout podem encolher (padrão "auto" fazia estourar).
+     Quadros que rolam de lado (kanban, linha do tempo) mantêm a largura. */
+  .page-content > *,
+  .page-content [style*="grid-template-columns"] > *,
+  .dash-grid > *,.grid-2 > *,.grid-3 > *,.grid-4 > *,.stat-grid > *,
+  .dash-right > *,.dash-left > *,.card,.form-row > *,.form-row-3 > *,.form-group{min-width:0}
+  .stat-value{font-size:clamp(20px,6.4vw,28px) !important;overflow-wrap:anywhere}
+  .page-content img,.page-content video,.page-content canvas,.page-content iframe,.page-content table{max-width:100%}
+  .page-content canvas{height:auto}
+
+  /* Grades com colunas fixas escritas direto no HTML/JS viram 1 coluna */
+  .page-content [style*="grid-template-columns"]{grid-template-columns:1fr !important}
+  .page-content [style*="width:"][style*="px"]:not(i):not(span):not(.nav-badge){max-width:100% !important}
+  .dash-grid,.grid-2,.grid-3,.grid-4,.form-row,.form-row-3,.dash-right,.dash-left{grid-template-columns:1fr !important}
+  .stat-grid{grid-template-columns:repeat(2,minmax(0,1fr)) !important;gap:10px}
+
+  /* Tabelas e quadros largos rolam dentro do próprio card */
+  .table-wrap,.kanban,.kanban-board,.board,.tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .page-content table{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch}
+
+  /* --- Barra do topo --- */
+  .topbar{
+    padding:0 12px;gap:8px;
+    padding-top:env(safe-area-inset-top);
+    height:calc(var(--topbar-h) + env(safe-area-inset-top));
+  }
+  #sidebarToggle{display:flex !important;flex-shrink:0}
+  .topbar-title{
+    font-size:14px;min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;
+  }
+  .topbar-title span{display:none}
+  .topbar-clock{display:none !important}
+  .topbar > .search-bar{display:none}
+  .topbar.busca-aberta > .search-bar{
+    display:flex;position:absolute;left:12px;right:12px;
+    top:calc(env(safe-area-inset-top) + 8px);width:auto !important;z-index:2;
+  }
+  .topbar-actions{flex-shrink:0;gap:6px}
+  .icon-btn{width:38px;height:38px}
+  .mob-busca-btn{display:flex !important}
+
+  /* Barras de busca dentro das páginas ocupam a linha toda */
+  .page-content .search-bar{width:100% !important;margin-left:0 !important}
+  .section-header{flex-wrap:wrap;gap:10px}
+  .section-header > *{max-width:100%}
+  /* Linhas de botões/etiquetas quebram para a linha de baixo */
+  .page-content div[style*="display:flex"]:not([style*="column"]):not(.kanban-board),
+  .section-header > div,.pauta-footer,.ec-topo-in,.ec-topo-dir,.ec-abas{flex-wrap:wrap}
+  .ec-topo-dir,.ec-abas{max-width:100%}
+
+  /* Calendário do mês: 7 colunas iguais, eventos cortados com "…" */
+  .cal-grid-month{grid-template-columns:repeat(7,minmax(0,1fr)) !important}
+  .cal-grid-month > *{min-width:0;overflow:hidden}
+  .cal-grid-month > * *{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .cal-grid-header{padding:6px 2px;font-size:9px}
+
+  /* --- Menu lateral vira gaveta --- */
+  .sidebar{
+    width:min(84vw,300px) !important;z-index:1000;
+    padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom);
+    transition:transform .25s ease;
+  }
+  .mob-veu{
+    position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:999;
+    opacity:0;pointer-events:none;transition:opacity .25s ease;
+  }
+  body.menu-aberto .mob-veu{opacity:1;pointer-events:auto}
+  body.menu-aberto{overflow:hidden}
+  .nav-item{padding-top:11px;padding-bottom:11px}
+
+  /* --- Janelas (modais) ocupam a tela --- */
+  .modal-overlay{padding:12px;padding-top:calc(12px + env(safe-area-inset-top))}
+  .modal{
+    width:100% !important;max-width:100% !important;padding:20px 16px;
+    max-height:calc(100dvh - 24px - env(safe-area-inset-top));
+  }
+  .modal *{min-width:0}
+  .modal [style*="grid-template-columns"]{grid-template-columns:1fr !important}
+  .modal-footer{flex-wrap:wrap}
+
+  /* Campos com fonte >=16px: o iPhone não dá zoom ao tocar */
+  input,select,textarea{font-size:16px !important}
+
+  /* Botões flutuantes acima da barra do iPhone */
+  .fab-area{bottom:calc(16px + env(safe-area-inset-bottom)) !important}
+
+  /* Login */
+  .login-gate{padding:16px}
+  .login-box{padding:30px 20px}
+}
+
+/* Botão de busca só aparece no celular */
+.mob-busca-btn{display:none}
