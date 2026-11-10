@@ -1510,6 +1510,7 @@ textarea.form-control{resize:vertical;min-height:80px}
 <script src="avisos-regras.js"></script>
 <script src="avisos.js"></script>
 <script src="mobile.js"></script>
+<script src="sincronia.js"></script>
 </head>
 <body>
 
@@ -3329,7 +3330,18 @@ try {
   if (!firebase.apps.length) firebaseApp = firebase.initializeApp(FIREBASE_CONFIG);
   else firebaseApp = firebase.apps[0];
   fdb = firebase.firestore();
-  fdb.settings({ merge: true });
+  // No app instalado do iPhone (tela de início) a conexão em tempo real
+  // padrão costuma travar e o sistema abria vazio. Lá usamos "long polling",
+  // que é a alternativa recomendada pelo Firebase e funciona em qualquer rede.
+  const APP_INSTALADO = (window.navigator.standalone === true) ||
+    (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches);
+  const IOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  if (APP_INSTALADO || IOS) {
+    fdb.settings({ merge: true, experimentalForceLongPolling: true, experimentalAutoDetectLongPolling: false });
+  } else {
+    fdb.settings({ merge: true });
+  }
 } catch(e) {
   console.warn('Firebase não configurado — usando localStorage como fallback', e.message);
   fdb = null;
